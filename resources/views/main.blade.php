@@ -38,6 +38,7 @@
     </style>
 </head>
 <body class="bg-gray-50">
+    
     <x-dashboard.nav />
         <main>
             @yield('content')
