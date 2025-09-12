@@ -8,6 +8,6 @@
                     </div>
                 </div>
                 <div class="relative h-80">
-                    <canvas id="geoChart"></canvas>
+                    <canvas id="geo"></canvas>
                 </div>
             </div>

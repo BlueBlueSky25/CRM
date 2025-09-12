@@ -7,7 +7,7 @@
                     </div>
                     <div class="ml-3">
                         <p class="text-xs font-medium text-gray-600">Total Customer</p>
-                        <p class="text-xl font-bold text-gray-900" id="totalCustomer">2,847</p>
+                        <p class="text-xl font-bold text-gray-900" id="totalCustomer">2,510</p>
                         <p class="text-xs text-green-600 mt-1">
                         </p>
                     </div>
@@ -41,7 +41,7 @@
                     </div>
                     <div class="ml-3">
                         <p class="text-xs font-medium text-gray-600">Proposal Terkirim</p>
-                        <p class="text-xl font-bold text-gray-900" id="proposalSent">1,249</p>
+                        <p class="text-xl font-bold text-gray-900" id="proposalSent">308</p>
                         <p class="text-xs text-green-600 mt-1">
                         </p>
                     </div>
@@ -58,7 +58,7 @@
                     </div>
                     <div class="ml-3">
                         <p class="text-xs font-medium text-gray-600">Tingkat Konversi</p>
-                        <p class="text-xl font-bold text-gray-900" id="conversionRate">68.4%</p>
+                        <p class="text-xl font-bold text-gray-900" id="conversionRate">68%</p>
                         <p class="text-xs text-green-600 mt-1">
                         </p>
                     </div>
@@ -93,7 +93,7 @@
                     </div>
                     <div class="ml-3">
                         <p class="text-xs font-medium text-gray-600">Tim Aktif</p>
-                        <p class="text-xl font-bold text-gray-900" id="activeTeam">12</p>
+                        <p class="text-xl font-bold text-gray-900" id="activeTeam">88</p>
                         <p class="text-xs text-blue-600 mt-1">
                         </p>
                     </div>

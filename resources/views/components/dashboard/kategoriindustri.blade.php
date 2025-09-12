@@ -8,6 +8,6 @@
                     </div>
                 </div>
                 <div class="relative h-80">
-                    <canvas id="industryChart"></canvas>
+                    <canvas id="industrichart"></canvas>
                 </div>
             </div>
