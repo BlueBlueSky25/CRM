@@ -9,7 +9,7 @@
                     </div>
                     <div class="ml-3">
                         <p class="text-xs font-medium text-gray-600">Total Customer</p>
-                        <p class="text-xl font-bold text-gray-900">2,547</p>
+                        <p class="text-xl font-bold text-gray-900">2,510</p>
                         <p class="text-xs text-green-600 mt-1">
                         </p>
                     </div>
@@ -25,7 +25,7 @@
                     </div>
                     <div class="ml-3">
                         <p class="text-xs font-medium text-gray-600">Active Leads</p>
-                        <p class="text-xl font-bold text-gray-900">847</p>
+                        <p class="text-xl font-bold text-gray-900">386</p>
                         <p class="text-xs text-green-600 mt-1">
                         </p>
                     </div>
@@ -41,7 +41,7 @@
                     </div>
                     <div class="ml-3">
                         <p class="text-xs font-medium text-gray-600">Konversi Rate</p>
-                        <p class="text-xl font-bold text-gray-900">68%</p>
+                        <p class="text-xl font-bold text-gray-900">60%</p>
                         <p class="text-xs text-green-600 mt-1">
                         </p>
                     </div>
