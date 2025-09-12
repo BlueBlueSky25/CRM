@@ -27,7 +27,7 @@
                             <div class="flex items-center space-x-3">
                                 <div class="w-3 h-3 bg-blue-500 rounded-full pulse-animation"></div>
                                 <div>
-                                    <p class="text-sm font-medium text-gray-900">PT. Teknologi Maju</p>
+                                    <p class="text-sm font-medium text-gray-900">PT. Lixen</p>
                                     <p class="text-xs text-gray-500">10:00 - 11:30</p>
                                 </div>
                             </div>
@@ -37,7 +37,7 @@
                             <div class="flex items-center space-x-3">
                                 <div class="w-3 h-3 bg-green-500 rounded-full"></div>
                                 <div>
-                                    <p class="text-sm font-medium text-gray-900">RS. Citra Medika</p>
+                                    <p class="text-sm font-medium text-gray-900">RS. Lixen</p>
                                     <p class="text-xs text-gray-500">14:00 - 15:00</p>
                                 </div>
                             </div>
