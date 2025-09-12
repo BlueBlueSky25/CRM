@@ -3,17 +3,15 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
 
         <!-- Filters and Search -->
         <x-settingsm.filtersearch />
 
         <!-- User Management Table -->
-        <x-settingsm.user.utable />
+        <x-settingsm.user.utable :users="$users" />
 
-        
+</div>
 
-        
-    </div>
-    <x-settingsm.user.uform />
+<!-- User Form -->
+<x-settingsm.user.uform :roles="$roles" />
 @endsection
