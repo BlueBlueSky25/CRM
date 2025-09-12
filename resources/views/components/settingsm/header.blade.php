@@ -1,3 +1,4 @@
+<!-- Settings Navigation dengan tema Dashboard -->
 <nav class="gradient-bg shadow-lg fixed top-0 left-0 right-0 z-50">
     <div class="container-expanded mx-auto px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -11,12 +12,33 @@
                     <img class="h-9 w-25" src="{{ asset('img/LOGO INOTAL UNTUK BG GELAP.png') }}" alt="Logo">
                 </div>
                 
+                <!-- Settings Navigation Links -->
+                <div class="hidden md:flex items-center space-x-6 ml-8">
+                    <a href="{{ route('user') }}" class="text-white hover:text-indigo-300 px-3 py-2 rounded-md text-sm font-medium transition duration-200 flex items-center space-x-2 {{ request()->routeIs('user') ? 'bg-white/20' : '' }}">
+                        <i class="fas fa-users text-sm"></i>
+                        <span>User</span>
+                    </a>
+                    <a href="{{ route('role') }}" class="text-white hover:text-indigo-300 px-3 py-2 rounded-md text-sm font-medium transition duration-200 flex items-center space-x-2 {{ request()->routeIs('role') ? 'bg-white/20' : '' }}">
+                        <i class="fas fa-user-shield text-sm"></i>
+                        <span>Role</span>
+                    </a>
+                    <a href="{{ route('menu') }}" class="text-white hover:text-indigo-300 px-3 py-2 rounded-md text-sm font-medium transition duration-200 flex items-center space-x-2 {{ request()->routeIs('menu') ? 'bg-white/20' : '' }}">
+                        <i class="fas fa-list text-sm"></i>
+                        <span>Menu</span>
+                    </a>
+                </div>
             </div>
 
             <div class="flex items-center space-x-4">
+                <!-- Back to Dashboard -->
+                <a href="{{ route('dashboard') }}" class="text-white hover:text-indigo-300 px-3 py-2 rounded-md text-sm font-medium transition duration-200 flex items-center space-x-2">
+                    <i class="fas fa-arrow-left text-sm"></i>
+                    <span class="hidden sm:inline">Back to Dashboard</span>
+                </a>
+
                 <!-- Notifications -->
                 <div class="relative">
-                    <button class="text-white text-lg hover:text-yellow-300 transition-colors" onclick="toggleNotifications()">
+                    <button class="text-white text-lg hover:text-indigo-300 transition-colors" onclick="toggleNotifications()">
                         <i class="fas fa-bell"></i>
                         <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
                             3
@@ -31,15 +53,15 @@
                             </div>
                             <div class="max-h-64 overflow-y-auto">
                                 <div class="px-4 py-3 hover:bg-gray-50 bg-blue-50">
-                                    <p class="text-sm text-gray-900">New customer registered</p>
+                                    <p class="text-sm text-gray-900">New user created</p>
                                     <p class="text-xs text-gray-500 mt-1">2 minutes ago</p>
                                 </div>
                                 <div class="px-4 py-3 hover:bg-gray-50 bg-blue-50">
-                                    <p class="text-sm text-gray-900">Proposal submitted for review</p>
+                                    <p class="text-sm text-gray-900">Role permissions updated</p>
                                     <p class="text-xs text-gray-500 mt-1">1 hour ago</p>
                                 </div>
                                 <div class="px-4 py-3 hover:bg-gray-50">
-                                    <p class="text-sm text-gray-900">Monthly report generated</p>
+                                    <p class="text-sm text-gray-900">Menu configuration saved</p>
                                     <p class="text-xs text-gray-500 mt-1">3 hours ago</p>
                                 </div>
                             </div>
@@ -52,7 +74,7 @@
                     </div>
                 </div>
 
-                <!-- User Info and Logout -->
+                <!-- User Info -->
                 <div class="flex items-center space-x-3">
                     <div class="hidden sm:flex items-center space-x-2">
                         <img class="h-8 w-8 rounded-full border-2 border-white" 
@@ -61,6 +83,24 @@
                         <span class="text-white font-medium">Admin User</span>
                     </div>
                 </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Navigation Links -->
+        <div class="md:hidden pb-3">
+            <div class="flex space-x-4">
+                <a href="{{ route('user') }}" class="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium transition duration-200 flex items-center space-x-2 {{ request()->routeIs('user') ? 'bg-white/20' : '' }}">
+                    <i class="fas fa-users text-sm"></i>
+                    <span>User</span>
+                </a>
+                <a href="{{ route('role') }}" class="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium transition duration-200 flex items-center space-x-2 {{ request()->routeIs('role') ? 'bg-white/20' : '' }}">
+                    <i class="fas fa-user-shield text-sm"></i>
+                    <span>Role</span>
+                </a>
+                <a href="{{ route('menu') }}" class="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium transition duration-200 flex items-center space-x-2 {{ request()->routeIs('menu') ? 'bg-white/20' : '' }}">
+                    <i class="fas fa-list text-sm"></i>
+                    <span>Menu</span>
+                </a>
             </div>
         </div>
     </div>
@@ -73,6 +113,16 @@
     }
     .container-expanded {
         max-width: 1400px;
+    }
+    
+    /* Fix untuk mencegah content tertutup navbar */
+    body {
+        padding-top: 64px; /* Height navbar (16 * 4 = 64px) */
+    }
+    
+    /* Atau bisa gunakan class ini pada container utama */
+    .main-content {
+        padding-top: 80px; /* Sedikit lebih besar untuk spacing yang nyaman */
     }
 </style>
 

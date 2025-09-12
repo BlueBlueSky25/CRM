@@ -21,3 +21,15 @@ Route::get('/customers', function () {
     return view('layout.customers');
 })->name('customers');
 
+Route::get('/menu', function () {
+    return view('layout.menu');
+})->name('menu');
+
+Route::get('/role', function () {
+    return view('layout.role');
+})->name('role');
+
+Route::get('/user', function () {
+    return view('layout.user');
+})->name('user');
+

@@ -1,4 +1,4 @@
-        <div class="mb-8 fade-in">
+        <div class="mb-8 mt-12 fade-in">
             <div class="glass-effect rounded-2xl p-6 text-white relative overflow-hidden">
                 <div class="gradient-bg absolute inset-0 rounded-2xl"></div>
                 <div class="relative z-10">
