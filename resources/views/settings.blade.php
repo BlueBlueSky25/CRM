@@ -26,6 +26,7 @@
     <div>
         <!-- Stats Cards -->
         <x-settingsm.kpi />
+        <x-settingsm.filtersearch />
     </div>
 
     <main>
