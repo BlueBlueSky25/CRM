@@ -292,6 +292,35 @@
                 exportBtn.addEventListener('click', exportData);
             }
         });
+
+
+
+        // Modal functions for Assign Menu
+function openAssignMenuModal(roleId, roleName) {
+    const modal = document.getElementById('assignMenuModal');
+    const form = document.getElementById('assignMenuForm');
+    
+    document.getElementById('roleId').value = roleId;
+    document.getElementById('roleName').textContent = roleName;
+    form.action = `/roles/${roleId}/assign-menu`;
+    
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeAssignMenuModal() {
+    const modal = document.getElementById('assignMenuModal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const assignMenuModal = document.getElementById('assignMenuModal');
+    if (event.target === assignMenuModal) {
+        closeAssignMenuModal();
+    }
+}
     </script>
 </body>
 </html>

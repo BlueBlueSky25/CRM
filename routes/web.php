@@ -22,12 +22,12 @@ Route::middleware('auth')->group(function () {
     // Dashboard & Pages
     // ==========================
     Route::get('/dashboard', function () {
-        return view('layout.dashboard');
-    })->name('dashboard');
+    return view('layout.dashboard');
+})->name('dashboard')->middleware(['auth', 'permission']);
 
-    Route::get('/customers', function () {
-        return view('layout.customers');
-    })->name('customers');
+Route::get('/customers', function () {
+    return view('layout.customers');
+})->name('customers')->middleware(['auth', 'permission']);
 
     // ==========================
     // Settings Pages
@@ -48,6 +48,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/roles', [RoleController::class, 'store'])->name('roles.store'); // <- TAMBAHKAN INI
     Route::put('/roles/{id}', [RoleController::class, 'update'])->name('roles.update'); // <- TAMBAHKAN INI
     Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->name('roles.destroy'); // <- TAMBAHKAN INIS
+    Route::post('/roles/{id}/assign-menu', [RoleController::class, 'assignMenu'])->name('roles.assignMenu');
 
     Route::post('/menus', [MenuController::class, 'store'])->name('menus.store'); // <- TAMBAHKAN INI
     Route::put('/menus/{id}', [MenuController::class, 'update'])->name('menus.update'); // <- TAMBAHKAN INI

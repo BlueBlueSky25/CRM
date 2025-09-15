@@ -80,7 +80,7 @@
                         <img class="h-8 w-8 rounded-full border-2 border-white" 
                             src="{{ asset('img/logo.png') }}" 
                             alt="Profile">
-                        <span class="text-white font-medium">Admin User</span>
+                        <span class="text-white font-medium">{{ Auth::user()->name }}</span>
                     </div>
                 </div>
             </div>
@@ -230,10 +230,15 @@ document.addEventListener('click', function(event) {
 
         <!-- Sidebar Footer -->
         <div class="absolute bottom-0 left-0 right-0 p-6 bg-gray-50 border-t">
-            <button type="button" class="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200">
+            <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit"
+                class="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200">
                 <i class="fas fa-sign-out-alt"></i>
                 <span class="font-medium">Logout</span>
             </button>
+        </form>
+
         </div>
     </div>
 </div>

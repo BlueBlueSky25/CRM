@@ -53,13 +53,31 @@
                 </div>
 
                 <!-- User Info and Logout -->
-                <div class="flex items-center space-x-3">
-                    <div class="hidden sm:flex items-center space-x-2">
-                        <img class="h-8 w-8 rounded-full border-2 border-white" 
-                            src="{{ asset('img/logo.png') }}" 
-                            alt="Profile">
-                        <span class="text-white font-medium">Admin User</span>
-                    </div>
+<div class="flex items-center space-x-3">
+    <div class="hidden sm:flex items-center space-x-2">
+        <img class="h-8 w-8 rounded-full border-2 border-white" 
+            src="{{ asset('img/logo.png') }}" 
+            alt="Profile">
+        <div>
+            <!-- Nama User -->
+            <span class="text-white font-medium block">
+                {{ Auth::user()->username }}
+            </span>
+            <!-- Role User (kecil) -->
+            <span class="text-blue-200 text-xs block">
+                {{ Auth::user()->role->role_name }}
+            </span>
+        </div>
+    </div>
+    
+    <!-- Logout Button -->
+    <form action="{{ route('logout') }}" method="POST">
+        @csrf
+        <button type="submit" class="text-white hover:text-blue-200">
+            <i class="fas fa-sign-out-alt"></i>
+        </button>
+    </form>
+</div>
                 </div>
             </div>
         </div>
@@ -108,8 +126,8 @@ document.addEventListener('click', function(event) {
                     src="{{ asset('img/logo.png') }}" 
                     alt="Profile">
                 <div>
-                    <h3 class="font-semibold text-gray-800">Admin User</h3>
-                    <p class="text-sm text-gray-500">Administrator</p>
+                    <h3 class="font-semibold text-graysuperadmin User</h3>
+                    <p class="text-sm text-graysuperadministrator</p>
                 </div>
             </div>
             <button id="sidebarClose" class="text-gray-400 hover:text-gray-600 transition-colors">
@@ -117,73 +135,52 @@ document.addEventListener('click', function(event) {
             </button>
         </div>
 
-        <!-- Sidebar Navigation -->
-        <nav class="space-y-2">
-            <!-- Dashboard -->
-            <a href="{{ route('dashboard') }}" class="flex items-center space-x-3 text-indigo-600 bg-indigo-50 rounded-lg px-3 py-2 transition-all duration-200">
-                <i class="fas fa-home w-5"></i>
-                <span class="font-medium">Dashboard</span>
-            </a>
+        @php
+    use Illuminate\Support\Facades\Auth;
+    $currentRoute = request()->route()->getName();
+    $user = Auth::user();
+    
+    // Load relationships dengan eager loading
+    $user->load('role.menus');
+@endphp
 
-            <!-- Customers -->
-            <a href="{{ route('customers') }}" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg px-3 py-2 transition-all duration-200">
-                <i class="fas fa-users w-5"></i>
-                <span class="font-medium">Customers</span>
-            </a>
+<nav class="space-y-2">
+    <!-- Dashboard -->
+    @if($user->role->menus->where('route', 'dashboard')->where('pivot.can_view', true)->count() > 0 || $user->role->role_name === 'superadmin')
+    <a href="{{ route('dashboard') }}" class="flex items-center space-x-3 {{ $currentRoute == 'dashboard' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-700 hover:text-indigo-600 hover:bg-indigo-50' }} rounded-lg px-3 py-2 transition-all duration-200">
+        <i class="fas fa-home w-5"></i>
+        <span class="font-medium">Dashboard</span>
+    </a>
+    @endif
 
-            <!-- Meeting & Jadwal -->
-            <a href="#" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg px-3 py-2 transition-all duration-200">
-                <i class="fas fa-bell w-5"></i>
-                <span class="font-medium">Meeting & Jadwal</span>
-            </a>
+    <!-- Customers -->
+    @if($user->role->menus->where('route', 'customers')->where('pivot.can_view', true)->count() > 0 || $user->role->role_name === 'superadmin')
+    <a href="{{ route('customers') }}" class="flex items-center space-x-3 {{ $currentRoute == 'customers' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-700 hover:text-indigo-600 hover:bg-indigo-50' }} rounded-lg px-3 py-2 transition-all duration-200">
+        <i class="fas fa-users w-5"></i>
+        <span class="font-medium">Customers</span>
+    </a>
+    @endif
 
-            <!-- Sales & Pipeline -->
-            <a href="#" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg px-3 py-2 transition-all duration-200">
-                <i class="fas fa-chart-bar w-5"></i>
-                <span class="font-medium">Sales & Pipeline</span>
-            </a>
-
-            <hr class="my-4">
-
-            <!-- Proposal & Document -->
-            <a href="#" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg px-3 py-2 transition-all duration-200">
-                <i class="fas fa-file-alt w-5"></i>
-                <span class="font-medium">Proposal & Document</span>
-            </a>
-
-            <!-- Analytics -->
-            <a href="#" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg px-3 py-2 transition-all duration-200">
-                <i class="fa-solid fa-magnifying-glass-chart w-5"></i>
-                <span class="font-medium">Analytics</span>
-            </a>
-
-            <hr class="my-4">
-
-            <!-- Settings -->
-            <a href="{{ route('user') }}" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg px-3 py-2 transition-all duration-200">
-                <i class="fas fa-cog w-5"></i>
-                <span class="font-medium">Settings</span>
-            </a>
-
-            <!-- Help & Support -->
-            <a href="#" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg px-3 py-2 transition-all duration-200">
-                <i class="fas fa-question-circle w-5"></i>
-                <span class="font-medium">Help & Support</span>
-            </a>
-
-            <!-- Profile -->
-            <a href="#" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg px-3 py-2 transition-all duration-200">
-                <i class="fas fa-user-circle w-5"></i>
-                <span class="font-medium">Profile</span>
-            </a>
-        </nav>
+    <!-- Settings (Hanya untuk superadmin & Admin) -->
+    @if($user->role->role_name === 'superadmin' || $user->role->role_name === 'Admin')
+    <a href="{{ route('user') }}" class="flex items-center space-x-3 {{ $currentRoute == 'user' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-700 hover:text-indigo-600 hover:bg-indigo-50' }} rounded-lg px-3 py-2 transition-all duration-200">
+        <i class="fas fa-cog w-5"></i>
+        <span class="font-medium">Settings</span>
+    </a>
+    @endif
+</nav>
 
         <!-- Sidebar Footer -->
         <div class="absolute bottom-0 left-0 right-0 p-6 bg-gray-50 border-t">
-            <button type="button" class="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200">
+            <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit"
+                class="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200">
                 <i class="fas fa-sign-out-alt"></i>
                 <span class="font-medium">Logout</span>
             </button>
+        </form>
+
         </div>
     </div>
 </div>

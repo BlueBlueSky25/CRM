@@ -39,19 +39,30 @@
                         {{ $role->users->count() }} Users
                     </td>
                     <td class="px-6 py-4 text-sm font-medium">
-                        <div class="flex space-x-2">
-                            <button class="text-blue-600 hover:text-blue-900" title="Edit Role">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <form action="{{ route('roles.destroy', $role->role_id) }}" method="POST" class="inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-900" title="Delete Role" onclick="return confirm('Are you sure you want to delete this role?')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                        </div>
-                    </td>
+    <div class="flex space-x-2">
+        @if($role->role_name !== 'superadmin')
+        <button class="text-blue-600 hover:text-blue-900" title="Edit Role">
+            <i class="fas fa-edit"></i>
+        </button>
+        @endif
+        
+        <button onclick="openAssignMenuModal({{ $role->role_id }}, '{{ $role->role_name }}')" 
+                class="text-green-600 hover:text-green-900" title="Assign Permissions">
+            <i class="fas fa-shield-alt"></i>
+        </button>
+        
+        @if($role->role_name !== 'superadmin')
+        <form action="{{ route('roles.destroy', $role->role_id) }}" method="POST" class="inline">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="text-red-600 hover:text-red-900" title="Delete Role" 
+                    onclick="return confirm('Are you sure you want to delete this role?')">
+                <i class="fas fa-trash"></i>
+            </button>
+        </form>
+        @endif
+    </div>
+</td>
                 </tr>
                 @endforeach
             </tbody>

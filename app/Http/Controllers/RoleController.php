@@ -43,53 +43,77 @@ class RoleController extends Controller
      * Update role
      */
     public function update(Request $request, $id)
-    {
-        $role = Role::findOrFail($id);
+{
+    $role = Role::findOrFail($id);
 
-        $request->validate([
-            'role_name'   => 'required|string|max:100|unique:roles,role_name,' . $id . ',role_id',
-            'description' => 'nullable|string'
-        ]);
-
-        $role->update([
-            'role_name'   => $request->role_name,
-            'description' => $request->description,
-        ]);
-
-        return redirect()->route('role')->with('success', 'Role berhasil diupdate');
+    // Super Admin tidak bisa diedit
+    if ($role->role_name === 'superadmin') {
+        return redirect()->back()->with('error', 'Cannot edit Super Admin role');
     }
 
-    /**
-     * Hapus role
-     */
-    public function destroy($id)
-    {
-        $role = Role::findOrFail($id);
-        $role->delete();
+    $request->validate([
+        'role_name'   => 'required|string|max:100|unique:roles,role_name,' . $id . ',role_id',
+        'description' => 'nullable|string'
+    ]);
 
-        return redirect()->route('role')->with('success', 'Role berhasil dihapus');
+    $role->update([
+        'role_name'   => $request->role_name,
+        'description' => $request->description,
+    ]);
+
+    return redirect()->back()->with('success', 'Role berhasil diupdate');
+}
+
+public function destroy($id)
+{
+    $role = Role::findOrFail($id);
+
+    // Super Admin tidak bisa dihapus
+    if ($role->role_name === 'superadmin') {
+        return redirect()->back()->with('error', 'Cannot delete Super Admin role');
     }
 
+    $role->delete();
+
+    return redirect()->back()->with('success', 'Role berhasil dihapus');
+}
     /**
      * Assign menu + permission ke role
      */
     public function assignMenu(Request $request, $id)
-    {
-        $role = Role::findOrFail($id);
+{
+    $role = Role::findOrFail($id);
 
-        // format request: menu_id => [can_view, can_create, can_edit, can_delete]
-        $syncData = [];
-        foreach ($request->menus as $menuId => $perms) {
-            $syncData[$menuId] = [
-                'can_view'   => in_array('view', $perms),
-                'can_create' => in_array('create', $perms),
-                'can_edit'   => in_array('edit', $perms),
-                'can_delete' => in_array('delete', $perms),
-            ];
-        }
-
-        $role->menus()->sync($syncData);
-
-        return redirect()->back()->with('success', 'Menu & permission berhasil diupdate');
+    $syncData = [];
+    foreach ($request->menus as $menuId => $perms) {
+        $syncData[$menuId] = [
+            'can_view'   => in_array('view', $perms),
+            'can_create' => in_array('create', $perms),
+            'can_edit'   => in_array('edit', $perms),
+            'can_delete' => in_array('delete', $perms),
+        ];
     }
+
+    $role->menus()->sync($syncData);
+
+    return redirect()->back()->with('success', 'Permissions updated successfully!');
+}
+
+public function assignAllPermissionsToSuperAdmin()
+{
+    $superAdmin = Role::where('role_name', 'superadmin')->first();
+    $menus = Menu::all();
+
+    $syncData = [];
+    foreach ($menus as $menu) {
+        $syncData[$menu->menu_id] = [
+            'can_view'   => true,
+            'can_create' => true,
+            'can_edit'   => true,
+            'can_delete' => true,
+        ];
+    }
+
+    $superAdmin->menus()->sync($syncData);
+}
 }
