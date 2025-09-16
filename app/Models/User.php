@@ -25,4 +25,48 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class, 'role_id', 'role_id');
     }
+   public function canAccess($menuId, $action)
+{
+
+    if ($this->role && $this->role->role_name === 'superadmin') {
+        return true;
+    }
+
+    // Cek apakah user punya role
+    if (!$this->role) return false;
+
+    // FIX: Pakai wherePivot untuk query pivot table langsung
+    $roleMenu = $this->role->menus()
+                          ->wherePivot('menu_id', $menuId)
+                          ->first();
+
+    if (!$roleMenu) return false;
+
+    // Cek permission berdasarkan action
+    return match($action) {
+        'view' => (bool) $roleMenu->pivot->can_view,
+        'create' => (bool) $roleMenu->pivot->can_create,
+        'edit' => (bool) $roleMenu->pivot->can_edit,
+        'delete' => (bool) $roleMenu->pivot->can_delete,
+        default => false
+    };
+}
+
+public function canAccessCurrent($action)
+{
+    $menuId = currentMenuId();
+    if (!$menuId) return false;
+    return $this->canAccess($menuId, $action);
+}
+
+
+    // TAMBAHAN: Helper method untuk cek multiple permissions sekaligus
+    public function hasAnyAccess($menuId)
+    {
+        return $this->canAccess($menuId, 'view') || 
+               $this->canAccess($menuId, 'create') || 
+               $this->canAccess($menuId, 'edit') || 
+               $this->canAccess($menuId, 'delete');
+    }
+
 }

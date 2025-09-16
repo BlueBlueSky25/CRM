@@ -135,40 +135,30 @@ document.addEventListener('click', function(event) {
             </button>
         </div>
 
-        @php
-    use Illuminate\Support\Facades\Auth;
-    $currentRoute = request()->route()->getName();
-    $user = Auth::user();
-    
-    // Load relationships dengan eager loading
-    $user->load('role.menus');
-@endphp
+       @php
+        use Illuminate\Support\Facades\Auth;
+        $currentRoute = request()->route()->getName();
+        $user = Auth::user();
+        $user->load('role.menus');
+
+        // Kalau superadmin, ambil semua menu tanpa filter
+        $menus = $user->role->role_name === 'superadmin'
+            ? \App\Models\Menu::all()
+            : $user->role->menus->where('pivot.can_view', true);
+        @endphp
 
 <nav class="space-y-2">
-    <!-- Dashboard -->
-    @if($user->role->menus->where('route', 'dashboard')->where('pivot.can_view', true)->count() > 0 || $user->role->role_name === 'superadmin')
-    <a href="{{ route('dashboard') }}" class="flex items-center space-x-3 {{ $currentRoute == 'dashboard' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-700 hover:text-indigo-600 hover:bg-indigo-50' }} rounded-lg px-3 py-2 transition-all duration-200">
-        <i class="fas fa-home w-5"></i>
-        <span class="font-medium">Dashboard</span>
-    </a>
+    @foreach($menus as $menu)
+    @if(auth()->user()->canAccess($menu->menu_id, 'view'))
+        <a href="{{ route($menu->route) }}" 
+           class="flex items-center space-x-3 {{ $currentRoute == $menu->route ? 'text-indigo-600 bg-indigo-50' : 'text-gray-700 hover:text-indigo-600 hover:bg-indigo-50' }} rounded-lg px-3 py-2 transition-all duration-200">
+            <i class="{{ $menu->icon ?? 'fas fa-circle' }} w-5"></i>
+            <span class="font-medium">{{ $menu->nama_menu }}</span>
+        </a>
     @endif
-
-    <!-- Customers -->
-    @if($user->role->menus->where('route', 'customers')->where('pivot.can_view', true)->count() > 0 || $user->role->role_name === 'superadmin')
-    <a href="{{ route('customers') }}" class="flex items-center space-x-3 {{ $currentRoute == 'customers' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-700 hover:text-indigo-600 hover:bg-indigo-50' }} rounded-lg px-3 py-2 transition-all duration-200">
-        <i class="fas fa-users w-5"></i>
-        <span class="font-medium">Customers</span>
-    </a>
-    @endif
-
-    <!-- Settings (Hanya untuk superadmin & Admin) -->
-    @if($user->role->role_name === 'superadmin' || $user->role->role_name === 'Admin')
-    <a href="{{ route('user') }}" class="flex items-center space-x-3 {{ $currentRoute == 'user' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-700 hover:text-indigo-600 hover:bg-indigo-50' }} rounded-lg px-3 py-2 transition-all duration-200">
-        <i class="fas fa-cog w-5"></i>
-        <span class="font-medium">Settings</span>
-    </a>
-    @endif
+    @endforeach
 </nav>
+
 
         <!-- Sidebar Footer -->
         <div class="absolute bottom-0 left-0 right-0 p-6 bg-gray-50 border-t">

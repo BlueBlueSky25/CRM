@@ -41,8 +41,26 @@
 <body class="bg-gray-50">
     
     <x-dashboard.nav />
+
+   
+
         <main>
             @yield('content')
         </main>
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        @if(session('error'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Akses Ditolak',
+                text: "{{ session('error') }}",
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'OK',
+                timer: 3000, // auto close dalam 3 detik
+                timerProgressBar: true
+            });
+        </script>
+        @endif
 </body>
 </html>

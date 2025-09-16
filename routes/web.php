@@ -16,18 +16,22 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // ==========================
 // Protected Routes (Harus Login)
 // ==========================
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'permission'])->group(function () {
     
     // ==========================
     // Dashboard & Pages
     // ==========================
     Route::get('/dashboard', function () {
-    return view('layout.dashboard');
-})->name('dashboard')->middleware(['auth', 'permission']);
+        return view('layout.dashboard');
+    })->name('dashboard');
 
-Route::get('/customers', function () {
-    return view('layout.customers');
-})->name('customers')->middleware(['auth', 'permission']);
+    Route::get('/customers', function () {
+        return view('layout.customers');
+    })->name('customers');
+
+    Route::get('/chart', function () {
+        return view('layout.chart');
+    })->name('chart');
 
     // ==========================
     // Settings Pages

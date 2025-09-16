@@ -18,20 +18,23 @@ class CheckPermission
         $user = Auth::user();
         $routeName = $request->route()->getName();
         
+        // Ambil menu sesuai route
+        $menu = $user->role->menus()->where('route', $routeName)->first();
+
         // Super admin bisa akses semua
         if ($user->role->role_name === 'superadmin') {
+            // Share menu_id ke view
+            view()->share('currentMenuId', $menu?->menu_id);
             return $next($request);
         }
 
-        // Cek permission berdasarkan route name
-        $canAccess = $user->role->menus()
-            ->where('route', $routeName)
-            ->where('can_view', true)
-            ->exists();
-
-        if (!$canAccess) {
-            abort(403, 'Unauthorized access.');
+        // Cek permission view
+        if (!$menu || !$menu->pivot->can_view) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses ke halaman ini.');
         }
+
+        // Share menu_id ke view supaya Blade bisa pakai untuk cek edit/delete/create
+        view()->share('currentMenuId', $menu->menu_id);
 
         return $next($request);
     }

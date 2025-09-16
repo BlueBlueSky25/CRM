@@ -74,15 +74,23 @@
                     </div>
                 </div>
 
-                <!-- User Info -->
+                <!-- User Info and Logout -->
                 <div class="flex items-center space-x-3">
                     <div class="hidden sm:flex items-center space-x-2">
                         <img class="h-8 w-8 rounded-full border-2 border-white" 
                             src="{{ asset('img/logo.png') }}" 
                             alt="Profile">
-                        <span class="text-white font-medium">{{ Auth::user()->name }}</span>
+                        <div>
+                            <!-- Nama User -->
+                            <span class="text-white font-medium block">
+                                {{ Auth::user()->username }}
+                            </span>
+                            <!-- Role User (kecil) -->
+                            <span class="text-blue-200 text-xs block">
+                                {{ Auth::user()->role->role_name }}
+                            </span>
+                        </div>
                     </div>
-                </div>
             </div>
         </div>
         

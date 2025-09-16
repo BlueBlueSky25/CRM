@@ -16,7 +16,7 @@ class UserController extends Controller
     {
         $users = User::with('role')->get();
         $roles = Role::all(); // Hanya untuk dropdown form
-
+        
         return view('layout.user', compact('users', 'roles'));
     }
 
