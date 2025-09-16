@@ -50,8 +50,11 @@ Route::get('/customers', function () {
     Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->name('roles.destroy'); // <- TAMBAHKAN INIS
     Route::post('/roles/{id}/assign-menu', [RoleController::class, 'assignMenu'])->name('roles.assignMenu');
 
+    
     Route::post('/menus', [MenuController::class, 'store'])->name('menus.store'); // <- TAMBAHKAN INI
     Route::put('/menus/{id}', [MenuController::class, 'update'])->name('menus.update'); // <- TAMBAHKAN INI
     Route::delete('/menus/{id}', [MenuController::class, 'destroy'])->name('menus.destroy'); // <- TAMBAHKAN INI
+
+
 
 });

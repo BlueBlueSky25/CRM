@@ -18,7 +18,41 @@ class RoleController extends Controller
         $users = User::all();
         $menus = Menu::all();
         
-        return view('layout.role', compact('roles', 'users', 'menus'));
+        // Ambil semua permissions yang sudah ada, digroup berdasarkan role_id
+        $rolePermissions = [];
+        foreach ($roles as $role) {
+            $permissions = $role->menus()->get();
+            $rolePermissions[$role->role_id] = [];
+            
+            foreach ($permissions as $menu) {
+                if ($menu->pivot->can_view) {
+                    $rolePermissions[$role->role_id][] = [
+                        'menu_id' => $menu->menu_id,
+                        'permission_type' => 'view'
+                    ];
+                }
+                if ($menu->pivot->can_create) {
+                    $rolePermissions[$role->role_id][] = [
+                        'menu_id' => $menu->menu_id,
+                        'permission_type' => 'create'
+                    ];
+                }
+                if ($menu->pivot->can_edit) {
+                    $rolePermissions[$role->role_id][] = [
+                        'menu_id' => $menu->menu_id,
+                        'permission_type' => 'edit'
+                    ];
+                }
+                if ($menu->pivot->can_delete) {
+                    $rolePermissions[$role->role_id][] = [
+                        'menu_id' => $menu->menu_id,
+                        'permission_type' => 'delete'
+                    ];
+                }
+            }
+        }
+        
+        return view('layout.role', compact('roles', 'users', 'menus', 'rolePermissions'));
     }
 
     /**
