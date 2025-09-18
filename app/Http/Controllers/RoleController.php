@@ -17,6 +17,8 @@ class RoleController extends Controller
         $roles = Role::all();
         $users = User::all();
         $menus = Menu::all();
+
+        
         
         // Ambil semua permissions yang sudah ada, digroup berdasarkan role_id
         $rolePermissions = [];

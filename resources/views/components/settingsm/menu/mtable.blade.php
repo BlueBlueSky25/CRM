@@ -5,10 +5,12 @@
             <h3 class="text-lg font-semibold text-gray-900">Menu Management</h3>
             <p class="text-sm text-gray-600 mt-1">Manage application menus and navigation</p>
         </div>
+        @if(auth()->user()->canAccess($currentMenuId, 'create'))
         <button onclick="openMenuModal()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center space-x-2">
             <i class="fas fa-plus"></i>
             <span>Add New Menu</span>
         </button>
+        @endif
     </div>
 
     <!-- Notifikasi -->
@@ -44,11 +46,15 @@
                     </td>
                     <td class="px-6 py-4 text-sm font-medium">
                         <div class="flex items-center space-x-2">
+                            @if(auth()->user()->canAccess($currentMenuId, 'edit'))
                             <button onclick="openEditMenuModal('{{ $menu->menu_id }}', '{{ $menu->nama_menu }}', '{{ $menu->route }}', '{{ $menu->icon }}')" 
                                     class="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-colors" 
                                     title="Edit Menu">
                                 <i class="fas fa-edit"></i>
                             </button>
+                            @endif
+
+                            @if(auth()->user()->canAccess($currentMenuId, 'delete'))
                             <form action="{{ route('menus.destroy', $menu->menu_id) }}" method="POST" class="inline-flex">
                                 @csrf
                                 @method('DELETE')
@@ -57,6 +63,7 @@
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>
+                            @endif
                         </div>
                     </td>
                 </tr>

@@ -5,10 +5,12 @@
             <h3 class="text-lg font-semibold text-gray-900">Role Management</h3>
             <p class="text-sm text-gray-600 mt-1">Manage roles and their assigned permissions</p>
         </div>
+        @if(auth()->user()->canAccess($currentMenuId, 'create'))
         <button onclick="openRoleModal()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center space-x-2">
             <i class="fas fa-plus"></i>
             <span>Add New Role</span>
         </button>
+        @endif
     </div>
 
     <!-- Notifikasi -->
@@ -42,11 +44,13 @@
             <div class="flex items-center space-x-2">
                 @if($role->role_name !== 'superadmin')
                     <!-- Edit Button -->
+                     @if(auth()->user()->canAccess($currentMenuId, 'edit'))
                     <button onclick="openEditRoleModal('{{ $role->role_id }}', '{{ $role->role_name }}', '{{ $role->description }}')" 
                             class="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-colors" 
                             title="Edit Role">
                         <i class="fas fa-edit"></i>
                     </button>
+                    @endif
                     
                     <!-- Assign Permissions Button -->
                     <button onclick="openAssignMenuModal({{ $role->role_id }}, '{{ $role->role_name }}')"
@@ -56,6 +60,7 @@
                     </button>
                     
                     <!-- Delete Button -->
+                     @if(auth()->user()->canAccess($currentMenuId, 'delete'))
                     <form action="{{ route('roles.destroy', $role->role_id) }}" method="POST" class="inline-flex">
                         @csrf
                         @method('DELETE')
@@ -64,6 +69,7 @@
                             <i class="fas fa-trash"></i>
                         </button>
                     </form>
+                    @endif
                 @else
                     <!-- SuperAdmin - Protected -->
                     <span class="text-xs text-gray-500 italic px-3 py-2">🛡️ Protected Role</span>

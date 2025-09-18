@@ -11,7 +11,7 @@
                             </div>
                         </div>
                         <div class="ml-4 min-w-0 flex-1">
-                            <p class="text-sm font-medium text-gray-600 truncate">Total Users</p>
+                            <p class="text-sm font-medium text-gray-600 truncate">{{ $totalUsers }}</p>
                             <p class="text-2xl font-bold text-gray-900">3</p>
                         </div>
                     </div>
@@ -26,7 +26,7 @@
                             </div>
                         </div>
                         <div class="ml-4 min-w-0 flex-1">
-                            <p class="text-sm font-medium text-gray-600 truncate">Total Roles</p>
+                            <p class="text-sm font-medium text-gray-600 truncate">{{ $totalRoles }}</p>
                             <p class="text-2xl font-bold text-gray-900">3</p>
                         </div>
                     </div>
