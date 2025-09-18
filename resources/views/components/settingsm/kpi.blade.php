@@ -11,8 +11,8 @@
                             </div>
                         </div>
                         <div class="ml-4 min-w-0 flex-1">
-                            <p class="text-sm font-medium text-gray-600 truncate">{{ $totalUsers }}</p>
-                            <p class="text-2xl font-bold text-gray-900">3</p>
+                            <p class="text-sm font-medium text-gray-600 truncate">Total Users</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $totalUsers }}</p>
                         </div>
                     </div>
                 </div>
@@ -26,8 +26,8 @@
                             </div>
                         </div>
                         <div class="ml-4 min-w-0 flex-1">
-                            <p class="text-sm font-medium text-gray-600 truncate">{{ $totalRoles }}</p>
-                            <p class="text-2xl font-bold text-gray-900">3</p>
+                            <p class="text-sm font-medium text-gray-600 truncate">Total Roles</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $totalRoles }}</p>
                         </div>
                     </div>
                 </div>
@@ -36,13 +36,13 @@
                 <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-shield-alt text-yellow-600 text-lg"></i>
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-users text-green-600 text-lg"></i>
                             </div>
                         </div>
                         <div class="ml-4 min-w-0 flex-1">
-                            <p class="text-sm font-medium text-gray-600 truncate">Active Permissions</p>
-                            <p class="text-2xl font-bold text-gray-900">6</p>
+                            <p class="text-sm font-medium text-gray-600 truncate">Online User</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $onlineUsers }}</p>
                         </div>
                     </div>
                 </div>
@@ -51,13 +51,13 @@
                 <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-exclamation-triangle text-red-600 text-lg"></i>
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-list text-green-600 text-lg"></i>
                             </div>
                         </div>
                         <div class="ml-4 min-w-0 flex-1">
-                            <p class="text-sm font-medium text-gray-600 truncate">Pending Reviews</p>
-                            <p class="text-2xl font-bold text-gray-900">2</p>
+                            <p class="text-sm font-medium text-gray-600 truncate">Total Menu</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $totalMenus }}</p>
                         </div>
                     </div>
                 </div>

@@ -53,11 +53,13 @@
                     @endif
                     
                     <!-- Assign Permissions Button -->
+                      @if(auth()->user()->canAccess($currentMenuId, 'edit'))
                     <button onclick="openAssignMenuModal({{ $role->role_id }}, '{{ $role->role_name }}')"
                             class="text-green-600 hover:text-green-900 p-2 rounded-lg hover:bg-green-50 transition-colors" 
                             title="Assign Permissions">
                         <i class="fas fa-shield-alt"></i>
                     </button>
+                    @endif
                     
                     <!-- Delete Button -->
                      @if(auth()->user()->canAccess($currentMenuId, 'delete'))

@@ -44,7 +44,6 @@
         
 
         <script>
-        // Set data permissions dari PHP ke JavaScript
         window.rolePermissions = @json($rolePermissions ?? []);
         </script> 
 

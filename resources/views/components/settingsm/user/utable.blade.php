@@ -105,7 +105,7 @@
                 </div>
             </div>
             
-            <form id="editUserForm" class="px-6 py-4">
+            <form id="editUserForm" action= "{{ route('users.update', ['id' => 0]) }}" method="POST" class="px-6 py-4">
                 @csrf
                 @method('PUT')
                 <input type="hidden" id="editUserId" name="user_id">
@@ -118,17 +118,19 @@
                     
                     <div>
                         <label for="editEmail" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input type="email" id="editEmail" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" required>
+                        <input type="email" id="editEmail" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" >
                     </div>
                     
                     <div>
                         <label for="editRole" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
                         <select id="editRole" name="role_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" required>
                             <option value="">Select Role</option>
-                            @foreach($roles ?? [] as $role)
+                            @foreach($roles as $role)
                                 <option value="{{ $role->role_id }}">{{ $role->role_name }}</option>
                             @endforeach
                         </select>
+                        
+            
                     </div>
                     
                     <div>
@@ -137,6 +139,7 @@
                             <span class="text-gray-500 font-normal">(Leave blank to keep current password)</span>
                         </label>
                         <input type="password" id="editPassword" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                        
                     </div>
                     
                     <div>

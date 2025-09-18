@@ -8,7 +8,7 @@
         
 
         <!-- User Management Table -->
-        <x-settingsm.user.utable :users="$users" />
+        <x-settingsm.user.utable :users="$users"  :roles="$roles" />
 
 </div>
 

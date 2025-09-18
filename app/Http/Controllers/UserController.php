@@ -28,8 +28,8 @@ class UserController extends Controller
    public function store(Request $request)
 {
     $request->validate([
-        'username' => 'required|string|max:100|unique:users,username', // <- GANTI 'akun' JADI 'users'
-        'email'    => 'nullable|email|unique:users,email', // <- GANTI 'akun' JADI 'users'
+        'username' => 'required|string|max:100|unique:users,username', 
+        'email'    => 'nullable|email|unique:users,email', 
         'password' => 'required|string|min:6',
         'role_id'  => 'required|exists:roles,role_id',
     ]);
@@ -55,7 +55,22 @@ public function update(Request $request, $id)
         'role_id'  => 'required|exists:roles,role_id',
     ]);
 
-    // ... sisanya sama
+    $data = [
+        'username' => $request->username,
+        'email' => $request->email,
+        'role_id' => $request->role_id,
+        'is_active' => $request->has('is_active') ? 1 : 0,
+    ];
+
+    // Kalau ada password baru
+    if ($request->filled('password')) {
+        $data['password_hash'] = Hash::make($request->password);
+    }
+
+    $user->update($data);
+
+    // REDIRECT KE HALAMAN YANG BENAR
+    return redirect()->back()->with('success', 'User berhasil diperbarui!');
 }
 
     /**

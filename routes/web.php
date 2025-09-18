@@ -37,7 +37,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // Settings Pages
     // ==========================
     Route::get('/user', [UserController::class, 'index'])->name('user');
-    Route::get('/role', [RoleController::class, 'index'])->name('role'); // <- TAMBAHKAN INI
+    Route::get('/role', [RoleController::class, 'index'])->name('role'); 
     Route::get('/menu', [MenuController::class, 'index'])->name('menu');
     // ==========================
     // CRUD Operations - USER
@@ -45,19 +45,19 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
     Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
-
+    
     // ==========================
     // CRUD Operations - ROLE
     // ==========================
-    Route::post('/roles', [RoleController::class, 'store'])->name('roles.store'); // <- TAMBAHKAN INI
-    Route::put('/roles/{id}', [RoleController::class, 'update'])->name('roles.update'); // <- TAMBAHKAN INI
-    Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->name('roles.destroy'); // <- TAMBAHKAN INIS
+    Route::post('/roles', [RoleController::class, 'store'])->name('roles.store'); 
+    Route::put('/roles/{id}', [RoleController::class, 'update'])->name('roles.update'); 
+    Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->name('roles.destroy'); 
     Route::post('/roles/{id}/assign-menu', [RoleController::class, 'assignMenu'])->name('roles.assignMenu');
 
     
-    Route::post('/menus', [MenuController::class, 'store'])->name('menus.store'); // <- TAMBAHKAN INI
-    Route::put('/menus/{id}', [MenuController::class, 'update'])->name('menus.update'); // <- TAMBAHKAN INI
-    Route::delete('/menus/{id}', [MenuController::class, 'destroy'])->name('menus.destroy'); // <- TAMBAHKAN INI
+    Route::post('/menus', [MenuController::class, 'store'])->name('menus.store'); 
+    Route::put('/menus/{id}', [MenuController::class, 'update'])->name('menus.update'); 
+    Route::delete('/menus/{id}', [MenuController::class, 'destroy'])->name('menus.destroy'); 
 
 
 
