@@ -166,8 +166,8 @@ document.addEventListener('click', function(event) {
                     src="{{ asset('img/logo.png') }}" 
                     alt="Profile">
                 <div>
-                    <h3 class="font-semibold text-gray-800">Admin User</h3>
-                    <p class="text-sm text-gray-500">Administrator</p>
+                    <h3 class="font-semibold text-graysuperadmin User</h3>
+                    <p class="text-sm text-graysuperadministrator</p>
                 </div>
             </div>
             <button id="sidebarClose" class="text-gray-400 hover:text-gray-600 transition-colors">
@@ -175,66 +175,30 @@ document.addEventListener('click', function(event) {
             </button>
         </div>
 
-        <!-- Sidebar Navigation -->
-        <nav class="space-y-2">
-            <!-- Dashboard -->
-            <a href="{{ route('dashboard') }}" class="flex items-center space-x-3 text-indigo-600 bg-indigo-50 rounded-lg px-3 py-2 transition-all duration-200">
-                <i class="fas fa-home w-5"></i>
-                <span class="font-medium">Dashboard</span>
-            </a>
+       @php
+        use Illuminate\Support\Facades\Auth;
+        $currentRoute = request()->route()->getName();
+        $user = Auth::user();
+        $user->load('role.menus');
 
-            <!-- Customers -->
-            <a href="{{ route('customers') }}" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg px-3 py-2 transition-all duration-200">
-                <i class="fas fa-users w-5"></i>
-                <span class="font-medium">Customers</span>
-            </a>
+        // Kalau superadmin, ambil semua menu tanpa filter
+        $menus = $user->role->role_name === 'superadmin'
+            ? \App\Models\Menu::all()
+            : $user->role->menus->where('pivot.can_view', true);
+        @endphp
 
-            <!-- Meeting & Jadwal -->
-            <a href="#" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg px-3 py-2 transition-all duration-200">
-                <i class="fas fa-bell w-5"></i>
-                <span class="font-medium">Meeting & Jadwal</span>
-            </a>
+<nav class="space-y-2">
+    @foreach($menus as $menu)
+    @if(auth()->user()->canAccess($menu->menu_id, 'view'))
+        <a href="{{ route($menu->route) }}" 
+           class="flex items-center space-x-3 {{ $currentRoute == $menu->route ? 'text-indigo-600 bg-indigo-50' : 'text-gray-700 hover:text-indigo-600 hover:bg-indigo-50' }} rounded-lg px-3 py-2 transition-all duration-200">
+            <i class="{{ $menu->icon ?? 'fas fa-circle' }} w-5"></i>
+            <span class="font-medium">{{ $menu->nama_menu }}</span>
+        </a>
+    @endif
+    @endforeach
+</nav>
 
-            <!-- Sales & Pipeline -->
-            <a href="#" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg px-3 py-2 transition-all duration-200">
-                <i class="fas fa-chart-bar w-5"></i>
-                <span class="font-medium">Sales & Pipeline</span>
-            </a>
-
-            <hr class="my-4">
-
-            <!-- Proposal & Document -->
-            <a href="#" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg px-3 py-2 transition-all duration-200">
-                <i class="fas fa-file-alt w-5"></i>
-                <span class="font-medium">Proposal & Document</span>
-            </a>
-
-            <!-- Analytics -->
-            <a href="#" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg px-3 py-2 transition-all duration-200">
-                <i class="fa-solid fa-magnifying-glass-chart w-5"></i>
-                <span class="font-medium">Analytics</span>
-            </a>
-
-            <hr class="my-4">
-
-            <!-- Settings -->
-            <a href="{{ route('user') }}" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg px-3 py-2 transition-all duration-200">
-                <i class="fas fa-cog w-5"></i>
-                <span class="font-medium">Settings</span>
-            </a>
-
-            <!-- Help & Support -->
-            <a href="#" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg px-3 py-2 transition-all duration-200">
-                <i class="fas fa-question-circle w-5"></i>
-                <span class="font-medium">Help & Support</span>
-            </a>
-
-            <!-- Profile -->
-            <a href="#" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg px-3 py-2 transition-all duration-200">
-                <i class="fas fa-user-circle w-5"></i>
-                <span class="font-medium">Profile</span>
-            </a>
-        </nav>
 
         <!-- Sidebar Footer -->
         <div class="absolute bottom-0 left-0 right-0 p-6 bg-gray-50 border-t">

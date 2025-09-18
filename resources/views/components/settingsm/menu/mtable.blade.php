@@ -28,6 +28,7 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Menu Name</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Route</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Icon</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Parent</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
             </thead>
@@ -44,6 +45,11 @@
                             -
                         @endif
                     </td>
+                    <!-- Parent Menu Column -->
+                    <td class="px-6 py-4 text-sm text-gray-600">
+                        {{ $menu->parent_id ?? '-' }}
+                    </td>
+                    <!-- Actions Column -->
                     <td class="px-6 py-4 text-sm font-medium">
                         <div class="flex items-center space-x-2">
                             @if(auth()->user()->canAccess($currentMenuId, 'edit'))
@@ -71,6 +77,7 @@
             </tbody>
         </table>
     </div>
+
 </div>
 
 <!-- Edit Menu Modal -->
@@ -101,6 +108,13 @@
                         <label for="editMenuRoute" class="block text-sm font-medium text-gray-700 mb-1">Route</label>
                         <input type="text" id="editMenuRoute" name="route" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" placeholder="e.g., users.index">
                     </div>
+
+                    <div>
+                        <label for="editMenuOrder" class="block text-sm font-medium text-gray-700 mb-1">Order</label>
+                        <input type="number" id="editMenuOrder" name="order" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" 
+                               placeholder="Order Number">
+                    </div>
                     
                     <div>
                         <label for="editMenuIcon" class="block text-sm font-medium text-gray-700 mb-1">Icon</label>
@@ -126,6 +140,7 @@
         </div>
     </div>
 </div>
+
 
 <!-- Add Menu Modal -->
 <div id="addMenuModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 z-50" style="backdrop-filter: blur(4px);">

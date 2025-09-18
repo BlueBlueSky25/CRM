@@ -135,7 +135,7 @@ document.addEventListener('click', function(event) {
             </button>
         </div>
 
-       @php
+        @php
         use Illuminate\Support\Facades\Auth;
         $currentRoute = request()->route()->getName();
         $user = Auth::user();
@@ -151,7 +151,7 @@ document.addEventListener('click', function(event) {
     @foreach($menus as $menu)
     @if(auth()->user()->canAccess($menu->menu_id, 'view'))
         <a href="{{ route($menu->route) }}" 
-           class="flex items-center space-x-3 {{ $currentRoute == $menu->route ? 'text-indigo-600 bg-indigo-50' : 'text-gray-700 hover:text-indigo-600 hover:bg-indigo-50' }} rounded-lg px-3 py-2 transition-all duration-200">
+            class="flex items-center space-x-3 {{ $currentRoute == $menu->route ? 'text-indigo-600 bg-indigo-50' : 'text-gray-700 hover:text-indigo-600 hover:bg-indigo-50' }} rounded-lg px-3 py-2 transition-all duration-200">
             <i class="{{ $menu->icon ?? 'fas fa-circle' }} w-5"></i>
             <span class="font-medium">{{ $menu->nama_menu }}</span>
         </a>

@@ -6,7 +6,10 @@
     <title>Dashboard CRM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    {{-- Vite --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <style>
         .gradient-bg {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -42,25 +45,24 @@
     
     <x-dashboard.nav />
 
-   
+    <main>
+        @yield('content')
+    </main>
 
-        <main>
-            @yield('content')
-        </main>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        @if(session('error'))
-        <script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Akses Ditolak',
-                text: "{{ session('error') }}",
-                confirmButtonColor: '#ef4444',
-                confirmButtonText: 'OK',
-                timer: 3000, // auto close dalam 3 detik
-                timerProgressBar: true
-            });
-        </script>
-        @endif
+    @if(session('error'))
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Akses Ditolak',
+            text: "{{ session('error') }}",
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'OK',
+            timer: 3000,
+            timerProgressBar: true
+        });
+    </script>
+    @endif
 </body>
 </html>

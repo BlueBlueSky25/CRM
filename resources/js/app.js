@@ -2,7 +2,6 @@ import './bootstrap';
 import 'flowbite';
 import Chart from 'chart.js/auto';
 
-// Contoh chart untuk geoChart
 const geo = document.getElementById('geo');
 if (geo) {
     new Chart(geo, {
@@ -41,7 +40,7 @@ if (geo) {
     });
 }
 
-const inds = document.getElementById('industrichart');
+const inds = document.getElementById('inds');
 if (inds) {
     new Chart(inds, {
         type: 'pie',
