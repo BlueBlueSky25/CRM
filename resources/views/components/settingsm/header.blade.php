@@ -175,27 +175,79 @@ document.addEventListener('click', function(event) {
             </button>
         </div>
 
-       @php
+
+        @php
         use Illuminate\Support\Facades\Auth;
         $currentRoute = request()->route()->getName();
         $user = Auth::user();
         $user->load('role.menus');
 
-        // Kalau superadmin, ambil semua menu tanpa filter
-        $menus = $user->role->role_name === 'superadmin'
-            ? \App\Models\Menu::all()
-            : $user->role->menus->where('pivot.can_view', true);
+        // Kalau superadmin, ambil semua menu dengan children-nya
+        $parentMenus = $user->role->role_name === 'superadmin'
+            ? \App\Models\Menu::whereNull('parent_id')->with('children')->orderBy('order', 'asc')->get()
+            : $user->role->menus->where('pivot.can_view', true)->whereNull('parent_id')->load('children')->sortBy('order');
         @endphp
 
 <nav class="space-y-2">
-    @foreach($menus as $menu)
-    @if(auth()->user()->canAccess($menu->menu_id, 'view'))
-        <a href="{{ route($menu->route) }}" 
-           class="flex items-center space-x-3 {{ $currentRoute == $menu->route ? 'text-indigo-600 bg-indigo-50' : 'text-gray-700 hover:text-indigo-600 hover:bg-indigo-50' }} rounded-lg px-3 py-2 transition-all duration-200">
-            <i class="{{ $menu->icon ?? 'fas fa-circle' }} w-5"></i>
-            <span class="font-medium">{{ $menu->nama_menu }}</span>
-        </a>
-    @endif
+    @foreach($parentMenus as $menu)
+        @if(auth()->user()->canAccess($menu->menu_id, 'view'))
+            @php
+                // Cek apakah menu ini punya child (pakai relationship)
+                $hasChildren = $menu->children->count() > 0;
+                
+                // Cek apakah salah satu child menu sedang aktif
+                $isParentActive = false;
+                if($hasChildren) {
+                    foreach($menu->children as $child) {
+                        if($currentRoute == $child->route) {
+                            $isParentActive = true;
+                            break;
+                        }
+                    }
+                }
+            @endphp
+            
+            @if($hasChildren)
+                <!-- Parent Menu dengan Children -->
+                <div class="relative" x-data="{ open: {{ $isParentActive ? 'true' : 'false' }} }">
+                    <button @click="open = !open" 
+                            class="flex items-center justify-between w-full space-x-3 {{ $isParentActive ? 'text-indigo-600 bg-indigo-50' : 'text-gray-700 hover:text-indigo-600 hover:bg-indigo-50' }} rounded-lg px-3 py-2 transition-all duration-200">
+                        <div class="flex items-center space-x-3">
+                            <i class="{{ $menu->icon ?? 'fas fa-circle' }} w-5"></i>
+                            <span class="font-medium">{{ $menu->nama_menu }}</span>
+                        </div>
+                        <i class="fas fa-chevron-down transition-transform duration-200" :class="{ 'rotate-180': open }"></i>
+                    </button>
+                    
+                    <!-- Submenu -->
+                    <div x-show="open" 
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 -translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 -translate-y-2"
+                         class="ml-6 mt-2 space-y-1">
+                        @foreach($menu->children as $child)
+                            @if(auth()->user()->canAccess($child->menu_id, 'view'))
+                                <a href="{{ (!empty($child->route) && Route::has($child->route)) ? route($child->route) : '#' }}"  
+                                   class="flex items-center space-x-3 {{ $currentRoute == $child->route ? 'text-indigo-600 bg-indigo-50 border-l-2 border-indigo-600' : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50' }} rounded-lg px-3 py-2 transition-all duration-200">
+                                    <i class="{{ $child->icon ?? 'fas fa-circle text-xs' }} w-4"></i>
+                                    <span class="font-medium">{{ $child->nama_menu }}</span>
+                                </a>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+            @else
+                <!-- Single Menu tanpa Children -->
+                <a href="{{ (!empty($menu->route) && Route::has($menu->route)) ? route($menu->route) : '#' }}" 
+                   class="flex items-center space-x-3 {{ $currentRoute == $menu->route ? 'text-indigo-600 bg-indigo-50' : 'text-gray-700 hover:text-indigo-600 hover:bg-indigo-50' }} rounded-lg px-3 py-2 transition-all duration-200">
+                    <i class="{{ $menu->icon ?? 'fas fa-circle' }} w-5"></i>
+                    <span class="font-medium">{{ $menu->nama_menu }}</span>
+                </a>
+            @endif
+        @endif
     @endforeach
 </nav>
 

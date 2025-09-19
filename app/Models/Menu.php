@@ -18,6 +18,7 @@ class Menu extends Model
         'route',
         'icon',
         'order',
+        'parent_id',
     ];
 
     /**
@@ -47,6 +48,11 @@ class Menu extends Model
         return $query->whereNull('parent_id');
     }
 
+     public function scopeChildrenOnly($query)
+    {
+        return $query->whereNotNull('parent_id');
+    }
+
     // TAMBAH INI: Helper method untuk cek apakah menu punya children
     public function hasChildren()
     {
@@ -57,5 +63,44 @@ class Menu extends Model
     public function getActiveChildren()
     {
         return $this->children()->where('is_active', true)->get();
+    }
+
+     public function getFullPath()
+    {
+        if ($this->parent) {
+            return $this->parent->nama_menu . ' > ' . $this->nama_menu;
+        }
+        return $this->nama_menu;
+    }
+
+    public function getLevel()
+    {
+        $level = 0;
+        $parent = $this->parent;
+        while ($parent) {
+            $level++;
+            $parent = $parent->parent;
+        }
+        return $level;
+    }
+
+    // TAMBAH INI: Helper untuk get semua descendants (children, grandchildren, dst)
+    public function getAllDescendants()
+    {
+        $descendants = collect();
+        foreach ($this->children as $child) {
+            $descendants->push($child);
+            $descendants = $descendants->merge($child->getAllDescendants());
+        }
+        return $descendants;
+    }
+
+    // TAMBAH INI: Method untuk render menu tree
+    public static function getMenuTree()
+    {
+        return self::with('children')
+                   ->whereNull('parent_id')
+                   ->orderBy('order')
+                   ->get();
     }
 }
