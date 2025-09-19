@@ -36,7 +36,7 @@ class CheckPermission
 
         // Cek permission view
         if (!$menu || !$menu->pivot->can_view) {
-        return redirect()->back()->with('error', 'Anda tidak memiliki akses ke halaman ini.');
+        return redirect()->back()->with('error', 'Anda tidak memiliki akses ke halaman atau fitur ini.');
     }
 
         // Share menu_id ke view supaya Blade bisa pakai untuk cek edit/delete/create

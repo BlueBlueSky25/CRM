@@ -15,7 +15,7 @@ class UserController extends Controller
     public function index()
     {
         $users = User::with('role')->get();
-        $roles = Role::all(); // Hanya untuk dropdown form
+        $roles = Role::all(); 
         
 
         
@@ -62,7 +62,7 @@ public function update(Request $request, $id)
         'is_active' => $request->has('is_active') ? 1 : 0,
     ];
 
-    // Kalau ada password baru
+    
     if ($request->filled('password')) {
         $data['password_hash'] = Hash::make($request->password);
     }

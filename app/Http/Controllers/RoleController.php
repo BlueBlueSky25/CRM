@@ -50,6 +50,14 @@ class RoleController extends Controller
                         'menu_id' => $menu->menu_id,
                         'permission_type' => 'delete'
                     ];
+                if ($menu->pivot->can_assign) {
+                    $rolePermissions[$role->role_id][] = [
+                        'menu_id' => $menu->menu_id,
+                        'permission_type' => 'assign'
+                    ];
+                    
+                    }
+                    
                 }
             }
         }

@@ -27,7 +27,7 @@ class Menu extends Model
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'role_menu', 'menu_id', 'role_id')
-                    ->withPivot('can_view', 'can_create', 'can_edit', 'can_delete');
+                    ->withPivot('can_view', 'can_create', 'can_edit', 'can_delete', 'can_assign');
     }
 
     public function parent()

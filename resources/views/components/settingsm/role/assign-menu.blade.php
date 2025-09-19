@@ -20,6 +20,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Menu</th>
                                 <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">View</th>
                                 <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Create</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Assign</th>
                                 <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Edit</th>
                                 <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Delete</th>
                             </tr>
@@ -38,6 +39,10 @@
                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     <input type="checkbox" name="menus[{{ $menu->menu_id }}][]" value="create" 
+                                           class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <input type="checkbox" name="menus[{{ $menu->menu_id }}][]" value="assign" 
                                            class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
                                 </td>
                                 <td class="px-6 py-4 text-center">

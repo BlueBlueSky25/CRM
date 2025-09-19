@@ -129,8 +129,6 @@
                                 <option value="{{ $role->role_id }}">{{ $role->role_name }}</option>
                             @endforeach
                         </select>
-                        
-            
                     </div>
                     
                     <div>

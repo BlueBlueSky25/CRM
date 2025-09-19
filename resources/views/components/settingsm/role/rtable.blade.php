@@ -53,7 +53,7 @@
                     @endif
                     
                     <!-- Assign Permissions Button -->
-                      @if(auth()->user()->canAccess($currentMenuId, 'edit'))
+                      @if(auth()->user()->canAccess($currentMenuId, 'assign'))
                     <button onclick="openAssignMenuModal({{ $role->role_id }}, '{{ $role->role_name }}')"
                             class="text-green-600 hover:text-green-900 p-2 rounded-lg hover:bg-green-50 transition-colors" 
                             title="Assign Permissions">

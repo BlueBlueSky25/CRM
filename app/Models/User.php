@@ -48,6 +48,7 @@ class User extends Authenticatable
         'create' => (bool) $roleMenu->pivot->can_create,
         'edit' => (bool) $roleMenu->pivot->can_edit,
         'delete' => (bool) $roleMenu->pivot->can_delete,
+        'assign' => (bool) $roleMenu->pivot->can_assign,
         default => false
     };
 }

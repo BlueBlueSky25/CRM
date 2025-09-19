@@ -20,7 +20,7 @@ class Role extends Model
     public function menus()
     {
         return $this->belongsToMany(Menu::class, 'role_menu', 'role_id', 'menu_id')
-                    ->withPivot('can_view', 'can_create', 'can_edit', 'can_delete')
+                    ->withPivot('can_view', 'can_create', 'can_edit', 'can_delete', 'can_assign')
                     ->withTimestamps();
     }
 }

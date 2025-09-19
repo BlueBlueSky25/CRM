@@ -169,6 +169,20 @@
                         <input type="text" id="addMenuRoute" name="route" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" placeholder="e.g., users.index">
                     </div>
 
+                    <!-- BENERIN KII GABISA MASUK KE POP UP MODAL INI SELECT PARENT NYA -->
+                    <!-- <div> 
+                        <label for="AddMenuParent" class="block text-sm font-medium text-gray-700 mb-1">Parent</label>
+                        <select id="AddMenuParent" name="parent_id" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" 
+                            required>
+                            <option value="">Select Parent</option>
+                            
+                                <option value="">---- Select Parent ----</option>
+                            
+                        </select>
+                    </div> -->
+
+
                     <div>
                         <label for="addMenuOrder" class="block text-sm font-medium text-gray-700 mb-1">Order</label>
                         <input type="number" id="addMenuOrder" name="order" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" placeholder="Order Number">
