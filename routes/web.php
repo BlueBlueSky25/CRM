@@ -29,9 +29,9 @@ Route::middleware(['auth', 'permission'])->group(function () {
         return view('layout.customers');
     })->name('customers');
 
-    Route::get('/chart', function () {
-        return view('layout.chart');
-    })->name('chart');
+    Route::get('/public', function () {
+        return view('public');
+    })->name('public');
 
     // ==========================
     // Settings Pages
