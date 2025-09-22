@@ -35,9 +35,6 @@
     </main>
 
 
-
-
-
     <!-- Footer -->
     <x-settingsm.footer />
     
@@ -46,6 +43,8 @@
         <script>
         window.rolePermissions = @json($rolePermissions ?? []);
         </script> 
+
+        
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script>
         // Modal functions for User

@@ -32,6 +32,7 @@ class UserController extends Controller
         'email'    => 'nullable|email|unique:users,email', 
         'password' => 'required|string|min:6',
         'role_id'  => 'required|exists:roles,role_id',
+        'is_active' => 'sometimes|boolean',
     ]);
 
     User::create([
@@ -39,7 +40,7 @@ class UserController extends Controller
         'email'          => $request->email,
         'password_hash'  => Hash::make($request->password),
         'role_id'        => $request->role_id,
-        'is_active'      => true,
+        'is_active'      => $request->input('is_active', true),
     ]);
 
     return redirect()->route('user')->with('success', 'User berhasil ditambahkan!');
@@ -53,6 +54,7 @@ public function update(Request $request, $id)
         'username' => 'required|string|max:100|unique:users,username,' . $id . ',user_id', // <- GANTI 'akun' JADI 'users'
         'email'    => 'nullable|email|unique:users,email,' . $id . ',user_id', // <- GANTI 'akun' JADI 'users'
         'role_id'  => 'required|exists:roles,role_id',
+        'is_active' => 'sometimes|boolean',
     ]);
 
     $data = [

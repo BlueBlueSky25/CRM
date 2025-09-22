@@ -3,44 +3,44 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+use App\Models\Menu;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckPermission
 {
-    public function handle(Request $request, Closure $next): Response
+    public function handle($request, Closure $next)
     {
-        if (!Auth::check()) {
+        $user = Auth::user();
+        if (!$user) {
             return redirect()->route('login');
         }
 
-        $user = Auth::user();
-        $routeName = $request->route()->getName();
-        
-        if ($request->has('role')) {
-                if ($request->role === 'superadmin' && $user->role->role_name !== 'superadmin') {
-                    return redirect()->back()->with('error', 'Hanya superadmin yang bisa assign role superadmin.');
+        // Ambil current route name
+        $routeName = Route::currentRouteName();
+
+        // Cari menu berdasarkan route
+        $menu = Menu::where('route', $routeName)->first();
+
+        if ($menu) {
+            // Share current menu ID biar ga Undefined
+            view()->share('currentMenuId', $menu->menu_id);
+
+            // Tentukan action berdasarkan HTTP method
+            $action = match ($request->method()) {
+                'POST' => 'create',
+                'PUT', 'PATCH' => 'edit',
+                'DELETE' => 'delete',
+                default => 'view',
+            };
+
+            // Cek akses user
+            if (!$user->canAccess($menu->menu_id, $action)) {
+                return redirect()->back()->with('error', 'Anda tidak memiliki akses ke halaman atau fitur ini.');
+            }
         }
-    }
-
-        // Ambil menu sesuai route
-        $menu = $user->role->menus()->where('route', $routeName)->first();
-
-        // Super admin bisa akses semua
-        if ($user->role->role_name === 'superadmin') {
-            // Share menu_id ke view
-            view()->share('currentMenuId', $menu?->menu_id);
-            return $next($request);
-        }
-
-        // Cek permission view
-        if (!$menu || !$menu->pivot->can_view) {
-        return redirect()->back()->with('error', 'Anda tidak memiliki akses ke halaman atau fitur ini.');
-    }
-
-        // Share menu_id ke view supaya Blade bisa pakai untuk cek edit/delete/create
-        view()->share('currentMenuId', $menu->menu_id);
 
         return $next($request);
     }

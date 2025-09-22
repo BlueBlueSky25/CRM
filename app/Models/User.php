@@ -11,38 +11,43 @@ class User extends Authenticatable
     public $timestamps = true;
 
     protected $fillable = [
-        'username', 'role_id', 'is_active', 'email', 'password_hash'
+        'username', 'role_id', 'is_active', 'email', 'password_hash','is_active'
     ];
 
     protected $hidden = ['password_hash'];
+
+
 
     public function getAuthPassword()
     {
         return $this->password_hash;
     }
 
+
+
     public function role()
     {
         return $this->belongsTo(Role::class, 'role_id', 'role_id');
     }
+
+
+
+
    public function canAccess($menuId, $action)
 {
-
     if ($this->role && $this->role->role_name === 'superadmin') {
         return true;
     }
 
-    // Cek apakah user punya role
     if (!$this->role) return false;
 
-    // FIX: Pakai wherePivot untuk query pivot table langsung
+    // PERBAIKAN: Gunakan where() bukan wherePivot()
     $roleMenu = $this->role->menus()
-                          ->wherePivot('menu_id', $menuId)
+                          ->where('menu.menu_id', $menuId)
                           ->first();
 
     if (!$roleMenu) return false;
 
-    // Cek permission berdasarkan action
     return match($action) {
         'view' => (bool) $roleMenu->pivot->can_view,
         'create' => (bool) $roleMenu->pivot->can_create,
@@ -52,6 +57,10 @@ class User extends Authenticatable
         default => false
     };
 }
+
+
+
+
 
 public function canAccessCurrent($action)
 {

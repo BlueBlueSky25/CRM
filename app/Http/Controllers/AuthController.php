@@ -16,10 +16,22 @@ class AuthController extends Controller
     {
         $credentials = $request->only('username', 'password');
 
-        if (Auth::attempt($credentials, $request->filled('remember'))) {
-            $request->session()->regenerate();
-            return redirect()->intended('/dashboard');
+       if (Auth::attempt($credentials, $request->filled('remember'))) {
+        $user = Auth::user(); // ambil user yang berhasil login
+
+        // cek apakah user aktif
+        if (!$user->is_active) {
+            Auth::logout();
+
+            return back()->withErrors([
+                'loginError' => '❌ Akun anda tidak aktif. Mohon hubungi admin untuk aktivasi.',
+            ]);
         }
+
+        // kalau aktif, lanjut login
+        $request->session()->regenerate();
+        return redirect()->intended('/dashboard');
+    }
 
         return back()->withErrors([
             'loginError' => 'Username atau password salah!',

@@ -27,6 +27,15 @@
             <h2 class="text-4xl text-gray-900 font-semibold">Sign in</h2>
             @csrf
 
+            {{-- Error Messages --}}
+            @if ($errors->any())
+                <div class="w-full mb-4 p-3 rounded-lg bg-red-100 text-red-700 text-sm text-center">
+                    @foreach ($errors->all() as $error)
+                        <p>{{ $error }}</p>
+                    @endforeach
+                </div>
+            @endif
+
             <div class="flex items-center gap-4 w-full my-5">
                 <div class="w-full h-px bg-gray-300/90"></div>
                 <p class="text-nowrap text-sm text-gray-400/90">Silahkan Login Terlebih Dahulu</p>

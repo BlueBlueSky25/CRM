@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController; 
 use App\Http\Controllers\MenuController;
+use App\Http\Controllers\PerusahaanController;
 
 // ==========================
 // Public Routes
@@ -29,9 +30,9 @@ Route::middleware(['auth', 'permission'])->group(function () {
         return view('layout.customers');
     })->name('customers');
 
-    Route::get('/public', function () {
-        return view('public');
-    })->name('public');
+    Route::get('/perusahaan', function () {
+        return view('.layout.perusahaan');
+    })->name('perusahaan');
 
     // ==========================
     // Settings Pages
@@ -54,10 +55,14 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->name('roles.destroy'); 
     Route::post('/roles/{id}/assign-menu', [RoleController::class, 'assignMenu'])->name('roles.assignMenu');
 
-    
+    // ==========================
+    // CRUD Operations - MENU
+    // ==========================
     Route::post('/menus', [MenuController::class, 'store'])->name('menus.store'); 
     Route::put('/menus/{id}', [MenuController::class, 'update'])->name('menus.update'); 
     Route::delete('/menus/{id}', [MenuController::class, 'destroy'])->name('menus.destroy'); 
+
+   
 
 
 

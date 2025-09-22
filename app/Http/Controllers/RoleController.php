@@ -125,7 +125,8 @@ public function destroy($id)
      * Assign menu + permission ke role
      */
     public function assignMenu(Request $request, $id)
-{
+{   
+    
     $role = Role::findOrFail($id);
 
     $syncData = [];
@@ -135,6 +136,7 @@ public function destroy($id)
             'can_create' => in_array('create', $perms),
             'can_edit'   => in_array('edit', $perms),
             'can_delete' => in_array('delete', $perms),
+            'can_assign' => in_array('assign', $perms),
         ];
     }
 
@@ -155,6 +157,7 @@ public function assignAllPermissionsToSuperAdmin()
             'can_create' => true,
             'can_edit'   => true,
             'can_delete' => true,
+            'can_assign' => true,
         ];
     }
 
