@@ -5,7 +5,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController; 
 use App\Http\Controllers\MenuController;
-use App\Http\Controllers\PerusahaanController;
 
 // ==========================
 // Public Routes
@@ -30,9 +29,21 @@ Route::middleware(['auth', 'permission'])->group(function () {
         return view('layout.customers');
     })->name('customers');
 
-    Route::get('/perusahaan', function () {
-        return view('.layout.perusahaan');
-    })->name('perusahaan');
+    Route::get('/marketing', function () {
+        return view('.layout.marketing');
+    })->name('marketing');
+
+    Route::get('/industri', function () {
+        return view('.layout.industri');
+    })->name('industri');
+
+
+
+    // ==========================
+    // TAMBAH INI: Sales Management untuk Marketing
+    // ==========================
+    Route::get('/marketing', [UserController::class, 'salesManagement'])->name('marketing');
+
 
     // ==========================
     // Settings Pages
@@ -40,6 +51,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/user', [UserController::class, 'index'])->name('user');
     Route::get('/role', [RoleController::class, 'index'])->name('role'); 
     Route::get('/menu', [MenuController::class, 'index'])->name('menu');
+
     // ==========================
     // CRUD Operations - USER
     // ==========================

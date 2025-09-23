@@ -47,8 +47,9 @@
                     </td>
                     <!-- Parent Menu Column -->
                     <td class="px-6 py-4 text-sm text-gray-600">
-                        {{ $menu->parent_id ?? '-' }}
+                        {{ $menu->parent?->nama_menu ?? '-' }}
                     </td>
+
                     <!-- Actions Column -->
                     <td class="px-6 py-4 text-sm font-medium">
                         <div class="flex items-center space-x-2">

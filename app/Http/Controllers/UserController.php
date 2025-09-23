@@ -22,6 +22,27 @@ class UserController extends Controller
         return view('layout.user', compact('users', 'roles'));
     }
 
+
+    public function salesManagement()
+    {
+        // Ambil role Sales
+        $salesRole = Role::where('role_name', 'Sales')->first();
+        
+        if (!$salesRole) {
+            return redirect()->back()->with('error', 'Role Sales tidak ditemukan!');
+        }
+
+        // Ambil semua user dengan role Sales
+        $salesUsers = User::with('role')
+                         ->where('role_id', $salesRole->role_id)
+                         ->get();
+
+        // Kirim ke view khusus sales management
+
+        return view('layout.marketing', compact('salesUsers', 'salesRole'));
+    }
+
+
     /**
      * Simpan user baru
      */
@@ -33,6 +54,9 @@ class UserController extends Controller
         'password' => 'required|string|min:6',
         'role_id'  => 'required|exists:roles,role_id',
         'is_active' => 'sometimes|boolean',
+        'phone'      => 'nullable|string|max:20',                    // Hapus regex yang terlalu ketat
+        'birth_date' => 'nullable|date|before_or_equal:today',       // Ganti "before" jadi "before_or_equal"  
+        'address'    => 'nullable|string|max:1000',
     ]);
 
     User::create([
@@ -41,6 +65,9 @@ class UserController extends Controller
         'password_hash'  => Hash::make($request->password),
         'role_id'        => $request->role_id,
         'is_active'      => $request->input('is_active', true),
+        'phone'          => $request->phone,
+        'birth_date'     => $request->birth_date,
+        'address'        => $request->address,
     ]);
 
     return redirect()->route('user')->with('success', 'User berhasil ditambahkan!');
@@ -55,6 +82,9 @@ public function update(Request $request, $id)
         'email'    => 'nullable|email|unique:users,email,' . $id . ',user_id', // <- GANTI 'akun' JADI 'users'
         'role_id'  => 'required|exists:roles,role_id',
         'is_active' => 'sometimes|boolean',
+        'phone'      => 'nullable|string|max:20',                    // Hapus regex yang terlalu ketat
+        'birth_date' => 'nullable|date|before_or_equal:today',       // Ganti "before" jadi "before_or_equal"  
+        'address'    => 'nullable|string|max:1000',
     ]);
 
     $data = [
@@ -62,6 +92,9 @@ public function update(Request $request, $id)
         'email' => $request->email,
         'role_id' => $request->role_id,
         'is_active' => $request->has('is_active') ? 1 : 0,
+        'phone'          => $request->phone,
+        'birth_date'     => $request->birth_date,
+        'address'        => $request->address,
     ];
 
     

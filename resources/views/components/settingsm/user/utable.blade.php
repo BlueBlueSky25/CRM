@@ -26,6 +26,9 @@
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No.</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date Birth</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Address</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
@@ -43,6 +46,27 @@
                             </div>
                         </div>
                     </td>
+
+                    <td class="px-6 py-4">
+                        <!-- <div class="text-sm text-gray-400 italic">Not available</div> -->
+                        {{-- field phone: --}}
+                         <div class="text-sm text-gray-900">{{ $user->phone ?? '-' }}</div> 
+                    </td>
+
+                    
+                    <td class="px-6 py-4">
+                        {{-- field date_birth: --}}
+                        <!-- <div class="text-sm text-gray-400 italic">Not available</div> -->
+                        <div class="text-sm text-gray-900"> {{ $user->birth_date ? date('d M Y', strtotime($user->birth_date)) : '-' }}</div> 
+                    </td>
+
+                    
+                    <td class="px-6 py-4">
+                        {{-- field date_birth: --}}
+                        <!-- <div class="text-sm text-gray-400 italic">Not available</div> -->
+                         <div class="text-sm text-gray-900">{{ $user->address ?? '-' }}</div> 
+                    </td>
+
                     <td class="px-6 py-4">
                         <span class="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                             {{ $user->role->role_name ?? 'No Role' }}
@@ -56,7 +80,15 @@
                     <td class="px-6 py-4 text-sm font-medium">
                         <div class="flex items-center space-x-2">
                             @if(auth()->user()->canAccess($currentMenuId, 'edit'))
-                            <button onclick="openEditModal('{{ $user->user_id }}', '{{ $user->username }}', '{{ $user->email }}', '{{ $user->role_id }}', {{ $user->is_active ? 'true' : 'false' }})" 
+                            <button onclick="openEditModal(
+                                '{{ $user->user_id }}',
+                                '{{ $user->username }}',
+                                '{{ $user->email }}',
+                                '{{ $user->role_id }}',
+                                {{ $user->is_active ? 'true' : 'false' }},
+                                '{{ $user->phone }}',
+                                '{{ $user->birth_date }}',
+                                `{{ $user->address }}`)"
                                     class="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 flex items-center" 
                                     title="Edit User">
                                 <i class="fas fa-edit"></i>
@@ -95,7 +127,7 @@
 <!-- Edit User Modal -->
 <div id="editUserModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 z-50" style="backdrop-filter: blur(4px);">
     <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full" style="animation: modalSlideIn 0.3s ease-out;">
+        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full" style="animation: modalSlideIn 0.3s ease-out;">
             <div class="px-6 py-4 border-b border-gray-200">
                 <div class="flex justify-between items-center">
                     <h3 class="text-lg font-semibold text-gray-900">Edit User</h3>
@@ -110,7 +142,7 @@
                 @method('PUT')
                 <input type="hidden" id="editUserId" name="user_id">
                 
-                <div class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="editUsername" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
                         <input type="text" id="editUsername" name="username" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" required>
@@ -119,6 +151,27 @@
                     <div>
                         <label for="editEmail" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                         <input type="email" id="editEmail" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" >
+                    </div>
+
+                    <div>
+                        <label for="editPhone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                        <input type="text" id="editPhone" name="phone"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                    </div>
+
+                        
+                    <div>
+                        <label for="editDateBirth" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                        <input type="date" name="birth_date" id="editBirthDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                        max="{{ date('Y-m-d') }}"
+                        value="{{ old('birth_date') }}">
+                    </div>
+
+                        
+                    <div>
+                        <label for="editAddress" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                        <textarea id="editAddress" name="address" rows="2"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"></textarea>
                     </div>
                     
                     <div>
@@ -167,13 +220,16 @@
 <!-- JavaScript untuk Modal -->
 <script>
     // Function to open edit modal
-    function openEditModal(userId, username, email, roleId, isActive) {
+    function openEditModal(userId, username, email, roleId, isActive, phone, birthDate, address) {
         document.getElementById('editUserId').value = userId;
         document.getElementById('editUsername').value = username;
         document.getElementById('editEmail').value = email;
         document.getElementById('editRole').value = roleId;
         document.getElementById('editIsActive').checked = isActive == 1 || isActive == true;
-        
+        document.getElementById('editPhone').value = phone || '';
+        document.getElementById('editBirthDate').value = birthDate || '';
+        document.getElementById('editAddress').value = address || '';
+
         // Clear password fields
         document.getElementById('editPassword').value = '';
         document.getElementById('editPasswordConfirm').value = '';
