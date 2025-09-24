@@ -16,6 +16,6 @@
 
                 <!-- Customer Table -->
                 <div class="bg-white rounded-xl shadow-sm border">
-                    <x-marketing.table :salesUsers="$salesUsers" />
+                    <x-marketing.table :salesUsers="$salesUsers" :currentMenuId="$currentMenuId" />
                     <x-marketing.pagination />
 @endsection

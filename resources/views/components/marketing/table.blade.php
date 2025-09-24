@@ -42,29 +42,21 @@
                                         </div>
                                     </div>
                                 </td>
-
-                                {{-- Phone (belum ada field) --}}
                                 <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-400 italic">Not available</div>
-                                    {{-- Nanti kalau udah ada field phone: --}}
-                                    {{-- <div class="text-sm text-gray-900">{{ $user->phone ?? '-' }}</div> --}}
+                        
+                                    <div class="text-sm text-gray-900">{{ $user->phone ?? '-' }}</div>
                                 </td>
 
-                                {{-- Date Birth (belum ada field) --}}
                                 <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-400 italic">Not available</div>
-                                    {{-- Nanti kalau udah ada field date_birth: --}}
-                                    {{-- <div class="text-sm text-gray-900">{{ $user->date_birth ? date('d M Y', strtotime($user->date_birth)) : '-' }}</div> --}}
+                                    
+                                    <div class="text-sm text-gray-900">{{ $user->birth_date ? date('d M Y', strtotime($user->birth_date)) : '-' }}</div>
                                 </td>
 
-                                {{-- Address (belum ada field) --}}
                                 <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-400 italic">Not available</div>
-                                    {{-- Nanti kalau udah ada field address: --}}
-                                    {{-- <div class="text-sm text-gray-900">{{ $user->address ?? '-' }}</div> --}}
+                                    
+                                     <div class="text-sm text-gray-900">{{ $user->address ?? '-' }}</div> 
                                 </td>
 
-                                {{-- Role --}}
                                 <td class="px-6 py-4">
                                     <span class="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                         {{ $user->role->role_name ?? 'No Role' }}

@@ -9,7 +9,7 @@
 
         <!-- User Management Table -->
         <x-settingsm.user.utable :users="$users"  :roles="$roles" />
-
+        <!-- <x-globalr.pagination :paginator="$users" /> -->
 </div>
 
 <!-- User Form -->

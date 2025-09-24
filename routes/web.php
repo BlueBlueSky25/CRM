@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController; 
 use App\Http\Controllers\MenuController;
+use App\Http\Controllers\SalesController;
 
 // ==========================
 // Public Routes
@@ -29,12 +30,12 @@ Route::middleware(['auth', 'permission'])->group(function () {
         return view('layout.customers');
     })->name('customers');
 
-    Route::get('/marketing', function () {
-        return view('.layout.marketing');
-    })->name('marketing');
+    // Route::get('/marketing', function () {
+    //     return view('layout.marketing');
+    // })->name('marketing');
 
     Route::get('/industri', function () {
-        return view('.layout.industri');
+        return view('layout.industri');
     })->name('industri');
 
 
@@ -42,7 +43,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // ==========================
     // TAMBAH INI: Sales Management untuk Marketing
     // ==========================
-    Route::get('/marketing', [UserController::class, 'salesManagement'])->name('marketing');
+    
 
 
     // ==========================
@@ -74,6 +75,11 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::put('/menus/{id}', [MenuController::class, 'update'])->name('menus.update'); 
     Route::delete('/menus/{id}', [MenuController::class, 'destroy'])->name('menus.destroy'); 
 
+
+    Route::get('/marketing', [SalesController::class, 'index'])->name('marketing.index');
+    Route::post('/marketing/sales', [SalesController::class, 'store'])->name('marketing.sales.store');
+    Route::put('/marketing/sales/{id}', [SalesController::class, 'update'])->name('marketing.sales.update');
+    Route::delete('/marketing/sales/{id}', [SalesController::class, 'destroy'])->name('marketing.sales.destroy');
    
 
 

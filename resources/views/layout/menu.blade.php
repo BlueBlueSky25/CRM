@@ -7,7 +7,7 @@
         
 
         <x-settingsm.menu.mtable :menus="$menus" />
-
+        <!-- <x-globalr.pagination :paginator="$menus" /> -->
 </div>
 
 <x-settingsm.menu.mform />
