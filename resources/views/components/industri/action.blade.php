@@ -19,7 +19,7 @@
             </button> -->
 
             <!-- Tambah Customer -->
-            <button onclick="openSalesModal()"
+            <button onclick="openIndustriModal()"
             class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
             <i class="fas fa-plus"></i>
             Tambah Sales
@@ -30,7 +30,7 @@
     </div>
 
     <!-- ================= Modal Tambah Customer ================= -->
-    <div id="salesModal"
+    <div id="IndustriModal"
     class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-xl shadow-lg w-full max-w-lg p-6">
         <div class="flex justify-between items-center mb-4">
@@ -79,11 +79,11 @@
     <!-- ================= Script ================= -->
     <script>
     // ===== Modal Tambah Customer =====
-    function openSalesModal() {
-        document.getElementById('salesModal').classList.remove('hidden');
+    function openIndustriModal() {
+        document.getElementById('IndustriModal').classList.remove('hidden');
     }
-    function closeSalesModal() {
-        document.getElementById('salesModal').classList.add('hidden');
+    function closeIndustriModal() {
+        document.getElementById('IndustriModal').classList.add('hidden');
     }
 
     // ===== Modal Import =====

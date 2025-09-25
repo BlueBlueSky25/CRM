@@ -10,23 +10,26 @@ use Illuminate\Support\Facades\Hash;
 class SalesController extends Controller
 {
     public function index()
-    {
-        // Ambil role sales
-        $salesRole = Role::where('role_name', 'Sales')->first();
+{
+    
+    $salesRole = Role::where('role_name', 'Sales')->first();
+    
+    if (!$salesRole) {
         
-        // Ambil semua user dengan role sales
-        $salesUsers = User::where('role_id', $salesRole->role_id)->get();
-        
-        // Untuk form create, ambil role sales saja
-        $salesRole = Role::where('role_name', 'sales')->get();
-         $currentMenuId = view()->shared('currentMenuId', null);
+        return redirect()->back()->with('error', 'Role sales tidak ditemukan!');
+    }
+    
+    
+    $salesUsers = User::where('role_id', $salesRole->role_id)->get();
+    
+    $currentMenuId = view()->shared('currentMenuId', null);
 
     return view('layout.marketing', [
         'salesUsers' => $salesUsers,
         'salesRole' => $salesRole, 
-        'currentMenuId' => $currentMenuId // JANGAN LUPA INI
+        'currentMenuId' => $currentMenuId
     ]);
-    }
+}
 
     public function store(Request $request)
     {
@@ -40,7 +43,7 @@ class SalesController extends Controller
         ]);
 
         // Dapatkan role sales
-        $salesRole = Role::where('role_name', 'sales')->first();
+        $salesRole = Role::where('role_name', 'Sales')->first();
 
         User::create([
             'username'       => $request->username,
@@ -53,7 +56,7 @@ class SalesController extends Controller
             'is_active'      => true,
         ]);
 
-        return redirect()->route('marketing.index')->with('success', 'Sales user berhasil ditambahkan!');
+        return redirect()->route('marketing')->with('success', 'Sales user berhasil ditambahkan!');
     }
 
     public function update(Request $request, $id)
@@ -91,6 +94,6 @@ class SalesController extends Controller
         $user = User::findOrFail($id);
         $user->delete();
 
-        return redirect()->route('marketing.index')->with('success', 'Sales user berhasil dihapus!');
+        return redirect()->route('marketing')->with('success', 'Sales user berhasil dihapus!');
     }
 }

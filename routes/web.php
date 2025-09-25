@@ -76,7 +76,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::delete('/menus/{id}', [MenuController::class, 'destroy'])->name('menus.destroy'); 
 
 
-    Route::get('/marketing', [SalesController::class, 'index'])->name('marketing.index');
+    Route::get('/marketing', [SalesController::class, 'index'])->name('marketing');
     Route::post('/marketing/sales', [SalesController::class, 'store'])->name('marketing.sales.store');
     Route::put('/marketing/sales/{id}', [SalesController::class, 'update'])->name('marketing.sales.update');
     Route::delete('/marketing/sales/{id}', [SalesController::class, 'destroy'])->name('marketing.sales.destroy');
