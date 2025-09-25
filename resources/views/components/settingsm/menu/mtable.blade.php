@@ -6,14 +6,14 @@
             <p class="text-sm text-gray-600 mt-1">Manage application menus and navigation</p>
         </div>
         @if(auth()->user()->canAccess($currentMenuId, 'create'))
-        <button onclick="openMenuModal()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center space-x-2">
+        <button onclick="openMenuModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2">
             <i class="fas fa-plus"></i>
             <span>Add New Menu</span>
         </button>
         @endif
     </div>
 
-    <!-- Notifikasi -->
+    <!-- Notification -->
     @if(session('success'))
         <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mx-6 mt-4">
             <p>{{ session('success') }}</p>
@@ -35,7 +35,7 @@
             <tbody class="bg-white divide-y divide-gray-200">
                 @foreach($menus as $index => $menu)
                 <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 text-sm text-gray-900">{{ $index + 1 }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">{{ $menus->firstItem() + $loop->index }}</td>
                     <td class="px-6 py-4 font-medium text-gray-900">{{ $menu->nama_menu }}</td>
                     <td class="px-6 py-4 text-sm text-gray-600">{{ $menu->route ?? '-' }}</td>
                     <td class="px-6 py-4 text-sm text-gray-600">
@@ -78,23 +78,21 @@
             </tbody>
         </table>
     </div>
-
 </div>
 
 <!-- Edit Menu Modal -->
-<div id="editMenuModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 z-50" style="backdrop-filter: blur(4px);">
-    <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full" style="animation: modalSlideIn 0.3s ease-out;">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-lg font-semibold text-gray-900">Edit Menu</h3>
-                    <button onclick="closeEditMenuModal()" class="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
+<div id="editMenuModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden animate-modal-in">
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-semibold text-white">Edit Menu</h3>
+                <button onclick="closeEditMenuModal()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
             </div>
-            
-            <form id="editMenuForm" action="{{ route('menus.update', ['id' => 0]) }}" method="POST" class="px-6 py-4">
+        </div>
+        <div class="overflow-y-auto max-h-[calc(90vh-140px)] p-6">
+            <form id="editMenuForm" action="{{ route('menus.update', ['id' => 0]) }}" method="POST" class="space-y-4">
                 @csrf
                 @method('PUT')
                 <input type="hidden" id="editMenuId" name="menu_id">
@@ -102,24 +100,22 @@
                 <div class="space-y-4">
                     <div>
                         <label for="editMenuName" class="block text-sm font-medium text-gray-700 mb-1">Menu Name *</label>
-                        <input type="text" id="editMenuName" name="nama_menu" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" required>
+                        <input type="text" id="editMenuName" name="nama_menu" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
                     </div>
                     
                     <div>
                         <label for="editMenuRoute" class="block text-sm font-medium text-gray-700 mb-1">Route</label>
-                        <input type="text" id="editMenuRoute" name="route" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" placeholder="e.g., users.index">
+                        <input type="text" id="editMenuRoute" name="route" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" placeholder="e.g., users.index">
                     </div>
 
                     <div>
                         <label for="editMenuOrder" class="block text-sm font-medium text-gray-700 mb-1">Order</label>
-                        <input type="number" id="editMenuOrder" name="order" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" 
-                            placeholder="Order Number">
+                        <input type="number" id="editMenuOrder" name="order" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" placeholder="Order Number">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Parent Menu</label>
-                        <select name="parent_id" id="editMenuParent" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none">                         
+                        <select name="parent_id" id="editMenuParent" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">                         
                             <option value="">-- No Parent (Main Menu) --</option>
                             @foreach(App\Models\Menu::whereNull('parent_id')->get() as $menu)
                                 <option value="{{ $menu->menu_id }}">{{ $menu->nama_menu }}</option>
@@ -130,7 +126,7 @@
                     <div>
                         <label for="editMenuIcon" class="block text-sm font-medium text-gray-700 mb-1">Icon</label>
                         <div class="relative">
-                            <input type="text" id="editMenuIcon" name="icon" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" placeholder="e.g., fas fa-users">
+                            <input type="text" id="editMenuIcon" name="icon" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" placeholder="e.g., fas fa-users">
                             <div class="absolute right-3 top-2.5">
                                 <i id="iconPreview" class="text-gray-400"></i>
                             </div>
@@ -140,12 +136,8 @@
                 </div>
                 
                 <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
-                    <button type="button" onclick="closeEditMenuModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
-                        Cancel
-                    </button>
-                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors">
-                        Update Menu
-                    </button>
+                    <button type="button" onclick="closeEditMenuModal()" class="px-6 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 font-medium shadow-md hover:shadow-lg">Update Menu</button>
                 </div>
             </form>
         </div>
@@ -154,58 +146,52 @@
 
 
 <!-- Add Menu Modal -->
-<div id="addMenuModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 z-50" style="backdrop-filter: blur(4px);">
-    <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full" style="animation: modalSlideIn 0.3s ease-out;">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-lg font-semibold text-gray-900">Add New Menu</h3>
-                    <button onclick="closeAddMenuModal()" class="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
+<div id="addMenuModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden animate-modal-in">
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-semibold text-white">Add New Menu</h3>
+                <button onclick="closeAddMenuModal()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
             </div>
-            
-            <form id="addMenuForm" action="{{ route('menus.store') }}" method="POST" class="px-6 py-4">
+        </div>
+
+        <div class="overflow-y-auto max-h-[calc(90vh-140px)] p-6">
+            <form id="addMenuForm" action="{{ route('menus.store') }}" method="POST" class="space-y-4">
                 @csrf
                 
                 <div class="space-y-4">
                     <div>
-                        <label for="addMenuName" class="block text-sm font-medium text-gray-700 mb-1">Menu Name</label>
-                        <input type="text" id="addMenuName" name="nama_menu" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" placeholder="Enter menu name" required>
+                        <label for="addMenuName" class="block text-sm font-medium text-gray-700 mb-1">Menu Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="addMenuName" name="nama_menu" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" placeholder="Enter menu name" required>
                     </div>
                     
                     <div>
                         <label for="addMenuRoute" class="block text-sm font-medium text-gray-700 mb-1">Route</label>
-                        <input type="text" id="addMenuRoute" name="route" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" placeholder="e.g., users.index">
+                        <input type="text" id="addMenuRoute" name="route" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" placeholder="e.g., users.index">
                     </div>
 
                     <div>
                         <label for="addMenuOrder" class="block text-sm font-medium text-gray-700 mb-1">Order</label>
-                        <input type="number" id="addMenuOrder" name="order" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" placeholder="Order Number">
+                        <input type="number" id="addMenuOrder" name="order" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" placeholder="Order Number">
                     </div>
 
                     <div>
                         <label for="addMenuIcon" class="block text-sm font-medium text-gray-700 mb-1">Icon</label>
                         <div class="relative">
-                            <input type="text" id="addMenuIcon" name="icon" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" placeholder="e.g., fas fa-users">
+                            <input type="text" id="addMenuIcon" name="icon" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" placeholder="e.g., fas fa-users">
                             <div class="absolute right-3 top-2.5">
                                 <i id="addIconPreview" class="text-gray-400"></i>
                             </div>
                         </div>
                         <p class="text-xs text-gray-500 mt-1">Use FontAwesome classes (e.g., fas fa-users)</p>
                     </div>
-
-                    
                 </div>
                 
                 <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
-                    <button type="button" onclick="closeAddMenuModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
-                        Cancel
-                    </button>
-                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors">
-                        Add Menu
-                    </button>
+                    <button type="button" onclick="closeAddMenuModal()" class="px-6 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 font-medium shadow-md hover:shadow-lg">Add Menu</button>
                 </div>
             </form>
         </div>

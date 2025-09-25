@@ -7,7 +7,7 @@
         
 
         <x-settingsm.role.rtable :roles="$roles" />
-        <!-- <x-globalr.pagination :paginator="$roles" /> -->
+         <x-globalr.pagination :paginator="$roles" /> 
 
 </div>
 

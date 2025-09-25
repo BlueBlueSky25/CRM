@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController; 
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\SalesController;
+use App\Http\Controllers\CompanyChartController;
 
 // ==========================
 // Public Routes
@@ -22,9 +23,9 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // ==========================
     // Dashboard & Pages
     // ==========================
-    Route::get('/dashboard', function () {
-        return view('layout.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [CompanyChartController::class, 'index'])
+    ->name('dashboard')
+    ->middleware(['auth','permission']);
 
     Route::get('/customers', function () {
         return view('layout.customers');

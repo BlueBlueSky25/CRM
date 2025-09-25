@@ -37,7 +37,7 @@
             <tbody class="bg-white divide-y divide-gray-200">
                 @foreach($users as $index => $user)
                 <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 text-sm text-gray-900">{{ $index + 1 }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">{{ $users->firstItem() + $loop->index }}</td>
                     <td class="px-6 py-4">
                         <div class="flex items-center">
                             <div>
@@ -126,92 +126,101 @@
 
 
 <!-- Edit User Modal -->
-<div id="editUserModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 z-50" style="backdrop-filter: blur(4px);">
-    <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full" style="animation: modalSlideIn 0.3s ease-out;">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-lg font-semibold text-gray-900">Edit User</h3>
-                    <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100">
-                        <i class="fas fa-times"></i>
-                    </button>
+<div id="editUserModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden animate-modal-in">
+        <!-- Modal Header -->
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-xl font-semibold text-white">Edit User</h3>
+                    <p class="text-indigo-100 text-sm mt-1">Update user account details</p>
                 </div>
+                <button onclick="closeEditModal()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
             </div>
-            
-            <form id="editUserForm" action= "{{ route('users.update', ['id' => 0]) }}" method="POST" class="px-6 py-4">
+        </div>
+
+        <!-- Modal Body - Scrollable -->
+        <div class="overflow-y-auto max-h-[calc(90vh-140px)]">
+            <form id="editUserForm" action="{{ route('users.update', ['id' => 0]) }}" method="POST" class="p-6">
                 @csrf
                 @method('PUT')
                 <input type="hidden" id="editUserId" name="user_id">
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="editUsername" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                        <input type="text" id="editUsername" name="username" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" required>
-                    </div>
+                <!-- Personal Information Section -->
+                <div class="mb-6">
+                    <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-user-circle text-indigo-500 mr-2"></i>
+                        Personal Information
+                    </h4>
                     
-                    <div>
-                        <label for="editEmail" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input type="email" id="editEmail" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" >
-                    </div>
-
-                    <div>
-                        <label for="editPhone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                        <input type="text" id="editPhone" name="phone"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
-                    </div>
-
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <!-- Username -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Username <span class="text-red-500">*</span></label>
+                            <input type="text" id="editUsername" name="username" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                        </div>
                         
-                    <div>
-                        <label for="editDateBirth" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
-                        <input type="date" name="birth_date" id="editBirthDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-                        max="{{ date('Y-m-d') }}"
-                        value="{{ old('birth_date') }}">
-                    </div>
+                        <!-- Email -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input type="email" id="editEmail" name="email" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                        </div>
 
-                        
-                    <div>
-                        <label for="editAddress" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                        <textarea id="editAddress" name="address" rows="2"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"></textarea>
-                    </div>
-                    
-                    <div>
-                        <label for="editRole" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                        <select id="editRole" name="role_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" required>
-                            <option value="">Select Role</option>
-                            @foreach($roles as $role)
-                                <option value="{{ $role->role_id }}">{{ $role->role_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label for="editPassword" class="block text-sm font-medium text-gray-700 mb-1">
-                            New Password 
-                            <span class="text-gray-500 font-normal">(Leave blank to keep current password)</span>
-                        </label>
-                        <input type="password" id="editPassword" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
-                        
-                    </div>
-                    
-                    <div>
-                        <label for="editPasswordConfirm" class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
-                        <input type="password" id="editPasswordConfirm" name="password_confirmation" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
-                    </div>
-                    
-                    <div class="flex items-center">
-                        <input type="checkbox" id="editIsActive" name="is_active" value="1" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                        <label for="editIsActive" class="ml-2 text-sm text-gray-700">Active User</label>
+                        <!-- Phone -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                            <input type="text" id="editPhone" name="phone" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                        </div>
+
+                        <!-- Birth Date -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Birth Date</label>
+                            <input type="date" name="birth_date" id="editBirthDate" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" max="{{ date('Y-m-d') }}">
+                        </div>
+
+                        <!-- Address -->
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                            <textarea id="editAddress" name="address" rows="3" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"></textarea>
+                        </div>
+
+                        <!-- Role -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                            <select id="editRole" name="role_id" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                                <option value="">Select Role</option>
+                                @foreach($roles as $role)
+                                    <option value="{{ $role->role_id }}">{{ $role->role_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- New Password -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">New Password <span class="text-gray-500 font-normal">(Leave blank to keep current)</span></label>
+                            <input type="password" id="editPassword" name="password" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                        </div>
+
+                        <!-- Confirm New Password -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
+                            <input type="password" id="editPasswordConfirm" name="password_confirmation" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                        </div>
+
+                        <!-- Active User Checkbox -->
+                        <div class="flex items-center md:col-span-2">
+                            <input type="checkbox" id="editIsActive" name="is_active" value="1" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="editIsActive" class="ml-2 text-sm text-gray-700">Active User</label>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
-                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
-                        Cancel
-                    </button>
-                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors">
-                        Update User
-                    </button>
+
+                <!-- Form Actions -->
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                    <button type="button" onclick="closeEditModal()" class="px-6 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 font-medium shadow-md hover:shadow-lg">Update User</button>
                 </div>
             </form>
         </div>

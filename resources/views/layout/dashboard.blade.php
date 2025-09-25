@@ -17,7 +17,7 @@
 <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
     <!-- Distribusi Geografis -->
     <x-dashboard.distribusigeografis />
-    <x-dashboard.kategoriindustri />
+    <x-dashboard.kategoriindustri :chart-data="$chartCompanyData" />
 
     <!-- Placeholder untuk chart lain -->
     {{-- <div class="bg-white rounded-xl shadow-lg p-6">

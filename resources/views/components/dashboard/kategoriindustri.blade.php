@@ -1,7 +1,8 @@
-{{-- Single Hospital Distribution Card Component --}}
+{{-- kategoriindustri.blade.php --}}
+
 <div class="bg-white rounded-xl shadow-lg p-6 card-hover fade-in">
     <div class="flex items-center justify-between mb-6">
-        <h3 class="text-lg font-semibold text-gray-800">Distribusi Rumah Sakit</h3>
+        <h3 class="text-lg font-semibold text-gray-800">Distribusi Perusahaan</h3>
         <div class="flex space-x-2">
             <button class="text-gray-400 hover:text-gray-600 transition-colors" onclick="refreshChart()">
                 <i class="fas fa-sync-alt"></i>
@@ -14,14 +15,14 @@
     
     <!-- Chart Controls -->
     <div class="chart-controls">
-        <button class="control-btn active" onclick="switchChart('type')" id="btn-type">Tipe RS</button>
-        <button class="control-btn" onclick="switchChart('city')" id="btn-city">Kota</button>
+        <button class="control-btn active" onclick="switchChart('type')" id="btn-type">Tipe Perusahaan</button>
+        <button class="control-btn" onclick="switchChart('tier')" id="btn-tier">Tier</button>
         <button class="control-btn" onclick="switchChart('status')" id="btn-status">Status</button>
     </div>
     
     <!-- Chart Container -->
     <div class="relative h-80">
-        <canvas id="inds"></canvas>
+        <canvas id="companyChart"></canvas>
     </div>
     
     <!-- Custom Legend - Now Clickable -->
@@ -30,16 +31,16 @@
     <!-- Stats Row - Now Clickable -->
     <div class="stats-row">
         <div class="stat-item clickable-stat" onclick="showStatDetail('total')">
-            <div class="stat-number" id="totalHospitals">42</div>
-            <div class="stat-label">Total RS</div>
+            <div class="stat-number" id="totalCompanies">0</div>
+            <div class="stat-label">Total Perusahaan</div>
         </div>
         <div class="stat-item clickable-stat" onclick="showStatDetail('category')">
-            <div class="stat-number" id="typeCount">4</div>
+            <div class="stat-number" id="typeCount">0</div>
             <div class="stat-label">Kategori</div>
         </div>
-        <div class="stat-item clickable-stat" onclick="showStatDetail('city')">
-            <div class="stat-number" id="cityCount">3</div>
-            <div class="stat-label">Kota</div>
+        <div class="stat-item clickable-stat" onclick="showStatDetail('tier')">
+            <div class="stat-number" id="tierCount">0</div>
+            <div class="stat-label">Tier</div>
         </div>
     </div>
 </div>
@@ -48,10 +49,10 @@
 <div class="fullscreen-overlay" id="fullscreenOverlay">
     <div class="fullscreen-content">
         <i class="fas fa-times close-fullscreen" onclick="closeFullscreen()"></i>
-        <h2 class="text-2xl font-bold mb-6">Distribusi Rumah Sakit - Detail View</h2>
+        <h2 class="text-2xl font-bold mb-6">Distribusi Perusahaan - Detail View</h2>
         <div class="chart-controls mb-4">
-            <button class="control-btn active" onclick="switchChart('type')" id="fs-btn-type">Tipe RS</button>
-            <button class="control-btn" onclick="switchChart('city')" id="fs-btn-city">Kota</button>
+            <button class="control-btn active" onclick="switchChart('type')" id="fs-btn-type">Tipe Perusahaan</button>
+            <button class="control-btn" onclick="switchChart('tier')" id="fs-btn-tier">Tier</button>
             <button class="control-btn" onclick="switchChart('status')" id="fs-btn-status">Status</button>
         </div>
         <canvas id="fullscreenChart" style="max-height: calc(100% - 120px);"></canvas>
@@ -412,55 +413,25 @@
 </style>
 
 <script>
-// Data Rumah Sakit dengan detail lengkap
-const hospitalData = {
-    type: {
-        labels: ['Tipe A', 'Tipe B', 'Tipe C', 'Tipe D'],
-        data: [6, 14, 18, 4],
-        colors: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0'],
-        details: {
-            'Tipe A': [
-                'RS Premier Jatinegara', 'RS Pondok Indah', 'RS Siloam Kebun Jeruk',
-                'RS Metropolitan Medical Centre', 'RS Mayapada Jakarta Selatan', 'RS Hermina Kemayoran'
-            ],
-            'Tipe B': [
-                'RS Santo Borromeus', 'RS Al-Islam', 'RS Advent Bandung', 'RS Hasan Sadikin',
-                'RS Rajawali Citra', 'RS Immanuel', 'RS Santosa', 'RS Hermina Arcamanik',
-                'RS Salamun', 'RS Cahaya Kawaluyaan', 'RS Melinda', 'RS AMC Cileunyi',
-                'RS Pindad', 'RS Kartika Husada'
-            ],
-            'Tipe C': [
-                'RS Cibabat', 'RS Sartika Asih', 'RS Hermina Pandanaran', 'RS Muhammadiyah',
-                'RS Advent Bandung', 'RS Dustira', 'RS TK II Dustira', 'RS Bhayangkara',
-                'RS Lavalette', 'RS Cahaya Kawaluyaan', 'RS Melinda 2', 'RS AMC',
-                'RS Pindad 2', 'RS Kartika 2', 'RS Santo 2', 'RS Al-Islam 2', 'RS Advent 2', 'RS Hasan 2'
-            ],
-            'Tipe D': [
-                'RS Kecil Cimahi', 'RS Pratama Bandung', 'RS Klinik Utama', 'RS Bersalin Melati'
-            ]
-        }
-    },
-    city: {
-        labels: ['Kota Bandung', 'Kota Cimahi', 'Kab. Bandung'],
-        data: [35, 4, 3],
-        colors: ['#ff6384', '#36a2eb', '#ffce56'],
-        details: {
-            'Kota Bandung': Array(35).fill('RS').map((rs, i) => `${rs} Bandung ${i+1}`),
-            'Kota Cimahi': Array(4).fill('RS').map((rs, i) => `${rs} Cimahi ${i+1}`),
-            'Kab. Bandung': Array(3).fill('RS').map((rs, i) => `${rs} Kabupaten ${i+1}`)
-        }
-    },
-    status: {
-        labels: ['Aktif', 'Riset Kontak', 'Status Update'],
-        data: [28, 8, 6],
-        colors: ['#4ade80', '#fbbf24', '#f87171'],
-        details: {
-            'Aktif': Array(28).fill('RS').map((rs, i) => `${rs} Aktif ${i+1}`),
-            'Riset Kontak': Array(8).fill('RS').map((rs, i) => `${rs} Research ${i+1}`),
-            'Status Update': Array(6).fill('RS').map((rs, i) => `${rs} Update ${i+1}`)
-        }
-    }
-};
+// Data dari PHP/Laravel dengan struktur yang lebih sederhana
+const companyData = @json($chartData ?? []);
+console.log('Company Data loaded:', companyData);
+
+// Check if data is actually empty
+if (!companyData || Object.keys(companyData).length === 0) {
+    console.error('No company data received from controller');
+}
+// Jika companyData kosong, buat struktur default
+if (Object.keys(companyData).length === 0) {
+    companyData.type = { labels: [], data: [], details: {} };
+    companyData.tier = { labels: [], data: [], details: {} };
+    companyData.status = { labels: [], data: [], details: {} };
+}
+
+// Tambahkan colors
+companyData.type.colors = ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#ff9f40'];
+companyData.tier.colors = ['#4ade80', '#fbbf24', '#f87171', '#60a5fa', '#c084fc'];
+companyData.status.colors = ['#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 let currentChart = null;
 let currentView = 'type';
@@ -468,7 +439,7 @@ let isFullscreen = false;
 
 // Inisialisasi Chart
 function initChart() {
-    const ctx = document.getElementById('inds').getContext('2d');
+    const ctx = document.getElementById('companyChart').getContext('2d');
     createChart(ctx, currentView);
 }
 
@@ -477,7 +448,13 @@ function createChart(ctx, view) {
         currentChart.destroy();
     }
 
-    const data = hospitalData[view];
+    const data = companyData[view];
+    
+    // Cek jika data kosong
+    if (!data || !data.labels || data.labels.length === 0) {
+        showNoDataMessage(ctx);
+        return;
+    }
     
     currentChart = new Chart(ctx, {
         type: 'pie',
@@ -496,214 +473,114 @@ function createChart(ctx, view) {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    display: false
-                },
+                legend: { display: false },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((context.parsed / total) * 100).toFixed(1);
-                            return `${context.label}: ${context.parsed} RS (${percentage}%)`;
+                            const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                            return context.label + ': ' + context.parsed + ' Perusahaan (' + percentage + '%)';
                         }
                     }
                 }
             },
-            onClick: (event, elements) => {
+            onClick: function(event, elements) {
                 if (elements.length > 0) {
                     const elementIndex = elements[0].index;
-                    const label = data.labels[elementIndex]; // Pastikan label diambil dengan benar
-                    showChartDetail(label, view); // Pastikan view sesuai
+                    const label = data.labels[elementIndex];
+                    showChartDetail(label, view);
                 }
             },
-            onHover: (event, elements) => {
+            onHover: function(event, elements) {
                 event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
             }
         }
     });
 
     createCustomLegend(data);
+    updateStats(view);
+}
+
+function showNoDataMessage(ctx) {
+    ctx.font = '16px Arial';
+    ctx.fillStyle = '#6b7280';
+    ctx.textAlign = 'center';
+    ctx.fillText('Tidak ada data perusahaan tersedia', ctx.canvas.width / 2, ctx.canvas.height / 2);
+    updateStats('type');
 }
 
 function createCustomLegend(data) {
     const legendContainer = document.getElementById('customLegend');
+    if (!legendContainer) return;
+    
     legendContainer.innerHTML = '';
     
-    data.labels.forEach((label, index) => {
+    data.labels.forEach(function(label, index) {
         const legendItem = document.createElement('div');
         legendItem.className = 'legend-item';
-        legendItem.onclick = () => showChartDetail(label, currentView);
+        legendItem.onclick = function() { showChartDetail(label, currentView); };
         
-        legendItem.innerHTML = `
-            <div class="legend-color" style="background-color: ${data.colors[index]}"></div>
-            <span>${label} (${data.data[index]})</span>
-        `;
-        
+        legendItem.innerHTML = '<div class="legend-color" style="background-color: ' + data.colors[index] + '"></div><span>' + label + ' (' + data.data[index] + ')</span>';
         legendContainer.appendChild(legendItem);
     });
 }
 
-// Show detailed data popup for chart segments
 function showChartDetail(label, view) {
-    const data = hospitalData[view];
-    const details = data.details[label] || []; // Pastikan ini mengambil detail yang benar
+    const data = companyData[view];
+    const details = data.details[label] || [];
     
-    // Cek di sini jika details tidak kosong
-    console.log('Details:', details);
+    let tableContent = '';
+    details.forEach(function(company, index) {
+        tableContent += '<tr><td>' + (index + 1) + '</td><td>' + company + '</td><td>' + label + '</td><td><span class="status-badge">Active</span></td></tr>';
+    });
     
-    // Update isi popup
-    const bodyContent = `
-        <div class="stat-highlight">
-            <div class="number">${details.length}</div>
-            <div class="label">Total ${label}</div>
-        </div>
-        <h4>Daftar Rumah Sakit:</h4>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Nama Rumah Sakit</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${details.map((hospital, index) => `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${hospital}</td>
-                        <td><span>Status</span></td>
-                        <td><button>Detail</button></td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
+    const bodyContent = '<div class="stat-highlight"><div class="number">' + details.length + '</div><div class="label">Total ' + label + '</div></div><h4>Daftar Perusahaan:</h4><table class="data-table"><thead><tr><th>No</th><th>Nama Perusahaan</th><th>Tipe</th><th>Status</th></tr></thead><tbody>' + tableContent + '</tbody></table>';
     
     document.getElementById('popupBody').innerHTML = bodyContent;
+    document.getElementById('popupTitle').textContent = 'Detail ' + label;
     document.getElementById('dataPopup').classList.add('show');
 }
 
-// Show detailed stats popup
 function showStatDetail(type) {
     let title = '';
     let content = '';
     
     switch(type) {
         case 'total':
-            title = 'Total Rumah Sakit';
-            const totalAll = Object.values(hospitalData.type.data).reduce((a, b) => a + b, 0);
-            content = `
-                <div class="stat-highlight">
-                    <div class="number">${totalAll}</div>
-                    <div class="label">Total Rumah Sakit</div>
-                </div>
-                
-                <h4 style="margin: 16px 0 12px 0; color: #374151; font-weight: 600;">Breakdown by Type:</h4>
-                
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Tipe</th>
-                            <th>Jumlah</th>
-                            <th>Persentase</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${hospitalData.type.labels.map((label, index) => {
-                            const percentage = ((hospitalData.type.data[index] / totalAll) * 100).toFixed(1);
-                            return `
-                                <tr>
-                                    <td><span style="color: ${hospitalData.type.colors[index]}; font-weight: bold;">■</span> ${label}</td>
-                                    <td>${hospitalData.type.data[index]} RS</td>
-                                    <td>${percentage}%</td>
-                                </tr>
-                            `;
-                        }).join('')}
-                    </tbody>
-                </table>
-            `;
+            title = 'Total Perusahaan';
+            const totalAll = companyData.type.data.reduce(function(a, b) { return a + b; }, 0);
+            let typeRows = '';
+            
+            companyData.type.labels.forEach(function(label, index) {
+                const percentage = totalAll > 0 ? ((companyData.type.data[index] / totalAll) * 100).toFixed(1) : 0;
+                typeRows += '<tr><td><span style="color: ' + companyData.type.colors[index] + '; font-weight: bold;">■</span> ' + label + '</td><td>' + companyData.type.data[index] + ' Perusahaan</td><td>' + percentage + '%</td></tr>';
+            });
+            
+            content = '<div class="stat-highlight"><div class="number">' + totalAll + '</div><div class="label">Total Perusahaan</div></div><h4 style="margin: 16px 0 12px 0; color: #374151; font-weight: 600;">Breakdown by Type:</h4><table class="data-table"><thead><tr><th>Tipe</th><th>Jumlah</th><th>Persentase</th></tr></thead><tbody>' + typeRows + '</tbody></table>';
             break;
             
         case 'category':
-            title = 'Kategori Rumah Sakit';
-            content = `
-                <div class="stat-highlight">
-                    <div class="number">${hospitalData.type.labels.length}</div>
-                    <div class="label">Jenis Kategori</div>
-                </div>
-                
-                <h4 style="margin: 16px 0 12px 0; color: #374151; font-weight: 600;">Detail Kategori:</h4>
-                
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Kategori</th>
-                            <th>Deskripsi</th>
-                            <th>Jumlah</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><span style="color: #ff6384; font-weight: bold;">■</span> Tipe A</td>
-                            <td>RS Rujukan Tertinggi</td>
-                            <td>6 RS</td>
-                        </tr>
-                        <tr>
-                            <td><span style="color: #36a2eb; font-weight: bold;">■</span> Tipe B</td>
-                            <td>RS Rujukan Regional</td>
-                            <td>14 RS</td>
-                        </tr>
-                        <tr>
-                            <td><span style="color: #ffce56; font-weight: bold;">■</span> Tipe C</td>
-                            <td>RS Rujukan Kabupaten</td>
-                            <td>18 RS</td>
-                        </tr>
-                        <tr>
-                            <td><span style="color: #4bc0c0; font-weight: bold;">■</span> Tipe D</td>
-                            <td>RS Pratama</td>
-                            <td>4 RS</td>
-                        </tr>
-                    </tbody>
-                </table>
-            `;
+            title = 'Kategori Perusahaan';
+            let categoryRows = '';
+            
+            companyData.type.labels.forEach(function(label, index) {
+                categoryRows += '<tr><td><span style="color: ' + companyData.type.colors[index] + '; font-weight: bold;">■</span> ' + label + '</td><td>' + companyData.type.data[index] + ' Perusahaan</td><td><span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px;">Active</span></td></tr>';
+            });
+            
+            content = '<div class="stat-highlight"><div class="number">' + companyData.type.labels.length + '</div><div class="label">Jenis Kategori</div></div><h4 style="margin: 16px 0 12px 0; color: #374151; font-weight: 600;">Detail Kategori:</h4><table class="data-table"><thead><tr><th>Kategori</th><th>Jumlah Perusahaan</th><th>Status</th></tr></thead><tbody>' + categoryRows + '</tbody></table>';
             break;
             
-        case 'city':
-            title = 'Distribusi Kota';
-            content = `
-                <div class="stat-highlight">
-                    <div class="number">${hospitalData.city.labels.length}</div>
-                    <div class="label">Wilayah Cakupan</div>
-                </div>
-                
-                <h4 style="margin: 16px 0 12px 0; color: #374151; font-weight: 600;">Detail Wilayah:</h4>
-                
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Wilayah</th>
-                            <th>Jumlah RS</th>
-                            <th>Persentase</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${hospitalData.city.labels.map((label, index) => {
-                            const total = hospitalData.city.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((hospitalData.city.data[index] / total) * 100).toFixed(1);
-                            return `
-                                <tr>
-                                    <td><span style="color: ${hospitalData.city.colors[index]}; font-weight: bold;">■</span> ${label}</td>
-                                    <td>${hospitalData.city.data[index]} RS</td>
-                                    <td>${percentage}%</td>
-                                    <td><span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px;">Active</span></td>
-                                </tr>
-                            `;
-                        }).join('')}
-                    </tbody>
-                </table>
-            `;
+        case 'tier':
+            title = 'Distribusi Tier';
+            const tierTotal = companyData.tier.data.reduce(function(a, b) { return a + b; }, 0);
+            let tierRows = '';
+            
+            companyData.tier.labels.forEach(function(label, index) {
+                const percentage = tierTotal > 0 ? ((companyData.tier.data[index] / tierTotal) * 100).toFixed(1) : 0;
+                tierRows += '<tr><td><span style="color: ' + companyData.tier.colors[index] + '; font-weight: bold;">■</span> ' + label + '</td><td>' + companyData.tier.data[index] + ' Perusahaan</td><td>' + percentage + '%</td></tr>';
+            });
+            
+            content = '<div class="stat-highlight"><div class="number">' + companyData.tier.labels.length + '</div><div class="label">Level Tier</div></div><h4 style="margin: 16px 0 12px 0; color: #374151; font-weight: 600;">Detail Tier:</h4><table class="data-table"><thead><tr><th>Tier</th><th>Jumlah Perusahaan</th><th>Persentase</th></tr></thead><tbody>' + tierRows + '</tbody></table>';
             break;
     }
     
@@ -717,21 +594,24 @@ function closeDataPopup() {
 }
 
 function exportData() {
-    // Simulate data export
-    alert('Data exported successfully! 📊\n\nFile: hospital_distribution.xlsx\nLocation: Downloads folder');
+    alert('Data exported successfully! 📊\n\nFile: company_distribution.xlsx\nLocation: Downloads folder');
     closeDataPopup();
 }
 
 function switchChart(view) {
     currentView = view;
     
-    // Update button states for both normal and fullscreen
-    document.querySelectorAll('.control-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(`btn-${view}`).classList.add('active');
+    // Update button states
+    document.querySelectorAll('.control-btn').forEach(function(btn) {
+        btn.classList.remove('active');
+    });
+    document.getElementById('btn-' + view).classList.add('active');
     
     if (isFullscreen) {
-        document.querySelectorAll('#fullscreenOverlay .control-btn').forEach(btn => btn.classList.remove('active'));
-        document.getElementById(`fs-btn-${view}`).classList.add('active');
+        document.querySelectorAll('#fullscreenOverlay .control-btn').forEach(function(btn) {
+            btn.classList.remove('active');
+        });
+        document.getElementById('fs-btn-' + view).classList.add('active');
         
         const canvas = document.getElementById('fullscreenChart');
         if (canvas) {
@@ -739,41 +619,34 @@ function switchChart(view) {
             createFullscreenChart(ctx, view);
         }
     } else {
-        const ctx = document.getElementById('inds').getContext('2d');
+        const ctx = document.getElementById('companyChart').getContext('2d');
         createChart(ctx, view);
     }
-    
-    updateStats(view);
 }
 
 function updateStats(view) {
-    const data = hospitalData[view];
-    const total = data.data.reduce((a, b) => a + b, 0);
+    const data = companyData[view];
+    const total = data.data.reduce(function(a, b) { return a + b; }, 0);
     
-    document.getElementById('totalHospitals').textContent = total;
-    document.getElementById('typeCount').textContent = data.labels.length;
-    
-    if (view === 'city') {
-        document.getElementById('cityCount').textContent = data.labels.length;
-    } else {
-        document.getElementById('cityCount').textContent = hospitalData.city.labels.length;
-    }
+    document.getElementById('totalCompanies').textContent = total;
+    document.getElementById('typeCount').textContent = companyData.type.labels.length;
+    document.getElementById('tierCount').textContent = companyData.tier.labels.length;
 }
 
 function refreshChart() {
     const refreshBtn = document.querySelector('.fa-sync-alt').parentElement;
     refreshBtn.style.transform = 'rotate(360deg)';
     
-    setTimeout(() => {
+    setTimeout(function() {
         refreshBtn.style.transform = 'rotate(0deg)';
         switchChart(currentView);
         
         const notification = document.createElement('div');
         notification.innerHTML = '<i class="fas fa-check"></i> Data updated!';
-        notification.style.cssText = 'position:fixed;top:20px;right:20px;background:#10b981;color:white;padding:12px 20px;border-radius:6px;z-index:1001;animation:slideIn 0.3s ease;';
+        notification.style.cssText = 'position:fixed;top:20px;right:20px;background:#10b981;color:white;padding:12px 20px;border-radius:6px;z-index:1001;';
         document.body.appendChild(notification);
         
-        setTimeout(() => notification.remove(), 2000);
+        setTimeout(function() { notification.remove(); }, 2000);
     }, 500);
 }
 
@@ -783,11 +656,7 @@ function openFullscreen() {
     overlay.style.display = 'block';
     document.body.style.overflow = 'hidden';
     
-    // Sync button states
-    document.querySelectorAll('#fullscreenOverlay .control-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(`fs-btn-${currentView}`).classList.add('active');
-    
-    setTimeout(() => {
+    setTimeout(function() {
         const canvas = document.getElementById('fullscreenChart');
         if (canvas) {
             const ctx = canvas.getContext('2d');
@@ -797,12 +666,11 @@ function openFullscreen() {
 }
 
 function createFullscreenChart(ctx, view) {
-    // Destroy any existing fullscreen chart
     if (window.fullscreenChart) {
         window.fullscreenChart.destroy();
     }
 
-    const data = hospitalData[view];
+    const data = companyData[view];
     
     window.fullscreenChart = new Chart(ctx, {
         type: 'pie',
@@ -827,30 +695,25 @@ function createFullscreenChart(ctx, view) {
                     labels: {
                         padding: 20,
                         usePointStyle: true,
-                        font: {
-                            size: 16
-                        }
+                        font: { size: 16 }
                     }
                 },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((context.parsed / total) * 100).toFixed(1);
-                            return `${context.label}: ${context.parsed} RS (${percentage}%)`;
+                            const total = context.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                            const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                            return context.label + ': ' + context.parsed + ' Perusahaan (' + percentage + '%)';
                         }
                     }
                 }
             },
-            onClick: (event, elements) => {
+            onClick: function(event, elements) {
                 if (elements.length > 0) {
                     const elementIndex = elements[0].index;
                     const label = data.labels[elementIndex];
                     showChartDetail(label, view);
                 }
-            },
-            onHover: (event, elements) => {
-                event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
             }
         }
     });
@@ -863,7 +726,6 @@ function closeFullscreen() {
         overlay.style.display = 'none';
         document.body.style.overflow = 'auto';
         
-        // Destroy fullscreen chart
         if (window.fullscreenChart) {
             window.fullscreenChart.destroy();
             window.fullscreenChart = null;
@@ -872,12 +734,11 @@ function closeFullscreen() {
 }
 
 // Initialize
-window.onload = function() {
+document.addEventListener('DOMContentLoaded', function() {
     if (typeof Chart !== 'undefined') {
         initChart();
-        updateStats(currentView);
     }
-};
+});
 
 // Handle ESC key
 document.addEventListener('keydown', function(e) {
@@ -889,4 +750,5 @@ document.addEventListener('keydown', function(e) {
         }
     }
 });
+console.log('Raw data from PHP:', @json($chartCompanyData ?? []));
 </script>

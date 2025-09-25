@@ -1,40 +1,7 @@
-{{-- DEBUG: Hapus setelah selesai --}}
-@php
-    // Debug: Cek tipe paginator
-    $paginatorType = get_class($paginator ?? 'null');
-    $isPaginator = $paginator instanceof \Illuminate\Pagination\LengthAwarePaginator;
-    $isCollection = $paginator instanceof \Illuminate\Database\Eloquent\Collection;
-    
-    // Log atau dump (gunakan dd() untuk stop execution, atau Log untuk production)
-    if (app()->environment('local')) {  // Hanya di local
-        \Log::info("Pagination Debug - Type: {$paginatorType}, IsPaginator: " . ($isPaginator ? 'Yes' : 'No') . ", IsCollection: " . ($isCollection ? 'Yes' : 'No'));
-        // Atau gunakan ini untuk dump: dd($paginatorType, $paginator);
-    }
-@endphp
-
-{{-- Sisanya tetap sama --}}
-@if ($paginator instanceof \Illuminate\Pagination\LengthAwarePaginator && $paginator->hasPages())
-    {{-- ... kode pagination ... --}}
-@else
-    {{-- DEBUG: Tampilkan pesan jika bukan paginator --}}
-    <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
-        <p>Debug: Paginator bukan LengthAwarePaginator. Type: {{ $paginatorType ?? 'null' }}. Pagination tidak ditampilkan.</p>
-    </div>
-@endif
-
-
-@if ($paginator instanceof \Illuminate\Pagination\LengthAwarePaginator && $paginator->hasPages())
-    @php
-        // Ensure $paginator is a LengthAwarePaginator before calling elements()
-        // This check is redundant if the outer @if works, but adds robustness.
-        $elements = [];
-        if ($paginator instanceof \Illuminate\Pagination\LengthAwarePaginator) {
-            $elements = $paginator->elements();
-        }
-    @endphp
-
+@if ($paginator->hasPages())
     <div class="bg-white px-6 py-4 border-t border-gray-200">
         <div class="flex items-center justify-between">
+
             {{-- Info --}}
             <div class="text-sm text-gray-700">
                 Menampilkan 
@@ -48,6 +15,7 @@
 
             {{-- Pagination Links --}}
             <div class="flex space-x-1">
+
                 {{-- Previous Page Link --}}
                 @if ($paginator->onFirstPage())
                     <span class="px-3 py-2 text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">
@@ -60,27 +28,42 @@
                     </a>
                 @endif
 
-                {{-- Pagination Elements --}}
-                @foreach ($elements as $element)
-                    {{-- "Three Dots" Separator --}}
-                    @if (is_string($element))
-                        <span class="px-3 py-2 text-gray-400">{{ $element }}</span>
-                    @endif
+                {{-- Page Links --}}
+                @php
+                    $currentPage = $paginator->currentPage();
+                    $lastPage = $paginator->lastPage();
+                    $adjacents = 2; // jumlah halaman sebelum/sesudah halaman aktif
 
-                    {{-- Array Of Links --}}
-                    @if (is_array($element))
-                        @foreach ($element as $page => $url)
-                            @if ($page == $paginator->currentPage())
-                                <span class="px-3 py-2 text-white bg-primary border border-primary rounded-lg">{{ $page }}</span>
-                            @else
-                                <a href="{{ $url }}" 
-                                   class="px-3 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                                    {{ $page }}
-                                </a>
-                            @endif
-                        @endforeach
+                    $start = max(1, $currentPage - $adjacents);
+                    $end = min($lastPage, $currentPage + $adjacents);
+                @endphp
+
+                {{-- Always show first page if not in range --}}
+                @if ($start > 1)
+                    <a href="{{ $paginator->url(1) }}" class="px-3 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">1</a>
+                    @if ($start > 2)
+                        <span class="px-2">...</span>
                     @endif
-                @endforeach
+                @endif
+
+                {{-- Numbered page links --}}
+                @for ($page = $start; $page <= $end; $page++)
+                    @if ($page == $currentPage)
+                        <span class="px-3 py-2 text-white bg-blue-600 border border-blue-600 rounded-lg">{{ $page }}</span>
+                    @else
+                        <a href="{{ $paginator->url($page) }}" class="px-3 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                            {{ $page }}
+                        </a>
+                    @endif
+                @endfor
+
+                {{-- Always show last page if not in range --}}
+                @if ($end < $lastPage)
+                    @if ($end < $lastPage - 1)
+                        <span class="px-2">...</span>
+                    @endif
+                    <a href="{{ $paginator->url($lastPage) }}" class="px-3 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">{{ $lastPage }}</a>
+                @endif
 
                 {{-- Next Page Link --}}
                 @if ($paginator->hasMorePages())
