@@ -290,10 +290,10 @@
             }
 
             // Add export functionality
-            const exportBtn = document.querySelector('button:contains("Export")');
-            if (exportBtn) {
-                exportBtn.addEventListener('click', exportData);
-            }
+            // const exportBtn = document.querySelector('button:contains("Export")');
+            // if (exportBtn) {
+            //     exportBtn.addEventListener('click', exportData);
+            // }
         });
 
         // Modal functions for User
@@ -600,10 +600,10 @@
             }
 
             // Add export functionality
-            const exportBtn = document.querySelector('button:contains("Export")');
-            if (exportBtn) {
-                exportBtn.addEventListener('click', exportData);
-            }
+            // const exportBtn = document.querySelector('button:contains("Export")');
+            // if (exportBtn) {
+            //     exportBtn.addEventListener('click', exportData);
+            // }
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

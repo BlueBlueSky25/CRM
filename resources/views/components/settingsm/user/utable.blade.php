@@ -34,81 +34,102 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                @foreach($users as $index => $user)
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 text-sm text-gray-900">{{ $users->firstItem() + $loop->index }}</td>
-                    <td class="px-6 py-4">
-                        <div class="flex items-center">
-                            <div>
-                                <div class="text-sm font-medium text-gray-900">{{ $user->username }}</div>
-                                <div class="text-sm text-gray-500">{{ $user->email }}</div>
+            <<tbody class="bg-white divide-y divide-gray-200">
+                    @foreach($users as $index => $user)
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 text-sm text-gray-900">{{ $users->firstItem() + $loop->index }}</td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900">{{ $user->username }}</div>
+                                    <div class="text-sm text-gray-500">{{ $user->email }}</div>
+                                </div>
                             </div>
-                        </div>
-                    </td>
+                        </td>
 
-                    <td class="px-6 py-4">
-                        <!-- <div class="text-sm text-gray-400 italic">Not available</div> -->
-                        {{-- field phone: --}}
-                         <div class="text-sm text-gray-900">{{ $user->phone ?? '-' }}</div> 
-                    </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-900">{{ $user->phone ?? '-' }}</div> 
+                        </td>
 
-                    
-                    <td class="px-6 py-4">
-                        {{-- field date_birth: --}}
-                        <!-- <div class="text-sm text-gray-400 italic">Not available</div> -->
-                        <div class="text-sm text-gray-900"> {{ $user->birth_date ? date('d M Y', strtotime($user->birth_date)) : '-' }}</div> 
-                    </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-900">{{ $user->birth_date ? date('d M Y', strtotime($user->birth_date)) : '-' }}</div> 
+                        </td>
 
-                    
-                    <td class="px-6 py-4">
-                        {{-- field date_birth: --}}
-                        <!-- <div class="text-sm text-gray-400 italic">Not available</div> -->
-                         <div class="text-sm text-gray-900">{{ $user->alamat ?? '-' }}</div> 
-                    </td>
+                        <!-- KOLOM ALAMAT YANG DIUPDATE -->
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-900">
+                                @if($user->province || $user->regency || $user->district || $user->village || $user->address)
+                                    @php
+                                        $alamatWilayah = collect([
+                                            $user->village->name ?? null,
+                                            $user->district->name ?? null, 
+                                            $user->regency->name ?? null,
+                                            $user->province->name ?? null
+                                        ])->filter()->implode(', ');
+                                    @endphp
+                                    
+                                    @if($alamatWilayah)
+                                        <div class="font-medium">{{ $alamatWilayah }}</div>
+                                        @if($user->address)
+                                            <div class="text-xs text-gray-600 mt-1">{{ $user->address }}</div>
+                                        @endif
+                                    @else
+                                        {{ $user->address ?? '-' }}
+                                    @endif
+                                @else
+                                    -
+                                @endif
+                            </div>
+                        </td>
 
-                    <td class="px-6 py-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {{ $user->role->role_name ?? 'No Role' }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-medium {{ $user->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                            {{ $user->is_active ? 'Active' : 'Inactive' }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-sm font-medium">
-                        <div class="flex items-center space-x-2">
-                            @if(auth()->user()->canAccess($currentMenuId, 'edit'))
-                            <button onclick="openEditModal(
-                                '{{ $user->user_id }}',
-                                '{{ $user->username }}',
-                                '{{ $user->email }}',
-                                '{{ $user->role_id }}',
-                                {{ $user->is_active ? 'true' : 'false' }},
-                                '{{ $user->phone }}',
-                                '{{ $user->birth_date }}',
-                                `{{ $user->alamat }}`)"
-                                    class="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 flex items-center" 
-                                    title="Edit User">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            @endif
-                            
-                            @if(auth()->user()->canAccess($currentMenuId, 'delete'))
-                            <form action="{{ route('users.destroy', $user->user_id) }}" method="POST" class="inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-900 p-2 flex items-center" title="Delete User" onclick="return confirm('Are you sure you want to delete this user?')">
-                                    <i class="fas fa-trash"></i>
+                        <td class="px-6 py-4">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {{ $user->role->role_name ?? 'No Role' }}
+                            </span>
+                        </td>
+                        
+                        <td class="px-6 py-4">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium {{ $user->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                {{ $user->is_active ? 'Active' : 'Inactive' }}
+                            </span>
+                        </td>
+                        
+                        <td class="px-6 py-4 text-sm font-medium">
+                            <div class="flex items-center space-x-2">
+                                @if(auth()->user()->canAccess($currentMenuId, 'edit'))
+                                <button onclick="openEditModal(
+                                    '{{ $user->user_id }}',
+                                    '{{ $user->username }}',
+                                    '{{ $user->email }}',
+                                    '{{ $user->role_id }}',
+                                    {{ $user->is_active ? 'true' : 'false' }},
+                                    '{{ $user->phone }}',
+                                    '{{ $user->birth_date }}',
+                                    `{{ $user->address }}`,
+                                    '{{ $user->province_id }}',
+                                    '{{ $user->regency_id }}', 
+                                    '{{ $user->district_id }}',
+                                    '{{ $user->village_id }}')"
+                                        class="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 flex items-center" 
+                                        title="Edit User">
+                                    <i class="fas fa-edit"></i>
                                 </button>
-                            </form>
-                            @endif
-                        </div>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
+                                @endif
+                                
+                                @if(auth()->user()->canAccess($currentMenuId, 'delete'))
+                                <form action="{{ route('users.destroy', $user->user_id) }}" method="POST" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-600 hover:text-red-900 p-2 flex items-center" title="Delete User" onclick="return confirm('Are you sure you want to delete this user?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
         </table>
         
     </div>

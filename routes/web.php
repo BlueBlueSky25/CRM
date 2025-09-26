@@ -15,6 +15,20 @@ Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.process');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+
+
+// ==========================
+// CASCADE DROPDOWN ROUTES - HANYA BUTUH AUTH, TANPA PERMISSION
+// ==========================
+Route::middleware('auth')->group(function () {
+Route::get('/get-regencies/{provinceId}', [UserController::class, 'getRegencies']);
+Route::get('/get-districts/{regencyId}', [UserController::class, 'getDistricts']);
+Route::get('/get-villages/{districtId}', [UserController::class, 'getVillages']);
+});
+
+
+
+
 // ==========================
 // Protected Routes (Harus Login)
 // ==========================
@@ -42,9 +56,9 @@ Route::middleware(['auth', 'permission'])->group(function () {
 
 
     // ==========================
-    // TAMBAH INI: Sales Management untuk Marketing
+    // TAMBAHAN: 
     // ==========================
-    
+   
 
 
     // ==========================

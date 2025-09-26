@@ -1,7 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Province;
+use App\Models\Regency;
+use App\Models\District; 
+use App\Models\Village;
 use App\Models\User;
 use App\Models\Role;
 use Illuminate\Http\Request;
@@ -14,15 +17,22 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::with('role')->paginate(5);
+        $users = User::with(['role', 'province', 'regency', 'district', 'village'])->paginate(5);
         $roles = Role::all(); 
+        $provinces = Province::orderBy('name')->get();
         
 
         
-        return view('layout.user', compact('users', 'roles'));
+        return view('layout.user', compact('users', 'roles', 'provinces'));
     }
 
-
+    // public function create()
+    // {
+    //     $roles = Role::all();
+    //     $provinces = Province::orderBy('name')->get();
+        
+    //     return view('users.create', compact('roles', 'provinces'));
+    // }
 
 
 
@@ -37,6 +47,10 @@ class UserController extends Controller
         'phone'      => 'nullable|string|max:20',
         'birth_date' => 'nullable|date|before_or_equal:today',
         'address'    => 'nullable|string|max:1000',
+        'province_id' => 'nullable|exists:provinces,id',
+        'regency_id'  => 'nullable|exists:regencies,id', 
+        'district_id' => 'nullable|exists:districts,id',
+        'village_id'  => 'nullable|exists:villages,id',
     ]);
 
     User::create([
@@ -47,7 +61,11 @@ class UserController extends Controller
         'birth_date'     => $request->birth_date,
         'address'        => $request->address,
         'role_id'        => $request->role_id,                        
-        'is_active'      => $request->input('is_active', true),       
+        'is_active'      => $request->input('is_active', true),
+        'province_id'    => $request->province_id,
+        'regency_id'     => $request->regency_id,
+        'district_id'    => $request->district_id,
+        'village_id'     => $request->village_id,        
     ]);
 
     return redirect()->route('user')->with('success', 'User berhasil ditambahkan!');
@@ -58,13 +76,17 @@ public function update(Request $request, $id)
     $user = User::findOrFail($id);
 
     $request->validate([
-        'username' => 'required|string|max:100|unique:users,username,' . $id . ',user_id',
-        'email'    => 'nullable|email|unique:users,email,' . $id . ',user_id',
+        'username' => 'required|string|max:100|unique:users,username,' . $id . ',user_id', 
+        'email'    => 'nullable|email|unique:users,email,' . $id . ',user_id', 
         'role_id'  => 'required|exists:roles,role_id',
         'is_active' => 'sometimes|boolean',
-        'phone'      => 'nullable|string|max:20',
-        'birth_date' => 'nullable|date|before_or_equal:today',
+        'phone'      => 'nullable|string|max:20',                    
+        'birth_date' => 'nullable|date|before_or_equal:today',        
         'address'    => 'nullable|string|max:1000',
+        'province_id' => 'nullable|exists:provinces,id',
+        'regency_id'  => 'nullable|exists:regencies,id',
+        'district_id' => 'nullable|exists:districts,id', 
+        'village_id'  => 'nullable|exists:villages,id',
     ]);
 
     $data = [
@@ -75,6 +97,10 @@ public function update(Request $request, $id)
         'phone'          => $request->phone,
         'birth_date'     => $request->birth_date,
         'address'        => $request->address,
+        'province_id'    => $request->province_id,
+        'regency_id'     => $request->regency_id,
+        'district_id'    => $request->district_id,
+        'village_id'     => $request->village_id,
     ];
 
     
@@ -84,13 +110,109 @@ public function update(Request $request, $id)
 
     $user->update($data);
 
-    // REDIRECT KE HALAMAN YANG BENAR
+    
     return redirect()->back()->with('success', 'User berhasil diperbarui!');
 }
 
-    /**
-     * Hapus user
-     */
+    
+    // public function edit($id)
+    // {
+    //     $user = User::with(['province', 'regency', 'district', 'village'])->findOrFail($id);
+    //     $roles = Role::all();
+    //     $provinces = Province::orderBy('name')->get();
+        
+    //     return view('users.edit', compact('user', 'roles', 'provinces'));
+    // }
+
+    
+
+        public function getRegencies($provinceId)
+{
+    try {
+        // Validasi input
+        if (empty($provinceId)) {
+            return response()->json(['error' => 'Province ID required'], 400);
+        }
+
+        // Cek apakah province exist
+        $provinceExists = Province::where('id', $provinceId)->exists();
+        if (!$provinceExists) {
+            return response()->json(['error' => 'Province not found'], 404);
+        }
+
+        $regencies = Regency::where('province_id', $provinceId)
+                           ->orderBy('name', 'asc')
+                           ->select('id', 'name', 'province_id')
+                           ->get();
+        
+        \Log::info("Fetched regencies for province {$provinceId}: " . $regencies->count());
+        
+        return response()->json($regencies);
+        
+    } catch (\Exception $e) {
+        \Log::error("Error fetching regencies: " . $e->getMessage());
+        return response()->json(['error' => 'Server error'], 500);
+    }
+}
+
+public function getDistricts($regencyId)
+{
+    try {
+        if (empty($regencyId)) {
+            return response()->json(['error' => 'Regency ID required'], 400);
+        }
+
+        $regencyExists = Regency::where('id', $regencyId)->exists();
+        if (!$regencyExists) {
+            return response()->json(['error' => 'Regency not found'], 404);
+        }
+
+        $districts = District::where('regency_id', $regencyId)
+                           ->orderBy('name', 'asc')
+                           ->select('id', 'name', 'regency_id')
+                           ->get();
+        
+        \Log::info("Fetched districts for regency {$regencyId}: " . $districts->count());
+        
+        return response()->json($districts);
+        
+    } catch (\Exception $e) {
+        \Log::error("Error fetching districts: " . $e->getMessage());
+        return response()->json(['error' => 'Server error'], 500);
+    }
+}
+
+public function getVillages($districtId)
+{
+    try {
+        if (empty($districtId)) {
+            return response()->json(['error' => 'District ID required'], 400);
+        }
+
+        $districtExists = District::where('id', $districtId)->exists();
+        if (!$districtExists) {
+            return response()->json(['error' => 'District not found'], 404);
+        }
+
+        $villages = Village::where('district_id', $districtId)
+                         ->orderBy('name', 'asc') 
+                         ->select('id', 'name', 'district_id')
+                         ->get();
+        
+        \Log::info("Fetched villages for district {$districtId}: " . $villages->count());
+        
+        return response()->json($villages);
+        
+    } catch (\Exception $e) {
+        \Log::error("Error fetching villages: " . $e->getMessage());
+        return response()->json(['error' => 'Server error'], 500);
+    }
+}
+
+
+
+
+
     public function destroy($id)
     {
         $user = User::findOrFail($id);

@@ -20,6 +20,20 @@ class CheckPermission
 
         // Ambil current route name
         $routeName = Route::currentRouteName();
+        
+        // TAMBAHAN: Skip permission check untuk route cascade dropdown
+        $cascadeRoutes = [
+            '/get-regencies/',
+            '/get-districts/', 
+            '/get-villages/'
+        ];
+        
+        $currentPath = $request->getPathInfo();
+        foreach ($cascadeRoutes as $cascadeRoute) {
+            if (str_contains($currentPath, $cascadeRoute)) {
+                return $next($request); // Skip permission check
+            }
+        }
 
         // Cari menu berdasarkan route
         $menu = Menu::where('route', $routeName)->first();

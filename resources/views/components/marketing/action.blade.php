@@ -364,36 +364,36 @@ function clearValidation() {
 }
 
 // Form submission with loading state
-document.querySelector('#salesModal form').addEventListener('submit', function(e) {
-    e.preventDefault();
+// document.querySelector('#salesModal form').addEventListener('submit', function(e) {
+//     e.preventDefault();
     
-    if (!validateForm()) {
-        return;
-    }
+//     if (!validateForm()) {
+//         return;
+//     }
     
-    const submitBtn = this.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
+//     const submitBtn = this.querySelector('button[type="submit"]');
+//     const originalText = submitBtn.innerHTML;
     
-    // Show loading state
-    submitBtn.classList.add('btn-loading');
-    submitBtn.innerHTML = 'Menyimpan...';
-    submitBtn.disabled = true;
+//     // Show loading state
+//     submitBtn.classList.add('btn-loading');
+//     submitBtn.innerHTML = 'Menyimpan...';
+//     submitBtn.disabled = true;
     
-    // Simulate API call (replace with actual form submission)
-    setTimeout(() => {
-        // Reset button state
-        submitBtn.classList.remove('btn-loading');
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
+//     // Simulate API call (replace with actual form submission)
+//     setTimeout(() => {
+//         // Reset button state
+//         submitBtn.classList.remove('btn-loading');
+//         submitBtn.innerHTML = originalText;
+//         submitBtn.disabled = false;
         
-        // Show success message
-        showNotification('Sales berhasil ditambahkan!', 'success');
-        closeSalesModal();
+//         // Show success message
+//         showNotification('Sales berhasil ditambahkan!', 'success');
+//         closeSalesModal();
         
-        // Here you would normally submit the form:
-        // this.submit();
-    }, 2000);
-});
+//         // Here you would normally submit the form:
+//         // this.submit();
+//     }, 2000);
+// });
 
 // Notification system
 function showNotification(message, type = 'info') {

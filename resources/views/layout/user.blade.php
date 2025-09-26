@@ -13,5 +13,5 @@
 </div>
 
 <!-- User Form -->
-<x-settingsm.user.uform :roles="$roles" />
+<x-settingsm.user.uform :roles="$roles" :provinces="$provinces" />
 @endsection

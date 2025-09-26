@@ -11,12 +11,42 @@ class User extends Authenticatable
     public $timestamps = true;
 
     protected $fillable = [
-        'username', 'role_id', 'is_active', 'email','password_hash','is_active','phone','address','birth_date'
-    ];
+    'username', 
+    'role_id', 
+    'is_active', 
+    'email',
+    'password_hash',
+    'phone',
+    'address',          
+    'birth_date',
+    'province_id',      
+    'regency_id',       
+    'district_id',      
+    'village_id'        
+];
 
     protected $hidden = ['password_hash'];
 
 
+    public function province()
+    {
+        return $this->belongsTo(Province::class, 'province_id', 'id');
+    }
+
+    public function regency()
+    {
+        return $this->belongsTo(Regency::class, 'regency_id', 'id');
+    }
+
+    public function district()
+    {
+        return $this->belongsTo(District::class, 'district_id', 'id');
+    }
+
+    public function village()
+    {
+        return $this->belongsTo(Village::class, 'village_id', 'id');
+    }
 
     public function getAuthPassword()
     {

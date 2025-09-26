@@ -72,51 +72,60 @@
                                     max="{{ date('Y-m-d') }}">
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Provinsi <span class="text-red-500">*</span></label>
-                            <select id="province" name="province" class="w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                                <option value="">-- Pilih Provinsi --</option>
-                                {{-- @foreach($provinces as $province)
-                                    <option value="{{ $province->id }}">{{ $province->name }}</option>
-                                @endforeach --}}
-                            </select>
-                        </div>
+                <!-- Address Section -->
+                <div class="mb-6">
+                    <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-map-marker-alt text-indigo-500 mr-2"></i>
+                        Address Information
+                    </h4>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Provinsi <span class="text-red-500">*</span></label>
+                        <select id="create-province" name="province_id" class="cascade-province w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                            <option value="">-- Pilih Provinsi --</option>
+                            @foreach($provinces as $province)
+                                <option value="{{ $province->id }}">{{ $province->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Kabupaten/Kota <span class="text-red-500">*</span></label>
-                            <select id="regency" name="regency" class="w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                                <option value="">-- Pilih Kabupaten/Kota --</option>
-                                <!-- Options will be populated dynamically based on selected province -->
-                            </select>
-                        </div>
+                    <!-- Kabupaten/Kota -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kabupaten/Kota <span class="text-red-500">*</span></label>
+                        <select id="create-regency" name="regency_id" class="cascade-regency w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                            <option value="">-- Pilih Kabupaten/Kota --</option>
+                        </select>
+                    </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Kecamatan <span class="text-red-500">*</span></label>
-                            <select id="district" name="district" class="w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                                <option value="">-- Pilih Kecamatan --</option>
-                                <!-- Options will be populated dynamically based on selected regency -->
-                            </select>
-                        </div>
+                    <!-- Kecamatan -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kecamatan <span class="text-red-500">*</span></label>
+                        <select id="create-district" name="district_id" class="cascade-district w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                            <option value="">-- Pilih Kecamatan --</option>
+                        </select>
+                    </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Kelurahan/Desa <span class="text-red-500">*</span></label>
-                            <select id="village" name="village" class="w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                                <option value="">-- Pilih Kelurahan/Desa --</option>
-                                <!-- Options will be populated dynamically based on selected district -->
-                            </select>
-                        </div>
+                    <!-- Kelurahan/Desa -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kelurahan/Desa <span class="text-red-500">*</span></label>
+                        <select id="create-village" name="village_id" class="cascade-village w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                            <option value="">-- Pilih Kelurahan/Desa --</option>
+                        </select>
+                    </div>
+                    </div>
 
-                        <!-- Alamat -->
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Alamat</label>
-                            <div class="relative">
-                                <i class="fas fa-map-marker-alt absolute left-3 top-4 text-gray-400"></i>
-                                <textarea name="alamat" rows="3" 
-                                    class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none transition-all" 
-                                    placeholder="Enter full Alamat..."></textarea>
-                            </div>
+                    <!-- Detail Alamat (full width) -->
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Detail Alamat</label>
+                        <div class="relative">
+                            <i class="fas fa-home absolute left-3 top-3 text-gray-400"></i>
+                            <textarea id="address" name="address" rows="3" placeholder="Contoh: Jl. Merdeka No. 123, RT 01/RW 02" 
+                                    class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"></textarea>
                         </div>
+                        <small class="text-gray-500">Isi dengan detail alamat seperti nama jalan, nomor rumah, RT/RW</small>
                     </div>
                 </div>
 
@@ -313,13 +322,47 @@ select {
 </style>
 
 <script>
+// Debug function untuk cek elemen dengan unique IDs
+function checkElements() {
+    const elements = {
+        province: document.getElementById('create-province'),
+        regency: document.getElementById('create-regency'), 
+        district: document.getElementById('create-district'),
+        village: document.getElementById('create-village')
+    };
+    
+    console.log('Elements check:', elements);
+    
+    Object.keys(elements).forEach(key => {
+        if (!elements[key]) {
+            console.error(`Element ${key} not found!`);
+        } else {
+            console.log(`Element ${key} found:`, elements[key]);
+        }
+    });
+    
+    return elements;
+}
+
+// Reset dropdown function dengan unique IDs
+function resetAddressDropdowns() {
+    const regencySelect = document.getElementById('create-regency');
+    const districtSelect = document.getElementById('create-district');
+    const villageSelect = document.getElementById('create-village');
+    
+    if (regencySelect) regencySelect.innerHTML = '<option value="">-- Pilih Kabupaten/Kota --</option>';
+    if (districtSelect) districtSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+    if (villageSelect) villageSelect.innerHTML = '<option value="">-- Pilih Kelurahan/Desa --</option>';
+}
+
 // Modal Functions
 function openUserModal() {
     document.getElementById('userModal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     
-    // Focus on first input after animation
+    console.log('Modal opened - Initializing cascade');
     setTimeout(() => {
+        initializeAddressCascade();
         document.querySelector('#userModal input[name="username"]').focus();
     }, 300);
 }
@@ -331,6 +374,7 @@ function closeUserModal() {
     // Reset form
     document.querySelector('#userModal form').reset();
     clearUserValidation();
+    resetAddressDropdowns();
     hideRolePreview();
 }
 
@@ -453,23 +497,29 @@ function hideRolePreview() {
 }
 
 // Form submission with loading state
-document.querySelector('#userModal form').addEventListener('submit', function(e) {
-    const submitBtn = this.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
+function setupFormSubmission() {
+    const form = document.querySelector('#userModal form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
 
-    // Jalankan loading state SEBELUM validasi
-    submitBtn.classList.add('btn-loading');
-    submitBtn.innerHTML = 'Creating User...';
-    submitBtn.disabled = true;
+            // Jalankan loading state SEBELUM validasi
+            submitBtn.classList.add('btn-loading');
+            submitBtn.innerHTML = 'Creating User...';
+            submitBtn.disabled = true;
 
-    if (!validateUserForm()) {
-        e.preventDefault(); // Hanya block submit jika validasi gagal
-        // Reset tombol
-        submitBtn.classList.remove('btn-loading');
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-        return;
+            if (!validateUserForm()) {
+                e.preventDefault(); // Hanya block submit jika validasi gagal
+                // Reset tombol
+                submitBtn.classList.remove('btn-loading');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+        });
     }
+}
 
 // Notification system
 function showUserNotification(message, type = 'info') {
@@ -508,6 +558,222 @@ function showUserNotification(message, type = 'info') {
     }, 3000);
 }
 
+// CASCADE DROPDOWN - FIXED VERSION dengan unique IDs
+function initializeAddressCascade() {
+    console.log('Initializing address cascade...');
+    
+    // Cek apakah elemen ada dengan unique IDs
+    const elements = checkElements();
+    if (!elements.province || !elements.regency || !elements.district || !elements.village) {
+        console.error('One or more dropdown elements not found');
+        return;
+    }
+
+    console.log('All dropdown elements found');
+
+    // Get fresh references setiap kali
+    const getElements = () => ({
+        province: document.getElementById('create-province'),
+        regency: document.getElementById('create-regency'),
+        district: document.getElementById('create-district'),
+        village: document.getElementById('create-village')
+    });
+
+    // Remove existing listeners dengan clone
+    const currentElements = getElements();
+    
+    // Clone elements untuk remove existing listeners
+    const newProvinceSelect = currentElements.province.cloneNode(true);
+    const newRegencySelect = currentElements.regency.cloneNode(true);
+    const newDistrictSelect = currentElements.district.cloneNode(true);
+    const newVillageSelect = currentElements.village.cloneNode(true);
+
+    currentElements.province.parentNode.replaceChild(newProvinceSelect, currentElements.province);
+    currentElements.regency.parentNode.replaceChild(newRegencySelect, currentElements.regency);
+    currentElements.district.parentNode.replaceChild(newDistrictSelect, currentElements.district);
+    currentElements.village.parentNode.replaceChild(newVillageSelect, currentElements.village);
+
+    // Province change handler
+    newProvinceSelect.addEventListener('change', function() {
+        const provinceId = this.value;
+        console.log('Province selected:', provinceId);
+        
+        const els = getElements();
+        
+        // Reset dependent dropdowns
+        els.regency.innerHTML = '<option value="">-- Loading... --</option>';
+        els.district.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+        els.village.innerHTML = '<option value="">-- Pilih Kelurahan/Desa --</option>';
+        
+        els.regency.disabled = true;
+        els.district.disabled = true;
+        els.village.disabled = true;
+
+        if (provinceId) {
+            console.log('Fetching regencies for province:', provinceId);
+            
+            fetch(`/get-regencies/${provinceId}`)
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Regencies data received:', data);
+                    
+                    const currentEls = getElements();
+                    currentEls.regency.innerHTML = '<option value="">-- Pilih Kabupaten/Kota --</option>';
+                    
+                    if (data && Array.isArray(data) && data.length > 0) {
+                        data.forEach((item, index) => {
+                            console.log(`Adding regency ${index}:`, item);
+                            currentEls.regency.innerHTML += `<option value="${item.id}">${item.name}</option>`;
+                        });
+                        currentEls.regency.disabled = false;
+                        console.log('Regencies loaded successfully');
+                    } else {
+                        currentEls.regency.innerHTML += '<option value="">-- Tidak ada data --</option>';
+                        currentEls.regency.disabled = false;
+                        console.log('No regencies data found');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching regencies:', error);
+                    const currentEls = getElements();
+                    currentEls.regency.innerHTML = '<option value="">-- Error loading data --</option>';
+                    currentEls.regency.disabled = false;
+                    showUserNotification('Gagal memuat data kabupaten/kota', 'error');
+                });
+        } else {
+            const currentEls = getElements();
+            currentEls.regency.innerHTML = '<option value="">-- Pilih Kabupaten/Kota --</option>';
+            currentEls.regency.disabled = false;
+            console.log('Province cleared, resetting regency');
+        }
+    });
+
+    // Regency change handler
+    newRegencySelect.addEventListener('change', function() {
+        const regencyId = this.value;
+        console.log('Regency selected:', regencyId);
+        
+        const els = getElements();
+        
+        els.district.innerHTML = '<option value="">-- Loading... --</option>';
+        els.village.innerHTML = '<option value="">-- Pilih Kelurahan/Desa --</option>';
+        
+        els.district.disabled = true;
+        els.village.disabled = true;
+
+        if (regencyId) {
+            console.log('Fetching districts for regency:', regencyId);
+            
+            fetch(`/get-districts/${regencyId}`)
+                .then(response => {
+                    console.log('Districts response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Districts data received:', data);
+                    
+                    const currentEls = getElements();
+                    currentEls.district.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+                    
+                    if (data && Array.isArray(data) && data.length > 0) {
+                        data.forEach(item => {
+                            currentEls.district.innerHTML += `<option value="${item.id}">${item.name}</option>`;
+                        });
+                        currentEls.district.disabled = false;
+                        console.log('Districts loaded successfully');
+                    } else {
+                        currentEls.district.innerHTML += '<option value="">-- Tidak ada data --</option>';
+                        currentEls.district.disabled = false;
+                        console.log('No districts data found');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching districts:', error);
+                    const currentEls = getElements();
+                    currentEls.district.innerHTML = '<option value="">-- Error loading data --</option>';
+                    currentEls.district.disabled = false;
+                    showUserNotification('Gagal memuat data kecamatan', 'error');
+                });
+        } else {
+            const currentEls = getElements();
+            currentEls.district.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+            currentEls.district.disabled = false;
+        }
+    });
+
+    // District change handler  
+    newDistrictSelect.addEventListener('change', function() {
+        const districtId = this.value;
+        console.log('District selected:', districtId);
+        
+        const els = getElements();
+        
+        els.village.innerHTML = '<option value="">-- Loading... --</option>';
+        els.village.disabled = true;
+
+        if (districtId) {
+            console.log('Fetching villages for district:', districtId);
+            
+            fetch(`/get-villages/${districtId}`)
+                .then(response => {
+                    console.log('Villages response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Villages data received:', data);
+                    
+                    const currentEls = getElements();
+                    currentEls.village.innerHTML = '<option value="">-- Pilih Kelurahan/Desa --</option>';
+                    
+                    if (data && Array.isArray(data) && data.length > 0) {
+                        data.forEach(item => {
+                            currentEls.village.innerHTML += `<option value="${item.id}">${item.name}</option>`;
+                        });
+                        currentEls.village.disabled = false;
+                        console.log('Villages loaded successfully');
+                    } else {
+                        currentEls.village.innerHTML += '<option value="">-- Tidak ada data --</option>';
+                        currentEls.village.disabled = false;
+                        console.log('No villages data found');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching villages:', error);
+                    const currentEls = getElements();
+                    currentEls.village.innerHTML = '<option value="">-- Error loading data --</option>';
+                    currentEls.village.disabled = false;
+                    showUserNotification('Gagal memuat data kelurahan/desa', 'error');
+                });
+        } else {
+            const currentEls = getElements();
+            currentEls.village.innerHTML = '<option value="">-- Pilih Kelurahan/Desa --</option>';
+            currentEls.village.disabled = false;
+        }
+    });
+
+    console.log('Address cascade initialized successfully');
+}
+
+// Test function - panggil di console browser
+function testCascade() {
+    console.log('Testing cascade setup...');
+    checkElements();
+    initializeAddressCascade();
+}
+
 // Event listeners
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && !document.getElementById('userModal').classList.contains('hidden')) {
@@ -515,8 +781,10 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-document.getElementById('userModal').addEventListener('click', function(e) {
-    if (e.target === this) {
+// Modal click outside to close
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('userModal');
+    if (modal && e.target === modal) {
         closeUserModal();
     }
 });
@@ -533,5 +801,14 @@ document.addEventListener('change', function(e) {
     if (e.target.matches('#userModal select[name="role_id"]')) {
         showRolePreview(e.target.value);
     }
+});
+
+// Initialize saat DOM loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded - Initializing cascade');
+    setTimeout(() => {
+        initializeAddressCascade();
+        setupFormSubmission();
+    }, 100);
 });
 </script>
