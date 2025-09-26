@@ -73,14 +73,48 @@
                             </div>
                         </div>
 
-                        <!-- Address -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Provinsi <span class="text-red-500">*</span></label>
+                            <select id="province" name="province" class="w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                                <option value="">-- Pilih Provinsi --</option>
+                                {{-- @foreach($provinces as $province)
+                                    <option value="{{ $province->id }}">{{ $province->name }}</option>
+                                @endforeach --}}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Kabupaten/Kota <span class="text-red-500">*</span></label>
+                            <select id="regency" name="regency" class="w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                                <option value="">-- Pilih Kabupaten/Kota --</option>
+                                <!-- Options will be populated dynamically based on selected province -->
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Kecamatan <span class="text-red-500">*</span></label>
+                            <select id="district" name="district" class="w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                                <option value="">-- Pilih Kecamatan --</option>
+                                <!-- Options will be populated dynamically based on selected regency -->
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Kelurahan/Desa <span class="text-red-500">*</span></label>
+                            <select id="village" name="village" class="w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                                <option value="">-- Pilih Kelurahan/Desa --</option>
+                                <!-- Options will be populated dynamically based on selected district -->
+                            </select>
+                        </div>
+
+                        <!-- Alamat -->
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Alamat</label>
                             <div class="relative">
                                 <i class="fas fa-map-marker-alt absolute left-3 top-4 text-gray-400"></i>
-                                <textarea name="address" rows="3" 
+                                <textarea name="alamat" rows="3" 
                                     class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none transition-all" 
-                                    placeholder="Enter full address..."></textarea>
+                                    placeholder="Enter full Alamat..."></textarea>
                             </div>
                         </div>
                     </div>

@@ -78,7 +78,7 @@ class MenuController extends Controller
         $menu = Menu::findOrFail($id);
         $menu->delete();
 
-         if ($menu->hasChildren()) {
+        if ($menu->hasChildren()) {
             return redirect()->route('menu')->with('error', 'Tidak bisa menghapus menu yang masih memiliki sub-menu!');
         }
 

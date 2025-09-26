@@ -28,7 +28,7 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date Birth</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Address</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Alamat</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
@@ -64,7 +64,7 @@
                     <td class="px-6 py-4">
                         {{-- field date_birth: --}}
                         <!-- <div class="text-sm text-gray-400 italic">Not available</div> -->
-                         <div class="text-sm text-gray-900">{{ $user->address ?? '-' }}</div> 
+                         <div class="text-sm text-gray-900">{{ $user->alamat ?? '-' }}</div> 
                     </td>
 
                     <td class="px-6 py-4">
@@ -88,7 +88,7 @@
                                 {{ $user->is_active ? 'true' : 'false' }},
                                 '{{ $user->phone }}',
                                 '{{ $user->birth_date }}',
-                                `{{ $user->address }}`)"
+                                `{{ $user->alamat }}`)"
                                     class="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 flex items-center" 
                                     title="Edit User">
                                 <i class="fas fa-edit"></i>
@@ -180,10 +180,44 @@
                             <input type="date" name="birth_date" id="editBirthDate" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" max="{{ date('Y-m-d') }}">
                         </div>
 
-                        <!-- Address -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Provinsi <span class="text-red-500">*</span></label>
+                            <select id="province" name="province" class="w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                                <option value="">-- Pilih Provinsi --</option>
+                                {{-- @foreach($provinces as $province)
+                                    <option value="{{ $province->id }}">{{ $province->name }}</option>
+                                @endforeach --}}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Kabupaten/Kota <span class="text-red-500">*</span></label>
+                            <select id="regency" name="regency" class="w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                                <option value="">-- Pilih Kabupaten/Kota --</option>
+                                <!-- Options will be populated dynamically based on selected province -->
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Kecamatan <span class="text-red-500">*</span></label>
+                            <select id="district" name="district" class="w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                                <option value="">-- Pilih Kecamatan --</option>
+                                <!-- Options will be populated dynamically based on selected regency -->
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Kelurahan/Desa <span class="text-red-500">*</span></label>
+                            <select id="village" name="village" class="w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                                <option value="">-- Pilih Kelurahan/Desa --</option>
+                                <!-- Options will be populated dynamically based on selected district -->
+                            </select>
+                        </div>
+
+                        <!-- Alamat -->
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
-                            <textarea id="editAddress" name="address" rows="3" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"></textarea>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Alamat</label>
+                            <textarea id="editAlamat" name="alamat" rows="3" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"></textarea>
                         </div>
 
                         <!-- Role -->
@@ -230,7 +264,7 @@
 <!-- JavaScript untuk Modal -->
 <script>
     // Function to open edit modal
-    function openEditModal(userId, username, email, roleId, isActive, phone, birthDate, address) {
+    function openEditModal(userId, username, email, roleId, isActive, phone, birthDate, alamat) {
         document.getElementById('editUserId').value = userId;
         document.getElementById('editUsername').value = username;
         document.getElementById('editEmail').value = email;
@@ -238,7 +272,7 @@
         document.getElementById('editIsActive').checked = isActive == 1 || isActive == true;
         document.getElementById('editPhone').value = phone || '';
         document.getElementById('editBirthDate').value = birthDate || '';
-        document.getElementById('editAddress').value = address || '';
+        document.getElementById('editAlamat').value = alamat || '';
 
         // Clear password fields
         document.getElementById('editPassword').value = '';

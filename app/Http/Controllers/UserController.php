@@ -58,12 +58,12 @@ public function update(Request $request, $id)
     $user = User::findOrFail($id);
 
     $request->validate([
-        'username' => 'required|string|max:100|unique:users,username,' . $id . ',user_id', 
-        'email'    => 'nullable|email|unique:users,email,' . $id . ',user_id', 
+        'username' => 'required|string|max:100|unique:users,username,' . $id . ',user_id',
+        'email'    => 'nullable|email|unique:users,email,' . $id . ',user_id',
         'role_id'  => 'required|exists:roles,role_id',
         'is_active' => 'sometimes|boolean',
-        'phone'      => 'nullable|string|max:20',                    
-        'birth_date' => 'nullable|date|before_or_equal:today',        
+        'phone'      => 'nullable|string|max:20',
+        'birth_date' => 'nullable|date|before_or_equal:today',
         'address'    => 'nullable|string|max:1000',
     ]);
 

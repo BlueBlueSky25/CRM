@@ -81,7 +81,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::post('/marketing/sales', [SalesController::class, 'store'])->name('marketing.sales.store');
     Route::put('/marketing/sales/{id}', [SalesController::class, 'update'])->name('marketing.sales.update');
     Route::delete('/marketing/sales/{id}', [SalesController::class, 'destroy'])->name('marketing.sales.destroy');
-   
+
 
 
 

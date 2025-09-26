@@ -90,6 +90,41 @@
                             max="{{ date('Y-m-d') }}">
                     </div>
                 </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Provinsi <span class="text-red-500">*</span></label>
+                    <select id="province" name="province" class="w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                        <option value="">-- Pilih Provinsi --</option>
+                        {{-- @foreach($provinces as $province)
+                            <option value="{{ $province->id }}">{{ $province->name }}</option>
+                        @endforeach --}}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kabupaten/Kota <span class="text-red-500">*</span></label>
+                    <select id="regency" name="regency" class="w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                        <option value="">-- Pilih Kabupaten/Kota --</option>
+                        <!-- Options will be populated dynamically based on selected province -->
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kecamatan <span class="text-red-500">*</span></label>
+                    <select id="district" name="district" class="w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                        <option value="">-- Pilih Kecamatan --</option>
+                        <!-- Options will be populated dynamically based on selected regency -->
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kelurahan/Desa <span class="text-red-500">*</span></label>
+                    <select id="village" name="village" class="w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                        <option value="">-- Pilih Kelurahan/Desa --</option>
+                        <!-- Options will be populated dynamically based on selected district -->
+                    </select>
+                </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Alamat</label>
                     <div class="relative">
@@ -98,6 +133,7 @@
                             class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none transition-all"
                             placeholder="Masukkan alamat lengkap..."></textarea>
                     </div>
+
                 </div>
                 <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 mt-6">
                     <button type="button" onclick="closeSalesModal()" class="px-6 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">Batal</button>
