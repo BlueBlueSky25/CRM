@@ -26,7 +26,7 @@
     <div>
         <!-- Stats Cards -->
         <x-settingsm.kpi />
-        <x-settingsm.filtersearch />
+
     </div>
         
 
@@ -44,7 +44,20 @@
         window.rolePermissions = @json($rolePermissions ?? []);
         </script> 
 
-        
+    <script src="{{ asset('js/address-cascade.js') }}"></script>
+
+    <script src="{{ asset('js/user-modal.js') }}"></script>
+<script>
+    // Initialize cascade untuk CREATE form
+    document.addEventListener('DOMContentLoaded', function() {
+        const createCascade = new AddressCascade({
+            provinceId: 'create-province',
+            regencyId: 'create-regency',
+            districtId: 'create-district',
+            villageId: 'create-village'
+        });
+    });
+</script>    
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script>
         // Modal functions for User

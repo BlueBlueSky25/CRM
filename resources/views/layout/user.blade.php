@@ -8,7 +8,7 @@
         
 
         <!-- User Management Table -->
-        <x-settingsm.user.utable :users="$users"  :roles="$roles" />
+        <x-settingsm.user.utable :users="$users"  :roles="$roles" :provinces="$provinces" />
         <x-globalr.pagination :paginator="$users" /> 
 </div>
 

@@ -34,7 +34,7 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
             </thead>
-            <<tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="bg-white divide-y divide-gray-200">
                     @foreach($users as $index => $user)
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 text-sm text-gray-900">{{ $users->firstItem() + $loop->index }}</td>
@@ -164,7 +164,7 @@
 
         <!-- Modal Body - Scrollable -->
         <div class="overflow-y-auto max-h-[calc(90vh-140px)]">
-            <form id="editUserForm" action="{{ route('users.update', ['id' => 0]) }}" method="POST" class="p-6">
+            <form id="editUserModal" action="{{ route('users.update', ['id' => 0]) }}" method="POST" class="p-6">
                 @csrf
                 @method('PUT')
                 <input type="hidden" id="editUserId" name="user_id">
@@ -201,45 +201,60 @@
                             <input type="date" name="birth_date" id="editBirthDate" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" max="{{ date('Y-m-d') }}">
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Provinsi <span class="text-red-500">*</span></label>
-                            <select id="province" name="province" class="w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                                <option value="">-- Pilih Provinsi --</option>
-                                {{-- @foreach($provinces as $province)
-                                    <option value="{{ $province->id }}">{{ $province->name }}</option>
-                                @endforeach --}}
-                            </select>
+                        <!-- Address Section -->
+                        <div class="mb-6">
+                            <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                <i class="fas fa-map-marker-alt text-indigo-500 mr-2"></i>
+                                Address Information
+                            </h4>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Provinsi <span class="text-red-500">*</span></label>
+                                <select id="edit-province" name="province_id" class="cascade-province w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                                    <option value="">-- Pilih Provinsi --</option>
+                                    @foreach($provinces as $province)
+                                        <option value="{{ $province->id }}">{{ $province->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Kabupaten/Kota -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Kabupaten/Kota <span class="text-red-500">*</span></label>
+                                <select id="edit-regency" name="regency_id" class="cascade-regency w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                                    <option value="">-- Pilih Kabupaten/Kota --</option>
+                                </select>
+                            </div>
+
+                            <!-- Kecamatan -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Kecamatan <span class="text-red-500">*</span></label>
+                                <select id="edit-district" name="district_id" class="cascade-district w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                                    <option value="">-- Pilih Kecamatan --</option>
+                                </select>
+                            </div>
+
+                            <!-- Kelurahan/Desa -->
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Kelurahan/Desa <span class="text-red-500">*</span></label>
+                                <select id="edit-village" name="village_id" class="cascade-village w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                                    <option value="">-- Pilih Kelurahan/Desa --</option>
+                                </select>
+                            </div>
+                
+
+                            <!-- Detail Alamat (full width) -->
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Detail Alamat</label>
+                                <div class="relative">
+                                    <i class="fas fa-home absolute left-3 top-3 text-gray-400"></i>
+                                    <textarea id="editAlamat" name="address" rows="3" placeholder="Contoh: Jl. Merdeka No. 123, RT 01/RW 02" 
+                                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"></textarea>
+                                </div>
+                                <small class="text-gray-500">Isi dengan detail alamat seperti nama jalan, nomor rumah, RT/RW</small>
+                            </div>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Kabupaten/Kota <span class="text-red-500">*</span></label>
-                            <select id="regency" name="regency" class="w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                                <option value="">-- Pilih Kabupaten/Kota --</option>
-                                <!-- Options will be populated dynamically based on selected province -->
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Kecamatan <span class="text-red-500">*</span></label>
-                            <select id="district" name="district" class="w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                                <option value="">-- Pilih Kecamatan --</option>
-                                <!-- Options will be populated dynamically based on selected regency -->
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Kelurahan/Desa <span class="text-red-500">*</span></label>
-                            <select id="village" name="village" class="w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                                <option value="">-- Pilih Kelurahan/Desa --</option>
-                                <!-- Options will be populated dynamically based on selected district -->
-                            </select>
-                        </div>
-
-                        <!-- Alamat -->
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Alamat</label>
-                            <textarea id="editAlamat" name="alamat" rows="3" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"></textarea>
-                        </div>
 
                         <!-- Role -->
                         <div>
@@ -283,76 +298,3 @@
 </div>
 
 <!-- JavaScript untuk Modal -->
-<script>
-    // Function to open edit modal
-    function openEditModal(userId, username, email, roleId, isActive, phone, birthDate, alamat) {
-        document.getElementById('editUserId').value = userId;
-        document.getElementById('editUsername').value = username;
-        document.getElementById('editEmail').value = email;
-        document.getElementById('editRole').value = roleId;
-        document.getElementById('editIsActive').checked = isActive == 1 || isActive == true;
-        document.getElementById('editPhone').value = phone || '';
-        document.getElementById('editBirthDate').value = birthDate || '';
-        document.getElementById('editAlamat').value = alamat || '';
-
-        // Clear password fields
-        document.getElementById('editPassword').value = '';
-        document.getElementById('editPasswordConfirm').value = '';
-        
-        document.getElementById('editUserModal').classList.remove('hidden');
-    }
-
-    // Function to close edit modal
-    function closeEditModal() {
-        document.getElementById('editUserModal').classList.add('hidden');
-        document.getElementById('editUserForm').reset();
-    }
-
-    // Handle edit form submission
-    document.getElementById('editUserForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const password = document.getElementById('editPassword').value;
-        const passwordConfirm = document.getElementById('editPasswordConfirm').value;
-        
-        // Validate password confirmation if password is provided
-        if (password && password !== passwordConfirm) {
-            alert('Passwords do not match!');
-            return;
-        }
-        
-        // Submit form (you can customize this to use AJAX or regular form submission)
-        const userId = document.getElementById('editUserId').value;
-        const form = document.getElementById('editUserForm');
-        form.action = `/users/${userId}`;  // Adjust this URL to match your Laravel route
-        form.submit();
-    });
-
-    // Close modal when clicking outside
-    document.getElementById('editUserModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeEditModal();
-        }
-    });
-
-    // Handle ESC key to close modal
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeEditModal();
-        }
-    });
-</script>
-
-<!-- CSS untuk animasi modal -->
-<style>
-    @keyframes modalSlideIn {
-        from {
-            opacity: 0;
-            transform: translateY(-20px) scale(0.95);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-    }
-</style>

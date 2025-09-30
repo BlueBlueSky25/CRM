@@ -52,9 +52,31 @@
                                     <div class="text-sm text-gray-900">{{ $user->birth_date ? date('d M Y', strtotime($user->birth_date)) : '-' }}</div>
                                 </td>
 
+                                 <!-- KOLOM ALAMAT YANG DIUPDATE -->
                                 <td class="px-6 py-4">
-                                    
-                                     <div class="text-sm text-gray-900">{{ $user->address ?? '-' }}</div> 
+                                    <div class="text-sm text-gray-900">
+                                        @if($user->province || $user->regency || $user->district || $user->village || $user->address)
+                                            @php
+                                                $alamatWilayah = collect([
+                                                    $user->village->name ?? null,
+                                                    $user->district->name ?? null, 
+                                                    $user->regency->name ?? null,
+                                                    $user->province->name ?? null
+                                                ])->filter()->implode(', ');
+                                            @endphp
+                                            
+                                            @if($alamatWilayah)
+                                                <div class="font-medium">{{ $alamatWilayah }}</div>
+                                                @if($user->address)
+                                                    <div class="text-xs text-gray-600 mt-1">{{ $user->address }}</div>
+                                                @endif
+                                            @else
+                                                {{ $user->address ?? '-' }}
+                                            @endif
+                                        @else
+                                            -
+                                        @endif
+                                    </div>
                                 </td>
 
                                 <td class="px-6 py-4">
@@ -75,7 +97,7 @@
                                         @endif
                                         
                                         @if(auth()->user()->canAccess($currentMenuId, 'delete'))
-                                        <form action="{{ route('users.destroy', $user->user_id) }}" method="POST" class="inline">
+                                        <form action="{{ route('marketing.sales.destroy', $user->user_id) }}" method="POST" class="inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="text-red-600 hover:text-red-900 p-2 flex items-center" title="Delete User" onclick="return confirm('Are you sure you want to delete this user?')">
