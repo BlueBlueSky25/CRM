@@ -135,17 +135,6 @@
     </div>
 </div>
 
-
-
-
-
-
-
-
-
-
-
-
 <!-- Edit User Modal -->
 <div id="editUserModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden animate-modal-in">
@@ -171,7 +160,7 @@
                 
                 <!-- Personal Information Section -->
                 <div class="mb-6">
-                    <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                    <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center border-b pb-2">
                         <i class="fas fa-user-circle text-indigo-500 mr-2"></i>
                         Personal Information
                     </h4>
@@ -200,66 +189,77 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Birth Date</label>
                             <input type="date" name="birth_date" id="editBirthDate" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" max="{{ date('Y-m-d') }}">
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Address Section -->
-                        <div class="mb-6">
-                            <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                                <i class="fas fa-map-marker-alt text-indigo-500 mr-2"></i>
-                                Address Information
-                            </h4>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Provinsi <span class="text-red-500">*</span></label>
-                                <select id="edit-province" name="province_id" class="cascade-province w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                                    <option value="">-- Pilih Provinsi --</option>
-                                    @foreach($provinces as $province)
-                                        <option value="{{ $province->id }}">{{ $province->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <!-- Kabupaten/Kota -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Kabupaten/Kota <span class="text-red-500">*</span></label>
-                                <select id="edit-regency" name="regency_id" class="cascade-regency w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                                    <option value="">-- Pilih Kabupaten/Kota --</option>
-                                </select>
-                            </div>
-
-                            <!-- Kecamatan -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Kecamatan <span class="text-red-500">*</span></label>
-                                <select id="edit-district" name="district_id" class="cascade-district w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                                    <option value="">-- Pilih Kecamatan --</option>
-                                </select>
-                            </div>
-
-                            <!-- Kelurahan/Desa -->
-                            <div class="mt-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Kelurahan/Desa <span class="text-red-500">*</span></label>
-                                <select id="edit-village" name="village_id" class="cascade-village w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                                    <option value="">-- Pilih Kelurahan/Desa --</option>
-                                </select>
-                            </div>
-                
-
-                            <!-- Detail Alamat (full width) -->
-                            <div class="mt-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Detail Alamat</label>
-                                <div class="relative">
-                                    <i class="fas fa-home absolute left-3 top-3 text-gray-400"></i>
-                                    <textarea id="editAlamat" name="address" rows="3" placeholder="Contoh: Jl. Merdeka No. 123, RT 01/RW 02" 
-                                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"></textarea>
-                                </div>
-                                <small class="text-gray-500">Isi dengan detail alamat seperti nama jalan, nomor rumah, RT/RW</small>
-                            </div>
+                <!-- Address Section -->
+                <div class="mb-6">
+                    <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center border-b pb-2">
+                        <i class="fas fa-map-marker-alt text-indigo-500 mr-2"></i>
+                        Address Information
+                    </h4>
+                    
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <!-- Provinsi -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Provinsi <span class="text-red-500">*</span></label>
+                            <select id="edit-province" name="province_id" class="cascade-province w-full border border-gray-300 rounded-lg px-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                                <option value="">-- Pilih Provinsi --</option>
+                                @foreach($provinces as $province)
+                                    <option value="{{ $province->id }}">{{ $province->name }}</option>
+                                @endforeach
+                            </select>
                         </div>
 
+                        <!-- Kabupaten/Kota -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Kabupaten/Kota <span class="text-red-500">*</span></label>
+                            <select id="edit-regency" name="regency_id" class="cascade-regency w-full border border-gray-300 rounded-lg px-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                                <option value="">-- Pilih Kabupaten/Kota --</option>
+                            </select>
+                        </div>
 
+                        <!-- Kecamatan -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Kecamatan <span class="text-red-500">*</span></label>
+                            <select id="edit-district" name="district_id" class="cascade-district w-full border border-gray-300 rounded-lg px-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                                <option value="">-- Pilih Kecamatan --</option>
+                            </select>
+                        </div>
+
+                        <!-- Kelurahan/Desa -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Kelurahan/Desa <span class="text-red-500">*</span></label>
+                            <select id="edit-village" name="village_id" class="cascade-village w-full border border-gray-300 rounded-lg px-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                                <option value="">-- Pilih Kelurahan/Desa --</option>
+                            </select>
+                        </div>
+
+                        <!-- Detail Alamat (full width) -->
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Detail Alamat</label>
+                            <div class="relative">
+                                <i class="fas fa-home absolute left-3 top-3 text-gray-400"></i>
+                                <textarea id="editAlamat" name="address" rows="3" placeholder="Contoh: Jl. Merdeka No. 123, RT 01/RW 02" 
+                                        class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"></textarea>
+                            </div>
+                            <small class="text-gray-500">Isi dengan detail alamat seperti nama jalan, nomor rumah, RT/RW</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Settings Section -->
+                <div class="mb-6">
+                    <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center border-b pb-2">
+                        <i class="fas fa-cog text-indigo-500 mr-2"></i>
+                        Account Settings
+                    </h4>
+                    
+                    <div class="grid md:grid-cols-2 gap-4">
                         <!-- Role -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
-                            <select id="editRole" name="role_id" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Role <span class="text-red-500">*</span></label>
+                            <select id="editRole" name="role_id" class="w-full border border-gray-300 rounded-lg px-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
                                 <option value="">Select Role</option>
                                 @foreach($roles as $role)
                                     <option value="{{ $role->role_id }}">{{ $role->role_name }}</option>
@@ -267,22 +267,22 @@
                             </select>
                         </div>
 
+                        <!-- Active Status -->
+                        <div class="flex items-center pt-8">
+                            <input type="checkbox" id="editIsActive" name="is_active" value="1" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                            <label for="editIsActive" class="ml-2 text-sm font-medium text-gray-700">Active User</label>
+                        </div>
+
                         <!-- New Password -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">New Password <span class="text-gray-500 font-normal">(Leave blank to keep current)</span></label>
-                            <input type="password" id="editPassword" name="password" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">New Password <span class="text-xs text-gray-500 font-normal">(Leave blank to keep current)</span></label>
+                            <input type="password" id="editPassword" name="password" placeholder="••••••••" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
                         </div>
 
                         <!-- Confirm New Password -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
-                            <input type="password" id="editPasswordConfirm" name="password_confirmation" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
-                        </div>
-
-                        <!-- Active User Checkbox -->
-                        <div class="flex items-center md:col-span-2">
-                            <input type="checkbox" id="editIsActive" name="is_active" value="1" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                            <label for="editIsActive" class="ml-2 text-sm text-gray-700">Active User</label>
+                            <input type="password" id="editPasswordConfirm" name="password_confirmation" placeholder="••••••••" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
                         </div>
                     </div>
                 </div>

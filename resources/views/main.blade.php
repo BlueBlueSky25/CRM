@@ -51,10 +51,7 @@
         @yield('content')
     </main>
 
-
-
-
-
+    <x-dashboard.toast />
 
     <script src="{{ asset('js/address-cascade.js') }}"></script>
     <script>

@@ -20,4 +20,8 @@
 
 <!-- User Form -->
 <x-settingsm.user.uform :roles="$roles" :provinces="$provinces" />
+
+<script>
+    window.Laravel = {!! json_encode(['csrfToken' => csrf_token()]) !!};
+</script>
 @endsection

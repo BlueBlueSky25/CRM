@@ -30,12 +30,12 @@ class User extends Authenticatable
 
     public function setUsernameAttribute($value)
     {
-        $this->attributes['username'] = strtolower(str_replace(' ', '', $value));
+        $this->attributes['username'] = strtolower(str_replace(' ', '_', $value));
     }
 
     public function getUsernameAttribute($value)
     {
-        return strtoupper($value);
+        return strtoupper(str_replace('_', ' ', $value));
     }
 
     public function province()
@@ -98,10 +98,6 @@ class User extends Authenticatable
     };
 }
 
-
-
-
-
 public function canAccessCurrent($action)
 {
     $menuId = currentMenuId();
@@ -114,9 +110,9 @@ public function canAccessCurrent($action)
     public function hasAnyAccess($menuId)
     {
         return $this->canAccess($menuId, 'view') || 
-               $this->canAccess($menuId, 'create') || 
-               $this->canAccess($menuId, 'edit') || 
-               $this->canAccess($menuId, 'delete');
+                $this->canAccess($menuId, 'create') || 
+                $this->canAccess($menuId, 'edit') || 
+                $this->canAccess($menuId, 'delete');
     }
 
 }

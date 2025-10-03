@@ -99,31 +99,41 @@ document.addEventListener('DOMContentLoaded', function() {
             const rowNum = pagination.from + index;
             const roleClass = user.role ? user.role.role_name.toLowerCase() : 'no-role';
             
-            html += `
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 text-sm text-gray-900">${rowNum}</td>
-                    <td class="px-6 py-4">
-                        <div class="text-sm font-medium text-gray-900">${user.username}</div>
-                        <div class="text-sm text-gray-500">${user.email || '-'}</div>
-                    </td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${user.phone || '-'}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${user.birth_date || '-'}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${user.address || '-'}</td>
-                    <td class="px-6 py-4" data-role="${roleClass}">
-                        <span class="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            ${user.role ? user.role.role_name : 'No Role'}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-medium ${user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                            ${user.is_active ? 'Active' : 'Inactive'}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <button class="text-blue-600 hover:text-blue-900"><i class="fas fa-edit"></i></button>
-                    </td>
-                </tr>
-            `;
+           html += `
+            <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 text-sm text-gray-900">${rowNum}</td>
+                <td class="px-6 py-4">
+                    <div class="text-sm font-medium text-gray-900">${user.username}</div>
+                    <div class="text-sm text-gray-500">${user.email || '-'}</div>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-900">${user.phone || '-'}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">${user.birth_date || '-'}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">${user.address || '-'}</td>
+                <td class="px-6 py-4">
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        ${user.role ? user.role.role_name : 'No Role'}
+                    </span>
+                </td>
+                <td class="px-6 py-4">
+                    <span class="px-3 py-1 rounded-full text-xs font-medium ${user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                        ${user.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                </td>
+                <td class="px-6 py-4 flex space-x-2">
+                    <button onclick="openEditModal('${user.user_id}', '${user.username}', '${user.email}', '${user.role_id}', ${user.is_active}, '${user.phone || ''}', '${user.birth_date || ''}', \`${user.address || ''}\`, '${user.province_id || ''}', '${user.regency_id || ''}', '${user.district_id || ''}', '${user.village_id || ''}')" class="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <form action="/users/${user.user_id}" method="POST" onsubmit="return confirm('Yakin mau hapus?')" class="inline">
+                        <input type="hidden" name="_token" value="${window.Laravel.csrfToken}">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" class="text-red-600 hover:text-red-900 p-2">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        `;
+
         });
         
         tbody.innerHTML = html;
