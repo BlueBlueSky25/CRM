@@ -21,7 +21,7 @@
     @endif
 
     <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
+        <table id="userTable" class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No.</th>
@@ -34,7 +34,7 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody id=""class="bg-white divide-y divide-gray-200">
                     @foreach($users as $index => $user)
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 text-sm text-gray-900">{{ $users->firstItem() + $loop->index }}</td>
@@ -164,7 +164,7 @@
 
         <!-- Modal Body - Scrollable -->
         <div class="overflow-y-auto max-h-[calc(90vh-140px)]">
-            <form id="editUserModal" action="{{ route('users.update', ['id' => 0]) }}" method="POST" class="p-6">
+            <form id="editUserForm" action="{{ route('users.update', ['id' => 0]) }}" method="POST" class="p-6">
                 @csrf
                 @method('PUT')
                 <input type="hidden" id="editUserId" name="user_id">

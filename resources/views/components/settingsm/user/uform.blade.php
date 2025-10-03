@@ -69,7 +69,7 @@
                                 <i class="fas fa-calendar-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                                 <input type="date" name="birth_date" 
                                     class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
-                                    max="{{ date('Y-m-d') }}">
+                                    max="{{ date('Y-M-D') }}">
                             </div>
                         </div>
                     </div>

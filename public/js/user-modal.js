@@ -377,3 +377,22 @@ document.addEventListener('change', function(e) {
         showRolePreview(e.target.value);
     }
 });
+document.addEventListener('DOMContentLoaded', function() {
+    const createUsernameInput = document.querySelector('#userModal input[name="username"]');
+    
+    if (createUsernameInput) {
+        createUsernameInput.addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const editUsernameInput = document.querySelector('#editUsername');
+    
+    if (editUsernameInput) {
+        editUsernameInput.addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+    }
+});

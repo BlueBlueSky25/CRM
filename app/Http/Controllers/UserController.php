@@ -114,15 +114,6 @@ public function update(Request $request, $id)
     return redirect()->back()->with('success', 'User berhasil diperbarui!');
 }
 
-    
-    // public function edit($id)
-    // {
-    //     $user = User::with(['province', 'regency', 'district', 'village'])->findOrFail($id);
-    //     $roles = Role::all();
-    //     $provinces = Province::orderBy('name')->get();
-        
-    //     return view('users.edit', compact('user', 'roles', 'provinces'));
-    // }
 
     
 
@@ -219,5 +210,42 @@ public function getVillages($districtId)
         $user->delete();
 
         return redirect()->route('user')->with('success', 'User berhasil dihapus!');
+    }
+    
+
+    public function search(Request $request)
+    {
+        $query = User::with(['role', 'province', 'regency', 'district', 'village']);
+        
+        
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('username', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+        
+        // Role filter
+        if ($request->has('role') && $request->role != '') {
+            $query->whereHas('role', function($q) use ($request) {
+                $q->whereRaw('LOWER(role_name) = ?', [strtolower($request->role)]);
+            });
+        }
+        
+        $users = $query->paginate(5);
+        
+        return response()->json([
+            'users' => $users->items(),
+            'pagination' => [
+                'current_page' => $users->currentPage(),
+                'last_page' => $users->lastPage(),
+                'per_page' => $users->perPage(),
+                'total' => $users->total(),
+                'from' => $users->firstItem(),
+                'to' => $users->lastItem(),
+            ]
+        ]);
     }
 }

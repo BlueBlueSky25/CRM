@@ -58,7 +58,9 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // ==========================
     // TAMBAHAN: 
     // ==========================
-   
+    
+    Route::get('/users/search', [UserController::class, 'search'])->name('users.search');
+
 
 
     // ==========================

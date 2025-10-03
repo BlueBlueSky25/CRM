@@ -28,6 +28,16 @@ class User extends Authenticatable
     protected $hidden = ['password_hash'];
 
 
+    public function setUsernameAttribute($value)
+    {
+        $this->attributes['username'] = strtolower(str_replace(' ', '', $value));
+    }
+
+    public function getUsernameAttribute($value)
+    {
+        return strtoupper($value);
+    }
+
     public function province()
     {
         return $this->belongsTo(Province::class, 'province_id', 'id');
