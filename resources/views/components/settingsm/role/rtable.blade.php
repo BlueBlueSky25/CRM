@@ -1,5 +1,5 @@
 <!-- Role Management Table with Fixed Actions -->
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
         <div>
             <h3 class="text-lg font-semibold text-gray-900">Role Management</h3>
@@ -31,65 +31,62 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
             </thead>
-           <tbody class="bg-white divide-y divide-gray-200">
-    @foreach($roles as $index => $role)
-    <tr class="hover:bg-gray-50">
-        <td class="px-6 py-4 text-sm text-gray-900">{{ $roles->firstItem() + $loop->index }}</td>
-        <td class="px-6 py-4 font-medium text-gray-900">{{ $role->role_name }}</td>
-        <td class="px-6 py-4 text-sm text-gray-600">{{ $role->description ?? 'No description' }}</td>
-        <td class="px-6 py-4 text-sm text-gray-900">
-            {{ $role->users->count() }} Users
-        </td>
-        <td class="px-6 py-4 text-sm font-medium">
-            <div class="flex items-center space-x-2">
-                @if($role->role_name !== 'superadmin')
-                    <!-- Edit Button -->
-                     @if(auth()->user()->canAccess($currentMenuId, 'edit'))
-                    <button onclick="openEditRoleModal('{{ $role->role_id }}', '{{ $role->role_name }}', '{{ $role->description }}')" 
-                            class="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-colors" 
-                            title="Edit Role">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    @endif
-                    
-                    <!-- Assign Permissions Button -->
-                      @if(auth()->user()->canAccess($currentMenuId, 'assign'))
-                    <button onclick="openAssignMenuModal({{ $role->role_id }}, '{{ $role->role_name }}')"
-                            class="text-green-600 hover:text-green-900 p-2 rounded-lg hover:bg-green-50 transition-colors" 
-                            title="Assign Permissions">
-                        <i class="fas fa-shield-alt"></i>
-                    </button>
-                    @endif
-                    
+            <tbody class="bg-white divide-y divide-gray-200">
+                @foreach($roles as $index => $role)
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 text-sm text-gray-900">{{ $roles->firstItem() + $loop->index }}</td>
+                    <td class="px-6 py-4 font-medium text-gray-900">{{ $role->role_name }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">{{ $role->description ?? 'No description' }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">
+                        {{ $role->users->count() }} Users
+                    </td>
+                    <td class="px-6 py-4 text-sm font-medium">
+                        <div class="flex items-center space-x-2">
+                            @if($role->role_name !== 'superadmin')
+                                <!-- Edit Button -->
+                                @if(auth()->user()->canAccess($currentMenuId, 'edit'))
+                                <button onclick="openEditRoleModal('{{ $role->role_id }}', '{{ $role->role_name }}', '{{ $role->description }}')" 
+                                        class="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-colors" 
+                                        title="Edit Role">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                @endif
+                                
+                                <!-- Assign Permissions Button -->
+                                @if(auth()->user()->canAccess($currentMenuId, 'assign'))
+                                <button onclick="openAssignMenuModal({{ $role->role_id }}, '{{ $role->role_name }}')"
+                                        class="text-green-600 hover:text-green-900 p-2 rounded-lg hover:bg-green-50 transition-colors" 
+                                        title="Assign Permissions">
+                                    <i class="fas fa-shield-alt"></i>
+                                </button>
+                                @endif
 
-                    
-
-
-
-
-
-                    <!-- Delete Button -->
-                     @if(auth()->user()->canAccess($currentMenuId, 'delete'))
-                    <form action="{{ route('roles.destroy', $role->role_id) }}" method="POST" class="inline-flex">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="text-red-600 hover:text-red-900 p-2 rounded-lg hover:bg-red-50 transition-colors" 
-                                title="Delete Role" onclick="return confirm('Are you sure you want to delete this role?')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </form>
-                    @endif
-                @else
-                    <!-- SuperAdmin - Protected -->
-                    <span class="text-xs text-gray-500 italic px-3 py-2">🛡️ Protected Role</span>
-                @endif
-            </div>
-        </td>
-    </tr>
-    @endforeach
-</tbody>
+                                <!-- Delete Button -->
+                                @if(auth()->user()->canAccess($currentMenuId, 'delete'))
+                                <form action="{{ route('roles.destroy', $role->role_id) }}" method="POST" class="inline-flex">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-600 hover:text-red-900 p-2 rounded-lg hover:bg-red-50 transition-colors" 
+                                            title="Delete Role" onclick="return confirm('Are you sure you want to delete this role?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                                @endif
+                            @else
+                                <!-- SuperAdmin - Protected -->
+                                <span class="text-xs text-gray-500 italic px-3 py-2">🛡️ Protected Role</span>
+                            @endif
+                        </div>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
         </table>
     </div>
+    
+    <!-- Pagination langsung di dalam wrapper -->
+    <x-globalr.pagination :paginator="$roles" />
+    
 </div>
 
 <!-- Edit Role Modal -->
@@ -178,7 +175,6 @@
 
 <!-- JavaScript untuk Modal -->
 <script>
-    // Function to open edit role modal
     function openEditRoleModal(roleId, roleName, description) {
         document.getElementById('editRoleId').value = roleId;
         document.getElementById('editRoleName').value = roleName;
@@ -187,34 +183,29 @@
         document.getElementById('editRoleModal').classList.remove('hidden');
     }
 
-    // Function to close edit role modal
     function closeEditRoleModal() {
         document.getElementById('editRoleModal').classList.add('hidden');
         document.getElementById('editRoleForm').reset();
     }
 
-    // Function to open add role modal
     function openRoleModal() {
         document.getElementById('addRoleModal').classList.remove('hidden');
     }
 
-    // Function to close add role modal
     function closeAddRoleModal() {
         document.getElementById('addRoleModal').classList.add('hidden');
         document.getElementById('addRoleForm').reset();
     }
 
-    // Handle edit role form submission
     document.getElementById('editRoleForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
         const roleId = document.getElementById('editRoleId').value;
         const form = document.getElementById('editRoleForm');
-        form.action = `/roles/${roleId}`;  // Adjust this URL to match your Laravel route
+        form.action = `/roles/${roleId}`;
         form.submit();
     });
 
-    // Close modal when clicking outside
     document.getElementById('editRoleModal').addEventListener('click', function(e) {
         if (e.target === this) {
             closeEditRoleModal();
@@ -227,7 +218,6 @@
         }
     });
 
-    // Handle ESC key to close modals
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             closeEditRoleModal();
@@ -235,14 +225,11 @@
         }
     });
 
-    // Placeholder for assign menu modal function
     function openAssignMenuModal(roleId, roleName) {
         alert(`Assign permissions for role: ${roleName} (ID: ${roleId})`);
-        // This function will be implemented when you create the assign permissions modal
     }
 </script>
 
-<!-- CSS untuk animasi modal -->
 <style>
     @keyframes modalSlideIn {
         from {

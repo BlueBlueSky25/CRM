@@ -1,5 +1,5 @@
 <!-- Menu Management Table with Fixed Actions -->
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
         <div>
             <h3 class="text-lg font-semibold text-gray-900">Menu Management</h3>
@@ -45,12 +45,9 @@
                             -
                         @endif
                     </td>
-                    <!-- Parent Menu Column -->
                     <td class="px-6 py-4 text-sm text-gray-600">
                         {{ $menu->parent?->nama_menu ?? '-' }}
                     </td>
-
-                    <!-- Actions Column -->
                     <td class="px-6 py-4 text-sm font-medium">
                         <div class="flex items-center space-x-2">
                             @if(auth()->user()->canAccess($currentMenuId, 'edit'))
@@ -78,6 +75,10 @@
             </tbody>
         </table>
     </div>
+    
+    <!-- Pagination langsung di dalam wrapper -->
+    <x-globalr.pagination :paginator="$menus" />
+    
 </div>
 
 <!-- Edit Menu Modal -->
@@ -144,7 +145,6 @@
     </div>
 </div>
 
-
 <!-- Add Menu Modal -->
 <div id="addMenuModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden animate-modal-in">
@@ -198,98 +198,71 @@
     </div>
 </div>
 
-<!-- JavaScript untuk Modal -->
 <script>
-    // Function to open edit menu modal
     function openEditMenuModal(menuId, menuName, route, icon, parentId = null, order = null) {
-    document.getElementById('editMenuId').value = menuId;
-    document.getElementById('editMenuName').value = menuName;
-    document.getElementById('editMenuRoute').value = route || '';
-    document.getElementById('editMenuIcon').value = icon || '';
-    document.getElementById('editMenuOrder').value = order || '';
-    
-    // SET PARENT ID - INI YANG PENTING!
-    const parentSelect = document.getElementById('editMenuParent');
-    parentSelect.value = parentId || '';
-    
-    // Update icon preview
-    const iconPreview = document.getElementById('iconPreview');
-    if (icon) {
-        iconPreview.className = icon;
-    } else {
-        iconPreview.className = 'text-gray-400';
+        document.getElementById('editMenuId').value = menuId;
+        document.getElementById('editMenuName').value = menuName;
+        document.getElementById('editMenuRoute').value = route || '';
+        document.getElementById('editMenuIcon').value = icon || '';
+        document.getElementById('editMenuOrder').value = order || '';
+        
+        const parentSelect = document.getElementById('editMenuParent');
+        parentSelect.value = parentId || '';
+        
+        const iconPreview = document.getElementById('iconPreview');
+        if (icon) {
+            iconPreview.className = icon;
+        } else {
+            iconPreview.className = 'text-gray-400';
+        }
+        
+        document.getElementById('editMenuModal').classList.remove('hidden');
     }
-    
-    document.getElementById('editMenuModal').classList.remove('hidden');
-}
 
-    // Function to close edit menu modal
     function closeEditMenuModal() {
         document.getElementById('editMenuModal').classList.add('hidden');
         document.getElementById('editMenuForm').reset();
         document.getElementById('iconPreview').className = 'text-gray-400';
     }
 
-    // Function to open add menu modal
     function openMenuModal() {
         document.getElementById('addMenuModal').classList.remove('hidden');
     }
 
-    // Function to close add menu modal
     function closeAddMenuModal() {
         document.getElementById('addMenuModal').classList.add('hidden');
         document.getElementById('addMenuForm').reset();
         document.getElementById('addIconPreview').className = 'text-gray-400';
     }
 
-    // Handle edit menu form submission
     document.getElementById('editMenuForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        
         const menuId = document.getElementById('editMenuId').value;
         const form = document.getElementById('editMenuForm');
-        form.action = `/menus/${menuId}`;  // Adjust this URL to match your Laravel route
+        form.action = `/menus/${menuId}`;
         form.submit();
     });
 
-    // Icon preview for edit modal
     document.getElementById('editMenuIcon').addEventListener('input', function(e) {
         const iconPreview = document.getElementById('iconPreview');
         const iconValue = e.target.value.trim();
-        
-        if (iconValue) {
-            iconPreview.className = iconValue;
-        } else {
-            iconPreview.className = 'text-gray-400';
-        }
+        iconPreview.className = iconValue || 'text-gray-400';
     });
 
-    // Icon preview for add modal
     document.getElementById('addMenuIcon').addEventListener('input', function(e) {
         const iconPreview = document.getElementById('addIconPreview');
         const iconValue = e.target.value.trim();
-        
-        if (iconValue) {
-            iconPreview.className = iconValue;
-        } else {
-            iconPreview.className = 'text-gray-400';
-        }
+        iconPreview.className = iconValue || 'text-gray-400';
     });
 
-    // Close modal when clicking outside
     document.getElementById('editMenuModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeEditMenuModal();
-        }
+        if (e.target === this) closeEditMenuModal();
     });
 
     document.getElementById('addMenuModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeAddMenuModal();
-        }
+        if (e.target === this) closeAddMenuModal();
     });
 
-    // Handle ESC key to close modals
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             closeEditMenuModal();
@@ -298,7 +271,6 @@
     });
 </script>
 
-<!-- CSS untuk animasi modal -->
 <style>
     @keyframes modalSlideIn {
         from {

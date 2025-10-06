@@ -167,7 +167,15 @@
                                     required>
                                     <option value="">Select role</option>
                                     @foreach($roles as $role)
-                                        <option value="{{ $role->role_id }}">{{ $role->role_name }}</option>
+                                        @php
+                                            $isSuperAdmin = auth()->user()->role->role_name === 'Superadmin' || auth()->user()->role->role_name === 'superadmin';
+                                            $isProtectedRole = in_array($role->role_name, ['Admin', 'Superadmin', 'admin', 'superadmin']);
+                                        @endphp
+                                        
+                                        {{-- Hanya tampilkan role Admin/Superadmin untuk Superadmin --}}
+                                        @if(!$isProtectedRole || $isSuperAdmin)
+                                            <option value="{{ $role->role_id }}">{{ $role->role_name }}</option>
+                                        @endif
                                     @endforeach
                                 </select>
                                 <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
@@ -320,4 +328,3 @@
             font-size: 14px;
         }
 </style>
-

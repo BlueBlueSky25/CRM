@@ -47,9 +47,9 @@
     
     <x-dashboard.nav />
 
-    <main>
+    <div>
         @yield('content')
-    </main>
+    </div>
 
     <x-dashboard.toast />
 

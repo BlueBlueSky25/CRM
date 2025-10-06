@@ -1,6 +1,6 @@
-<div class="pt-4 px-4 md:px-6 lg:px-6 max-w-7xl mx-auto">
+<div class="pt-2 px-4 md:px-6 lg:px-6 max-w-7xl mx-auto">
         <!-- KPI Cards with proper margins -->
-        <div class="mt-4 mb-2">
+        <div class="mt-2 mb-0">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 <!-- Total Users Card -->
                 <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">

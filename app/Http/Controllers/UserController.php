@@ -26,14 +26,6 @@ class UserController extends Controller
         return view('layout.user', compact('users', 'roles', 'provinces'));
     }
 
-    // public function create()
-    // {
-    //     $roles = Role::all();
-    //     $provinces = Province::orderBy('name')->get();
-        
-    //     return view('users.create', compact('roles', 'provinces'));
-    // }
-
 
 
    public function store(Request $request)

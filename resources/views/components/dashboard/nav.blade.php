@@ -8,7 +8,7 @@
                 </button>
 
                 <div class="flex-shrink-0 flex items-center">
-                    <img class="h-[130px] w-auto" src="{{ asset('img/LOGO LIXEN.png') }}" alt="Logo">
+                    <img class="h-8 w-auto" src="{{ asset('img/LOGO INOTAL UNTUK BG GELAP.png') }}" alt="Logo">
                 </div>
                 
             </div>

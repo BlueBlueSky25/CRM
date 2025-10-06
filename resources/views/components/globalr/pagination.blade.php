@@ -1,82 +1,82 @@
 @if ($paginator->hasPages())
-    <div id="pagination" class="bg-white px-6 py-4 border-t border-gray-200">
-        <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between px-6 py-4 bg-white border-t border-gray-200">
+        {{-- Info --}}
+        <div class="text-sm text-gray-700">
+            Menampilkan 
+            <span class="font-medium">{{ $paginator->firstItem() ?? 0 }}</span>
+            sampai 
+            <span class="font-medium">{{ $paginator->lastItem() ?? 0 }}</span>
+            dari 
+            <span class="font-medium">{{ $paginator->total() }}</span>
+            hasil
+        </div>
 
-            {{-- Info --}}
-            <div class="text-sm text-gray-700">
-                Menampilkan 
-                <span class="font-medium">{{ $paginator->firstItem() ?? 0 }}</span>
-                sampai 
-                <span class="font-medium">{{ $paginator->lastItem() ?? 0 }}</span>
-                dari 
-                <span class="font-medium">{{ $paginator->total() }}</span>
-                hasil
-            </div>
+        {{-- Pagination Links --}}
+        <div class="flex items-center space-x-1">
+            {{-- Previous --}}
+            @if ($paginator->onFirstPage())
+                <span class="px-3 py-2 text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">
+                    <i class="fas fa-chevron-left"></i>
+                </span>
+            @else
+                <a href="{{ $paginator->previousPageUrl() }}" 
+                   class="px-3 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-300 transition-all">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            @endif
 
-            {{-- Pagination Links --}}
-            <div class="flex space-x-1">
+            @php
+                $start = max(1, $paginator->currentPage() - 2);
+                $end = min($paginator->lastPage(), $paginator->currentPage() + 2);
+            @endphp
 
-                {{-- Previous Page Link --}}
-                @if ($paginator->onFirstPage())
-                    <span class="px-3 py-2 text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">
-                        <i class="fas fa-chevron-left"></i>
+            {{-- First page --}}
+            @if ($start > 1)
+                <a href="{{ $paginator->url(1) }}" 
+                   class="px-3 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-300 transition-all">
+                    1
+                </a>
+                @if ($start > 2)
+                    <span class="px-2 text-gray-400">...</span>
+                @endif
+            @endif
+
+            {{-- Page numbers --}}
+            @for ($page = $start; $page <= $end; $page++)
+                @if ($page == $paginator->currentPage())
+                    <span class="px-3 py-2 text-white bg-indigo-600 rounded-lg font-medium shadow-sm">
+                        {{ $page }}
                     </span>
                 @else
-                    <a href="{{ $paginator->previousPageUrl() }}" 
-                       class="px-3 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                        <i class="fas fa-chevron-left"></i>
+                    <a href="{{ $paginator->url($page) }}" 
+                       class="px-3 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-300 transition-all">
+                        {{ $page }}
                     </a>
                 @endif
+            @endfor
 
-                {{-- Page Links --}}
-                @php
-                    $currentPage = $paginator->currentPage();
-                    $lastPage = $paginator->lastPage();
-                    $adjacents = 2; // jumlah halaman sebelum/sesudah halaman aktif
-
-                    $start = max(1, $currentPage - $adjacents);
-                    $end = min($lastPage, $currentPage + $adjacents);
-                @endphp
-
-                {{-- Always show first page if not in range --}}
-                @if ($start > 1)
-                    <a href="{{ $paginator->url(1) }}" class="px-3 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">1</a>
-                    @if ($start > 2)
-                        <span class="px-2">...</span>
-                    @endif
+            {{-- Last page --}}
+            @if ($end < $paginator->lastPage())
+                @if ($end < $paginator->lastPage() - 1)
+                    <span class="px-2 text-gray-400">...</span>
                 @endif
+                <a href="{{ $paginator->url($paginator->lastPage()) }}" 
+                   class="px-3 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-300 transition-all">
+                    {{ $paginator->lastPage() }}
+                </a>
+            @endif
 
-                {{-- Numbered page links --}}
-                @for ($page = $start; $page <= $end; $page++)
-                    @if ($page == $currentPage)
-                        <span class="px-3 py-2 text-white bg-blue-600 border border-blue-600 rounded-lg">{{ $page }}</span>
-                    @else
-                        <a href="{{ $paginator->url($page) }}" class="px-3 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                            {{ $page }}
-                        </a>
-                    @endif
-                @endfor
-
-                {{-- Always show last page if not in range --}}
-                @if ($end < $lastPage)
-                    @if ($end < $lastPage - 1)
-                        <span class="px-2">...</span>
-                    @endif
-                    <a href="{{ $paginator->url($lastPage) }}" class="px-3 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">{{ $lastPage }}</a>
-                @endif
-
-                {{-- Next Page Link --}}
-                @if ($paginator->hasMorePages())
-                    <a href="{{ $paginator->nextPageUrl() }}" 
-                       class="px-3 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                        <i class="fas fa-chevron-right"></i>
-                    </a>
-                @else
-                    <span class="px-3 py-2 text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">
-                        <i class="fas fa-chevron-right"></i>
-                    </span>
-                @endif
-            </div>
+            {{-- Next --}}
+            @if ($paginator->hasMorePages())
+                <a href="{{ $paginator->nextPageUrl() }}" 
+                   class="px-3 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-300 transition-all">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            @else
+                <span class="px-3 py-2 text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">
+                    <i class="fas fa-chevron-right"></i>
+                </span>
+            @endif
         </div>
     </div>
 @endif
