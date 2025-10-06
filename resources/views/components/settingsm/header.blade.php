@@ -30,12 +30,6 @@
             </div>
 
             <div class="flex items-center space-x-4">
-                <!-- Back to Dashboard -->
-                <a href="{{ route('dashboard') }}" class="text-white hover:text-indigo-300 px-3 py-2 rounded-md text-sm font-medium transition duration-200 flex items-center space-x-2">
-                    <i class="fas fa-arrow-left text-sm"></i>
-                    <span class="hidden sm:inline">Back to Dashboard</span>
-                </a>
-
                 <!-- Notifications -->
                 <div class="relative">
                     <button class="text-white text-lg hover:text-indigo-300 transition-colors" onclick="toggleNotifications()">

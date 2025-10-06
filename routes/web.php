@@ -7,6 +7,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\CompanyChartController;
+use App\Http\Controllers\CalendarController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,11 +49,21 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/industri', fn() => view('layout.industri'))->name('industri');
 
     // ==========================
-    // Calendar (React Page khusus)
+    // Calendar Page (React)
     // ==========================
-    Route::get('/calendar/{any?}', function () {
-        return view('react'); // react.blade.php
-    })->where('any', '.*')->name('calendar');
+    Route::get('/calendar', function () {
+        return view('react'); // atau view('calendar') sesuai file blade kamu
+    })->name('calendar');
+
+    // ==========================
+    // Calendar API Routes
+    // ==========================
+    Route::prefix('api/calendar')->name('calendar.events.')->group(function () {
+        Route::get('/events', [CalendarController::class, 'index'])->name('index');
+        Route::post('/events', [CalendarController::class, 'store'])->name('store');
+        Route::put('/events/{id}', [CalendarController::class, 'update'])->name('update');
+        Route::delete('/events/{id}', [CalendarController::class, 'destroy'])->name('destroy');
+    });
 
     // ==========================
     // Search APIs (AJAX)
