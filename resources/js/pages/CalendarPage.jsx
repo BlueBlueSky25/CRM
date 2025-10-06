@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { enUS, id } from "date-fns/locale";
@@ -10,13 +11,15 @@ import axios from "axios";
 // ============================================
 // SETUP AXIOS DENGAN CSRF TOKEN
 // ============================================
-axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-axios.defaults.headers.common['Accept'] = 'application/json';
-axios.defaults.headers.common['Content-Type'] = 'application/json';
+axios.defaults.headers.common["X-CSRF-TOKEN"] = document
+    .querySelector('meta[name="csrf-token"]')
+    ?.getAttribute("content");
+    axios.defaults.headers.common["Accept"] = "application/json";
+    axios.defaults.headers.common["Content-Type"] = "application/json";
 
-const DnDCalendar = withDragAndDrop(Calendar);
+    const DnDCalendar = withDragAndDrop(Calendar);
 
-const locales = {
+    const locales = {
     "id-ID": id,
     "en-US": enUS,
     };
@@ -29,6 +32,60 @@ const locales = {
     locales,
     });
 
+    // ============================================
+    // COMPONENT MODAL (PORTAL)
+    // ============================================
+    function Modal({ children, onClose, zIndex = 10000 }) {
+    useEffect(() => {
+        const prevOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        const onKey = (e) => {
+        if (e.key === "Escape") onClose && onClose();
+        };
+        document.addEventListener("keydown", onKey);
+        return () => {
+        document.removeEventListener("keydown", onKey);
+        document.body.style.overflow = prevOverflow;
+        };
+    }, [onClose]);
+
+    return createPortal(
+        <div
+        onMouseDown={(e) => {
+            if (e.target === e.currentTarget) onClose && onClose();
+        }}
+        style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex,
+        }}
+        >
+        <div
+            onMouseDown={(e) => e.stopPropagation()}
+            style={{
+            backgroundColor: "white",
+            borderRadius: 8,
+            padding: 24,
+            width: "90%",
+            maxWidth: 500,
+            maxHeight: "90vh",
+            overflow: "auto",
+            }}
+        >
+            {children}
+        </div>
+        </div>,
+        document.body
+    );
+    }
+
+    // ============================================
+    // COMPONENT UTAMA
+    // ============================================
     export default function CalendarPage() {
     const [events, setEvents] = useState([]);
     const [showModal, setShowModal] = useState(false);
@@ -145,31 +202,43 @@ const locales = {
 
     // DELETE: Tampilkan popup konfirmasi
     const handleDeleteClick = () => {
-        setShowModal(false);
         setShowDeleteConfirm(true);
     };
 
     // DELETE: Proses delete setelah konfirmasi
     const confirmDelete = async () => {
-        if (!selectedEvent || !selectedEvent.id) {
-        alert("Error: Event tidak valid");
+        const idToDelete =
+        selectedEvent?.id ??
+        selectedEvent?._id ??
+        selectedEvent?.eventId ??
+        selectedEvent?.uid;
+
+        if (!idToDelete) {
+        alert("Error: Event tidak valid (tidak ditemukan id).");
+        console.log("selectedEvent saat delete:", selectedEvent);
         return;
         }
 
         try {
-        await axios.delete(`/api/calendar/events/${selectedEvent.id}`);
-        setEvents(events.filter((ev) => ev.id !== selectedEvent.id));
+        await axios.delete(`/api/calendar/events/${idToDelete}`);
+
+        setEvents((prev) =>
+            prev.filter((ev) => {
+            const evId = ev?.id ?? ev?._id ?? ev?.eventId ?? ev?.uid;
+            return evId !== idToDelete;
+            })
+        );
+
         alert("Event berhasil dihapus!");
         setShowDeleteConfirm(false);
+        setShowModal(false);
         resetForm();
         } catch (error) {
         console.error("DELETE ERROR:", error);
         let errorMsg = "Gagal menghapus event";
-        if (error.response?.status === 404) {
-            errorMsg = "Event tidak ditemukan";
-        } else if (error.response?.data?.message) {
+        if (error.response?.status === 404) errorMsg = "Event tidak ditemukan";
+        else if (error.response?.data?.message)
             errorMsg = error.response.data.message;
-        }
         alert(`ERROR: ${errorMsg}`);
         setShowDeleteConfirm(false);
         }
@@ -226,187 +295,143 @@ const locales = {
 
         {/* MODAL FORM */}
         {showModal && (
-            <div 
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 9999
+            <Modal
+            onClose={() => {
+                setShowModal(false);
+                resetForm();
             }}
+            zIndex={10001}
             >
-            <div 
-                style={{
-                backgroundColor: 'white',
-                borderRadius: '8px',
-                padding: '24px',
-                width: '90%',
-                maxWidth: '500px',
-                maxHeight: '90vh',
-                overflow: 'auto'
-                }}
-            >
-                <h3 className="text-xl font-bold mb-4">
+            <h3 className="text-xl font-bold mb-4">
                 {selectedEvent ? "Edit Event" : "Tambah Event"}
-                </h3>
+            </h3>
 
-                <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit}>
                 <div className="mb-4">
-                    <label className="block text-sm font-medium mb-1">Judul</label>
-                    <input
+                <label className="block text-sm font-medium mb-1">Judul</label>
+                <input
                     type="text"
                     className="w-full border border-gray-300 rounded px-3 py-2"
                     value={formData.title}
                     onChange={(e) =>
-                        setFormData({ ...formData, title: e.target.value })
+                    setFormData({ ...formData, title: e.target.value })
                     }
                     required
-                    />
+                />
                 </div>
 
                 <div className="mb-4">
-                    <label className="block text-sm font-medium mb-1">Mulai</label>
-                    <input
+                <label className="block text-sm font-medium mb-1">Mulai</label>
+                <input
                     type="datetime-local"
                     className="w-full border border-gray-300 rounded px-3 py-2"
                     value={formData.start}
                     onChange={(e) =>
-                        setFormData({ ...formData, start: e.target.value })
+                    setFormData({ ...formData, start: e.target.value })
                     }
                     required
-                    />
+                />
                 </div>
 
                 <div className="mb-4">
-                    <label className="block text-sm font-medium mb-1">Selesai</label>
-                    <input
+                <label className="block text-sm font-medium mb-1">Selesai</label>
+                <input
                     type="datetime-local"
                     className="w-full border border-gray-300 rounded px-3 py-2"
                     value={formData.end}
                     onChange={(e) =>
-                        setFormData({ ...formData, end: e.target.value })
+                    setFormData({ ...formData, end: e.target.value })
                     }
                     required
-                    />
+                />
                 </div>
 
                 <div className="mb-4">
-                    <label className="flex items-center">
+                <label className="flex items-center">
                     <input
-                        type="checkbox"
-                        className="mr-2"
-                        checked={formData.allDay}
-                        onChange={(e) =>
+                    type="checkbox"
+                    className="mr-2"
+                    checked={formData.allDay}
+                    onChange={(e) =>
                         setFormData({ ...formData, allDay: e.target.checked })
-                        }
+                    }
                     />
                     <span className="text-sm">All Day Event</span>
-                    </label>
+                </label>
                 </div>
 
                 <div className="mb-4">
-                    <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-medium mb-1">
                     Deskripsi (Opsional)
-                    </label>
-                    <textarea
+                </label>
+                <textarea
                     className="w-full border border-gray-300 rounded px-3 py-2"
                     rows="3"
                     value={formData.description}
                     onChange={(e) =>
-                        setFormData({ ...formData, description: e.target.value })
+                    setFormData({ ...formData, description: e.target.value })
                     }
-                    ></textarea>
+                ></textarea>
                 </div>
 
                 <div className="flex justify-between">
-                    <div>
+                <div>
                     {selectedEvent && (
-                        <button
+                    <button
                         type="button"
                         onClick={handleDeleteClick}
                         className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                        >
+                    >
                         Hapus
-                        </button>
+                    </button>
                     )}
-                    </div>
-                    <div className="flex gap-2">
+                </div>
+                <div className="flex gap-2">
                     <button
-                        type="button"
-                        onClick={() => {
+                    type="button"
+                    onClick={() => {
                         setShowModal(false);
                         resetForm();
-                        }}
-                        className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
-                    >
-                        Batal
-                    </button>
-                    <button
-                        type="submit"
-                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                    >
-                        Simpan
-                    </button>
-                    </div>
-                </div>
-                </form>
-            </div>
-            </div>
-        )}
-
-        {/* MODAL DELETE CONFIRMATION */}
-        {showDeleteConfirm && (
-            <div 
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 10000
-            }}
-            >
-            <div 
-                style={{
-                backgroundColor: 'white',
-                borderRadius: '8px',
-                padding: '24px',
-                width: '90%',
-                maxWidth: '400px'
-                }}
-            >
-                <h3 className="text-xl font-bold mb-4">Konfirmasi Hapus</h3>
-                <p className="mb-6">
-                Apakah Anda yakin ingin menghapus event <strong>"{selectedEvent?.title}"</strong>?
-                </p>
-                <div className="flex justify-end gap-2">
-                <button
-                    onClick={() => {
-                    setShowDeleteConfirm(false);
-                    setShowModal(true);
                     }}
                     className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
-                >
+                    >
                     Batal
+                    </button>
+                    <button
+                    type="submit"
+                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                    >
+                    Simpan
+                    </button>
+                </div>
+                </div>
+            </form>
+            </Modal>
+        )}
+
+        {/* MODAL DELETE CONFIRM */}
+        {showDeleteConfirm && (
+            <Modal onClose={() => setShowDeleteConfirm(false)} zIndex={11000}>
+            <h3 className="text-xl font-bold mb-4">Konfirmasi Hapus</h3>
+            <p className="mb-6">
+                Apakah Anda yakin ingin menghapus event{" "}
+                <strong>"{selectedEvent?.title}"</strong>?
+            </p>
+            <div className="flex justify-end gap-2">
+                <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+                >
+                Batal
                 </button>
                 <button
-                    onClick={confirmDelete}
-                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                onClick={confirmDelete}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
                 >
-                    Ya, Hapus
+                Ya, Hapus
                 </button>
-                </div>
             </div>
-            </div>
+            </Modal>
         )}
         </div>
     );

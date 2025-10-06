@@ -8,7 +8,7 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\CompanyChartController;
 use App\Http\Controllers\CalendarController;
-
+use App\Http\Controllers\CompanyController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -42,11 +42,8 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/dashboard', [CompanyChartController::class, 'index'])
         ->name('dashboard');
 
-    // ==========================
-    // Static Pages (Blade)
-    // ==========================
     Route::get('/customers', fn() => view('layout.customers'))->name('customers');
-    Route::get('/industri', fn() => view('layout.industri'))->name('industri');
+    Route::get('/company', [CompanyController::class, 'index'])->name('company');
 
     // ==========================
     // Calendar Page (React)
@@ -108,6 +105,13 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::post('/marketing/sales', [SalesController::class, 'store'])->name('marketing.sales.store');
     Route::put('/marketing/sales/{id}', [SalesController::class, 'update'])->name('marketing.sales.update');
     Route::delete('/marketing/sales/{id}', [SalesController::class, 'destroy'])->name('marketing.sales.destroy');
+
+    // ==========================
+    // CRUD Operations - COMPANY
+    // ==========================
+    Route::post('/companies', [CompanyController::class, 'store'])->name('companies.store');
+    Route::put('/companies/{id}', [CompanyController::class, 'update'])->name('companies.update');
+    Route::delete('/companies/{id}', [CompanyController::class, 'destroy'])->name('companies.destroy');
 
     // ==========================
     // Catch-all React (HARUS PALING BAWAH)

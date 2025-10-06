@@ -14,8 +14,8 @@ class Company extends Model
         'company_name', 'company_type_id', 'tier', 'description', 'status'
     ];
 
-    public function type()
+    public function companyType()
     {
-        return $this->belongsTo(CompanyType::class, 'company_type_id', 'company_type_id');
+        return $this->belongsTo(CompanyType::class, 'company_type_id');
     }
 }
