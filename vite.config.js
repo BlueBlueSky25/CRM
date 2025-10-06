@@ -7,15 +7,15 @@ import path from 'path'
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: ['resources/css/app.css', 'resources/js/app.jsx'], // ✅ app.jsx bukan app.js
             refresh: true,
         }),
-        react(),         // ✅ Tambah plugin React
+        react(),
         tailwindcss(),
     ],
     resolve: {
         alias: {
-            '@': path.resolve(__dirname, 'resources/js'), // ✅ Alias supaya bisa import "@/components/ElectricBorder"
+            '@': path.resolve(__dirname, 'resources/js'),
         },
     },
     server: {

@@ -39,7 +39,7 @@ function hexToRgba(hex, alpha = 1) {
         if (dyAnims.length >= 2) {
         dyAnims[0].setAttribute('values', `${height}; 0`);
         dyAnims[1].setAttribute('values', `0; -${height}`);
-        }
+        }''
 
         const dxAnims = Array.from(svg.querySelectorAll('feOffset > animate[attributeName="dx"]'));
         if (dxAnims.length >= 2) {

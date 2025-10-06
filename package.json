@@ -7,7 +7,7 @@
         "dev": "vite"
     },
     "devDependencies": {
-        "@tailwindcss/vite": "^4.0.0",
+        "@tailwindcss/vite": "^4.1.14",
         "axios": "^1.11.0",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^2.0.0",
@@ -19,8 +19,13 @@
         "@vitejs/plugin-react": "^5.0.4",
         "chart.js": "^4.5.0",
         "chartjs": "^0.3.24",
+        "date-fns": "^4.1.0",
         "flowbite": "^3.1.2",
         "react": "^19.2.0",
-        "react-dom": "^19.2.0"
+        "react-big-calendar": "^1.19.4",
+        "react-dnd": "^16.0.1",
+        "react-dnd-html5-backend": "^16.0.1",
+        "react-dom": "^19.2.0",
+        "react-router-dom": "^7.9.3"
     }
 }
