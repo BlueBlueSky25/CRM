@@ -1,4 +1,4 @@
-@extends('main')
+@extends('layout.main')
 @section('title','CRM Dashboard')
 
 @section('content')
@@ -10,27 +10,27 @@
 
     <!-- Charts Section-->
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8 px-4 sm:px-6 lg:px-8">
-        <x-dashboard.distribusigeografis />
-        <x-dashboard.kategoriindustri :chart-data="$chartCompanyData" />
+        <x-dashboard.chart.distribusigeografis />
+        <x-dashboard.chart.kategoriindustri :chart-data="$chartCompanyData" />
     </div>
 
     <!-- Status Proposal & Trend -->
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8 px-4 sm:px-6 lg:px-8">
-        <x-dashboard.statusproposal />
-        <x-dashboard.trendbulanan />
+        <x-dashboard.chart.statusproposal />
+        <x-dashboard.kpi.trendbulanan />
     </div>
 
     <!-- Communication & Follow-up Reminders -->
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8 px-4 sm:px-6 lg:px-8">
-        <x-dashboard.folreminder />
-        <x-dashboard.komunikasi />
-        <x-dashboard.performawilayah />
+        <x-dashboard.kpi.folreminder />
+        <x-dashboard.kpi.komunikasi />
+        <x-dashboard.chart.performawilayah />
     </div>
 
     <!-- Aktivitas Terbaru & Quick Actions -->
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 px-4 sm:px-6 lg:px-8">
-        <x-dashboard.aktivitasterbaru />
-        <x-dashboard.action />
+        <x-dashboard.kpi.aktivitasterbaru />
+        <x-dashboard.action.action />
     </div>
 </div>
 

@@ -62,7 +62,7 @@ class RoleController extends Controller
             }
         }
         
-        return view('layout.role', compact('roles', 'users', 'menus', 'rolePermissions'));
+        return view('pages.role', compact('roles', 'users', 'menus', 'rolePermissions'));
     }
 
     /**

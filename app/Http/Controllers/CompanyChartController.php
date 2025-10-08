@@ -10,7 +10,7 @@ class CompanyChartController extends Controller
 {
     public function index()
     {
-        $companies = Company::with('type')->get();
+        $companies = Company::with('companyType')->get();
         $companyTypes = CompanyType::all();
 
         // Convert Collections to arrays untuk JavaScript
@@ -64,6 +64,6 @@ class CompanyChartController extends Controller
         // Debug: uncomment ini jika masih ada masalah
         // dd($chartCompanyData);
 
-        return view('layout.dashboard', compact('companies', 'companyTypes', 'chartData', 'chartCompanyData'));
+        return view('pages.dashboard', compact('companies', 'companyTypes', 'chartData', 'chartCompanyData'));
     }
 }

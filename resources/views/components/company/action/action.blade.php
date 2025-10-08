@@ -1,3 +1,5 @@
+
+@props(['companies','types'])
 <!-- Quick Actions Section -->
 <div class="fade-in">
     <div class="flex justify-between items-center mb-2">

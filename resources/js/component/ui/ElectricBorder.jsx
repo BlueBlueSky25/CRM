@@ -1,4 +1,4 @@
-import { useEffect, useId, useLayoutEffect, useRef } from 'react';
+import { useEffect, useId, usepagesEffect, useRef } from 'react';
 
 function hexToRgba(hex, alpha = 1) {
     if (!hex) return `rgba(0,0,0,${alpha})`;
@@ -80,7 +80,7 @@ function hexToRgba(hex, alpha = 1) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [speed, chaos]);
 
-    useLayoutEffect(() => {
+    usepagesEffect(() => {
         if (!rootRef.current) return;
         const ro = new ResizeObserver(() => updateAnim());
         ro.observe(rootRef.current);

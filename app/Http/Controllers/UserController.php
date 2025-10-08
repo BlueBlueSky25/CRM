@@ -23,7 +23,7 @@ class UserController extends Controller
         
 
         
-        return view('layout.user', compact('users', 'roles', 'provinces'));
+        return view('pages.user', compact('users', 'roles', 'provinces'));
     }
 
 

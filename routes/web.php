@@ -42,14 +42,14 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/dashboard', [CompanyChartController::class, 'index'])
         ->name('dashboard');
 
-    Route::get('/customers', fn() => view('layout.customers'))->name('customers');
+    Route::get('/customers', fn() => view('pages.customers'))->name('customers');
     Route::get('/company', [CompanyController::class, 'index'])->name('company');
 
     // ==========================
     // Calendar Page (React)
     // ==========================
     Route::get('/calendar', function () {
-        return view('react'); // atau view('calendar') sesuai file blade kamu
+        return view('layout.react'); 
     })->name('calendar');
 
     // ==========================
@@ -75,7 +75,9 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/user', [UserController::class, 'index'])->name('user');
     Route::get('/role', [RoleController::class, 'index'])->name('role'); 
     Route::get('/menu', [MenuController::class, 'index'])->name('menu');
-
+    Route::get('/pic', fn() => view('pages.pic'))->name('pic');
+    Route::get('/salesvisit', fn() => view('pages.salesvisit'))->name('salesvisit');
+    
     // ==========================
     // CRUD - Users
     // ==========================
@@ -116,7 +118,8 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // ==========================
     // Catch-all React (HARUS PALING BAWAH)
     // ==========================
-    Route::get('/{any}', function () {
-        return view('react');
-    })->where('any', '.*');
+
+    // Route::get('/{any}', function () {
+    //     return view('react');
+    // })->where('any', '.*');
 });

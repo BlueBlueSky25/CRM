@@ -14,79 +14,80 @@ import axios from "axios";
 axios.defaults.headers.common["X-CSRF-TOKEN"] = document
     .querySelector('meta[name="csrf-token"]')
     ?.getAttribute("content");
-    axios.defaults.headers.common["Accept"] = "application/json";
-    axios.defaults.headers.common["Content-Type"] = "application/json";
+axios.defaults.headers.common["Accept"] = "application/json";
+axios.defaults.headers.common["Content-Type"] = "application/json";
 
-    const DnDCalendar = withDragAndDrop(Calendar);
+const DnDCalendar = withDragAndDrop(Calendar);
 
-    const locales = {
+const locales = {
     "id-ID": id,
     "en-US": enUS,
-    };
+};
 
-    const localizer = dateFnsLocalizer({
+const localizer = dateFnsLocalizer({
     format,
     parse,
     startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
     getDay,
     locales,
-    });
+});
 
-    // ============================================
-    // COMPONENT MODAL (PORTAL)
-    // ============================================
-    function Modal({ children, onClose, zIndex = 10000 }) {
+// ============================================
+// COMPONENT MODAL (PORTAL)
+// ============================================
+function Modal({ children, onClose, zIndex = 10000 }) {
     useEffect(() => {
         const prevOverflow = document.body.style.overflow;
         document.body.style.overflow = "hidden";
         const onKey = (e) => {
-        if (e.key === "Escape") onClose && onClose();
+            if (e.key === "Escape") onClose && onClose();
         };
         document.addEventListener("keydown", onKey);
         return () => {
-        document.removeEventListener("keydown", onKey);
-        document.body.style.overflow = prevOverflow;
+            document.removeEventListener("keydown", onKey);
+            document.body.style.overflow = prevOverflow;
         };
     }, [onClose]);
 
     return createPortal(
         <div
-        onMouseDown={(e) => {
-            if (e.target === e.currentTarget) onClose && onClose();
-        }}
-        style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex,
-        }}
-        >
-        <div
-            onMouseDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => {
+                if (e.target === e.currentTarget) onClose && onClose();
+            }}
             style={{
-            backgroundColor: "white",
-            borderRadius: 8,
-            padding: 24,
-            width: "90%",
-            maxWidth: 500,
-            maxHeight: "90vh",
-            overflow: "auto",
+                position: "fixed",
+                inset: 0,
+                backgroundColor: "rgba(0, 0, 0, 0.6)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex,
             }}
         >
-            {children}
-        </div>
+            <div
+                onMouseDown={(e) => e.stopPropagation()}
+                style={{
+                    backgroundColor: "white",
+                    borderRadius: 8,
+                    padding: 24,
+                    width: "90%",
+                    maxWidth: 500,
+                    maxHeight: "90vh",
+                    overflow: "auto",
+                    position: "relative",
+                }}
+            >
+                {children}
+            </div>
         </div>,
         document.body
     );
-    }
+}
 
-    // ============================================
-    // COMPONENT UTAMA
-    // ============================================
-    export default function CalendarPage() {
+// ============================================
+// COMPONENT UTAMA
+// ============================================
+export default function CalendarPage() {
     const [events, setEvents] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -106,16 +107,16 @@ axios.defaults.headers.common["X-CSRF-TOKEN"] = document
 
     const fetchEvents = async () => {
         try {
-        const response = await axios.get("/api/calendar/events");
-        const formattedEvents = response.data.map((event) => ({
-            ...event,
-            start: new Date(event.start),
-            end: new Date(event.end),
-        }));
-        setEvents(formattedEvents);
+            const response = await axios.get("/api/calendar/events");
+            const formattedEvents = response.data.map((event) => ({
+                ...event,
+                start: new Date(event.start),
+                end: new Date(event.end),
+            }));
+            setEvents(formattedEvents);
         } catch (error) {
-        console.error("Error fetching events:", error);
-        setEvents([]);
+            console.error("Error fetching events:", error);
+            setEvents([]);
         }
     };
 
@@ -123,11 +124,11 @@ axios.defaults.headers.common["X-CSRF-TOKEN"] = document
     const handleSelectSlot = ({ start, end }) => {
         setSelectedEvent(null);
         setFormData({
-        title: "",
-        start: start.toISOString().slice(0, 16),
-        end: end.toISOString().slice(0, 16),
-        allDay: false,
-        description: "",
+            title: "",
+            start: start.toISOString().slice(0, 16),
+            end: end.toISOString().slice(0, 16),
+            allDay: false,
+            description: "",
         });
         setShowModal(true);
     };
@@ -137,11 +138,11 @@ axios.defaults.headers.common["X-CSRF-TOKEN"] = document
         console.log("Selected event:", event);
         setSelectedEvent(event);
         setFormData({
-        title: event.title,
-        start: new Date(event.start).toISOString().slice(0, 16),
-        end: new Date(event.end).toISOString().slice(0, 16),
-        allDay: event.allDay || false,
-        description: event.description || "",
+            title: event.title,
+            start: new Date(event.start).toISOString().slice(0, 16),
+            end: new Date(event.end).toISOString().slice(0, 16),
+            allDay: event.allDay || false,
+            description: event.description || "",
         });
         setShowModal(true);
     };
@@ -151,52 +152,52 @@ axios.defaults.headers.common["X-CSRF-TOKEN"] = document
         e.preventDefault();
 
         try {
-        if (selectedEvent) {
-            // UPDATE
-            const response = await axios.put(
-            `/api/calendar/events/${selectedEvent.id}`,
-            formData
-            );
-            setEvents(
-            events.map((ev) =>
-                ev.id === selectedEvent.id
-                ? {
-                    ...response.data,
-                    start: new Date(response.data.start),
-                    end: new Date(response.data.end),
-                    }
-                : ev
-            )
-            );
-            alert("Event berhasil diupdate!");
-        } else {
-            // CREATE
-            const response = await axios.post("/api/calendar/events", formData);
-            setEvents([
-            ...events,
-            {
-                ...response.data,
-                start: new Date(response.data.start),
-                end: new Date(response.data.end),
-            },
-            ]);
-            alert("Event berhasil ditambahkan!");
-        }
+            if (selectedEvent) {
+                // UPDATE
+                const response = await axios.put(
+                    `/api/calendar/events/${selectedEvent.id}`,
+                    formData
+                );
+                setEvents(
+                    events.map((ev) =>
+                        ev.id === selectedEvent.id
+                            ? {
+                                  ...response.data,
+                                  start: new Date(response.data.start),
+                                  end: new Date(response.data.end),
+                              }
+                            : ev
+                    )
+                );
+                alert("Event berhasil diupdate!");
+            } else {
+                // CREATE
+                const response = await axios.post("/api/calendar/events", formData);
+                setEvents([
+                    ...events,
+                    {
+                        ...response.data,
+                        start: new Date(response.data.start),
+                        end: new Date(response.data.end),
+                    },
+                ]);
+                alert("Event berhasil ditambahkan!");
+            }
 
-        setShowModal(false);
-        resetForm();
+            setShowModal(false);
+            resetForm();
         } catch (error) {
-        console.error("Error saving event:", error);
-        let errorMsg = "Gagal menyimpan event";
-        if (error.response?.status === 419) {
-            errorMsg = "CSRF Token tidak valid. Refresh halaman dan coba lagi.";
-        } else if (error.response?.data?.message) {
-            errorMsg = error.response.data.message;
-        } else if (error.response?.data?.errors) {
-            const errors = Object.values(error.response.data.errors).flat();
-            errorMsg = errors.join(", ");
-        }
-        alert(`ERROR: ${errorMsg}`);
+            console.error("Error saving event:", error);
+            let errorMsg = "Gagal menyimpan event";
+            if (error.response?.status === 419) {
+                errorMsg = "CSRF Token tidak valid. Refresh halaman dan coba lagi.";
+            } else if (error.response?.data?.message) {
+                errorMsg = error.response.data.message;
+            } else if (error.response?.data?.errors) {
+                const errors = Object.values(error.response.data.errors).flat();
+                errorMsg = errors.join(", ");
+            }
+            alert(`ERROR: ${errorMsg}`);
         }
     };
 
@@ -208,231 +209,260 @@ axios.defaults.headers.common["X-CSRF-TOKEN"] = document
     // DELETE: Proses delete setelah konfirmasi
     const confirmDelete = async () => {
         const idToDelete =
-        selectedEvent?.id ??
-        selectedEvent?._id ??
-        selectedEvent?.eventId ??
-        selectedEvent?.uid;
+            selectedEvent?.id ??
+            selectedEvent?._id ??
+            selectedEvent?.eventId ??
+            selectedEvent?.uid;
 
         if (!idToDelete) {
-        alert("Error: Event tidak valid (tidak ditemukan id).");
-        console.log("selectedEvent saat delete:", selectedEvent);
-        return;
+            alert("Error: Event tidak valid (tidak ditemukan id).");
+            console.log("selectedEvent saat delete:", selectedEvent);
+            return;
         }
 
         try {
-        await axios.delete(`/api/calendar/events/${idToDelete}`);
+            await axios.delete(`/api/calendar/events/${idToDelete}`);
 
-        setEvents((prev) =>
-            prev.filter((ev) => {
-            const evId = ev?.id ?? ev?._id ?? ev?.eventId ?? ev?.uid;
-            return evId !== idToDelete;
-            })
-        );
+            setEvents((prev) =>
+                prev.filter((ev) => {
+                    const evId = ev?.id ?? ev?._id ?? ev?.eventId ?? ev?.uid;
+                    return evId !== idToDelete;
+                })
+            );
 
-        alert("Event berhasil dihapus!");
-        setShowDeleteConfirm(false);
-        setShowModal(false);
-        resetForm();
+            alert("Event berhasil dihapus!");
+            setShowDeleteConfirm(false);
+            setShowModal(false);
+            resetForm();
         } catch (error) {
-        console.error("DELETE ERROR:", error);
-        let errorMsg = "Gagal menghapus event";
-        if (error.response?.status === 404) errorMsg = "Event tidak ditemukan";
-        else if (error.response?.data?.message)
-            errorMsg = error.response.data.message;
-        alert(`ERROR: ${errorMsg}`);
-        setShowDeleteConfirm(false);
+            console.error("DELETE ERROR:", error);
+            let errorMsg = "Gagal menghapus event";
+            if (error.response?.status === 404) errorMsg = "Event tidak ditemukan";
+            else if (error.response?.data?.message)
+                errorMsg = error.response.data.message;
+            alert(`ERROR: ${errorMsg}`);
+            setShowDeleteConfirm(false);
         }
     };
 
     // DRAG & DROP: Pindah atau resize event
     const moveEvent = async ({ event, start, end }) => {
         try {
-        await axios.put(`/api/calendar/events/${event.id}`, {
-            start: start.toISOString(),
-            end: end.toISOString(),
-        });
+            await axios.put(`/api/calendar/events/${event.id}`, {
+                start: start.toISOString(),
+                end: end.toISOString(),
+            });
 
-        const updatedEvents = events.map((e) =>
-            e.id === event.id ? { ...e, start, end } : e
-        );
-        setEvents(updatedEvents);
+            const updatedEvents = events.map((e) =>
+                e.id === event.id ? { ...e, start, end } : e
+            );
+            setEvents(updatedEvents);
         } catch (error) {
-        console.error("Error moving event:", error);
-        alert("Gagal memindahkan event");
-        fetchEvents();
+            console.error("Error moving event:", error);
+            alert("Gagal memindahkan event");
+            fetchEvents();
         }
     };
 
     const resetForm = () => {
         setFormData({
-        title: "",
-        start: "",
-        end: "",
-        allDay: false,
-        description: "",
+            title: "",
+            start: "",
+            end: "",
+            allDay: false,
+            description: "",
         });
         setSelectedEvent(null);
     };
 
     return (
         <div className="p-6">
-        <h2 className="text-2xl font-bold mb-4">Kalender CRM</h2>
+            <h2 className="text-2xl font-bold mb-4">Kalender CRM</h2>
 
-        <DnDCalendar
-            localizer={localizer}
-            events={events}
-            startAccessor="start"
-            endAccessor="end"
-            style={{ height: 600 }}
-            selectable
-            resizable
-            onSelectSlot={handleSelectSlot}
-            onSelectEvent={handleSelectEvent}
-            onEventDrop={moveEvent}
-            onEventResize={moveEvent}
-            views={["month", "week", "day", "agenda"]}
-        />
+            <DnDCalendar
+                localizer={localizer}
+                events={events}
+                startAccessor="start"
+                endAccessor="end"
+                style={{ height: 600 }}
+                selectable
+                resizable
+                onSelectSlot={handleSelectSlot}
+                onSelectEvent={handleSelectEvent}
+                onEventDrop={moveEvent}
+                onEventResize={moveEvent}
+                views={["month", "week", "day", "agenda"]}
+            />
 
-        {/* MODAL FORM */}
-        {showModal && (
-            <Modal
-            onClose={() => {
-                setShowModal(false);
-                resetForm();
-            }}
-            zIndex={10001}
-            >
-            <h3 className="text-xl font-bold mb-4">
-                {selectedEvent ? "Edit Event" : "Tambah Event"}
-            </h3>
-
-            <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Judul</label>
-                <input
-                    type="text"
-                    className="w-full border border-gray-300 rounded px-3 py-2"
-                    value={formData.title}
-                    onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
-                    }
-                    required
-                />
-                </div>
-
-                <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Mulai</label>
-                <input
-                    type="datetime-local"
-                    className="w-full border border-gray-300 rounded px-3 py-2"
-                    value={formData.start}
-                    onChange={(e) =>
-                    setFormData({ ...formData, start: e.target.value })
-                    }
-                    required
-                />
-                </div>
-
-                <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Selesai</label>
-                <input
-                    type="datetime-local"
-                    className="w-full border border-gray-300 rounded px-3 py-2"
-                    value={formData.end}
-                    onChange={(e) =>
-                    setFormData({ ...formData, end: e.target.value })
-                    }
-                    required
-                />
-                </div>
-
-                <div className="mb-4">
-                <label className="flex items-center">
-                    <input
-                    type="checkbox"
-                    className="mr-2"
-                    checked={formData.allDay}
-                    onChange={(e) =>
-                        setFormData({ ...formData, allDay: e.target.checked })
-                    }
-                    />
-                    <span className="text-sm">All Day Event</span>
-                </label>
-                </div>
-
-                <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">
-                    Deskripsi (Opsional)
-                </label>
-                <textarea
-                    className="w-full border border-gray-300 rounded px-3 py-2"
-                    rows="3"
-                    value={formData.description}
-                    onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                    }
-                ></textarea>
-                </div>
-
-                <div className="flex justify-between">
-                <div>
-                    {selectedEvent && (
-                    <button
-                        type="button"
-                        onClick={handleDeleteClick}
-                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                    >
-                        Hapus
-                    </button>
-                    )}
-                </div>
-                <div className="flex gap-2">
-                    <button
-                    type="button"
-                    onClick={() => {
+            {/* MODAL FORM */}
+            {showModal && (
+                <Modal
+                    onClose={() => {
                         setShowModal(false);
                         resetForm();
                     }}
-                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
-                    >
-                    Batal
-                    </button>
-                    <button
-                    type="submit"
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                    >
-                    Simpan
-                    </button>
-                </div>
-                </div>
-            </form>
-            </Modal>
-        )}
+                    zIndex={10001}
+                >
+                    <h3 className="text-xl font-bold mb-4">
+                        {selectedEvent ? "Edit Event" : "Tambah Event"}
+                    </h3>
 
-        {/* MODAL DELETE CONFIRM */}
-        {showDeleteConfirm && (
-            <Modal onClose={() => setShowDeleteConfirm(false)} zIndex={11000}>
-            <h3 className="text-xl font-bold mb-4">Konfirmasi Hapus</h3>
-            <p className="mb-6">
-                Apakah Anda yakin ingin menghapus event{" "}
-                <strong>"{selectedEvent?.title}"</strong>?
-            </p>
-            <div className="flex justify-end gap-2">
-                <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
-                >
-                Batal
-                </button>
-                <button
-                onClick={confirmDelete}
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                >
-                Ya, Hapus
-                </button>
-            </div>
-            </Modal>
-        )}
+                    <form onSubmit={handleSubmit}>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-1">Judul</label>
+                            <input
+                                type="text"
+                                className="w-full border border-gray-300 rounded px-3 py-2"
+                                value={formData.title}
+                                onChange={(e) =>
+                                    setFormData({ ...formData, title: e.target.value })
+                                }
+                                required
+                            />
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-1">Mulai</label>
+                            <input
+                                type="datetime-local"
+                                className="w-full border border-gray-300 rounded px-3 py-2"
+                                value={formData.start}
+                                onChange={(e) =>
+                                    setFormData({ ...formData, start: e.target.value })
+                                }
+                                required
+                            />
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-1">Selesai</label>
+                            <input
+                                type="datetime-local"
+                                className="w-full border border-gray-300 rounded px-3 py-2"
+                                value={formData.end}
+                                onChange={(e) =>
+                                    setFormData({ ...formData, end: e.target.value })
+                                }
+                                required
+                            />
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="flex items-center">
+                                <input
+                                    type="checkbox"
+                                    className="mr-2"
+                                    checked={formData.allDay}
+                                    onChange={(e) =>
+                                        setFormData({ ...formData, allDay: e.target.checked })
+                                    }
+                                />
+                                <span className="text-sm">All Day Event</span>
+                            </label>
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-1">
+                                Deskripsi (Opsional)
+                            </label>
+                            <textarea
+                                className="w-full border border-gray-300 rounded px-3 py-2"
+                                rows="3"
+                                value={formData.description}
+                                onChange={(e) =>
+                                    setFormData({ ...formData, description: e.target.value })
+                                }
+                            ></textarea>
+                        </div>
+
+                        <div className="flex justify-between">
+                            <div>
+                                {selectedEvent && (
+                                    <button
+                                        type="button"
+                                        onClick={handleDeleteClick}
+                                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                                    >
+                                        Hapus
+                                    </button>
+                                )}
+                            </div>
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowModal(false);
+                                        resetForm();
+                                    }}
+                                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                                >
+                                    Simpan
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </Modal>
+            )}
+
+            {/* MODAL DELETE CONFIRM - FIXED VERSION */}
+            {showDeleteConfirm &&
+                createPortal(
+                    <div
+                        onClick={(e) => {
+                            if (e.target === e.currentTarget) setShowDeleteConfirm(false);
+                        }}
+                        style={{
+                            position: "fixed",
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: "rgba(0, 0, 0, 0.6)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            zIndex: 99999,
+                        }}
+                    >
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            style={{
+                                backgroundColor: "white",
+                                borderRadius: 8,
+                                padding: 24,
+                                maxWidth: 400,
+                                width: "90%",
+                            }}
+                        >
+                            <h3 className="text-xl font-bold mb-4">Konfirmasi Hapus</h3>
+                            <p className="mb-6">
+                                Apakah Anda yakin ingin menghapus event{" "}
+                                <strong>"{selectedEvent?.title}"</strong>?
+                            </p>
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    onClick={() => setShowDeleteConfirm(false)}
+                                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={confirmDelete}
+                                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                                >
+                                    Ya, Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </div>,
+                    document.body
+                )}
         </div>
     );
 }

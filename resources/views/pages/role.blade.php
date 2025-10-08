@@ -1,4 +1,4 @@
-@extends('settings')
+@extends('layout.settings')
 @section('title','Role-Setting')
 
 @section('content')

@@ -13,7 +13,7 @@ class MenuController extends Controller
         $menus = Menu::with(['roles', 'parent'])->orderBy('order', 'asc')->paginate(5);
         $roles = Role::all();
         
-        return view('layout.menu', compact('menus', 'roles'));
+        return view('pages.menu', compact('menus', 'roles'));
     }
 
     public function store(Request $request)

@@ -25,7 +25,7 @@ class SalesController extends Controller
         $currentMenuId = view()->shared('currentMenuId', null);
         $provinces = Province::orderBy('name')->get();
 
-        return view('layout.marketing', [
+        return view('pages.marketing', [
             'salesUsers' => $salesUsers,
             'salesRole' => $salesRole,
             'provinces' => $provinces,

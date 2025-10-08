@@ -150,7 +150,7 @@
     </div>
     
     <!-- Pagination langsung di dalam wrapper -->
-    <x-globalr.pagination :paginator="$users" />
+    <x-globals.pagination :paginator="$users" />
     
 </div>
 

@@ -77,7 +77,7 @@
     </div>
     
     <!-- Pagination langsung di dalam wrapper -->
-    <x-globalr.pagination :paginator="$menus" />
+    <x-globals.pagination :paginator="$menus" />
     
 </div>
 

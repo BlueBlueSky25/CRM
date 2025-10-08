@@ -85,7 +85,7 @@
     </div>
     
     <!-- Pagination langsung di dalam wrapper -->
-    <x-globalr.pagination :paginator="$roles" />
+    <x-globals.pagination :paginator="$roles" />
     
 </div>
 

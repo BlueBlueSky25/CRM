@@ -1,4 +1,4 @@
-@extends('main')
+@extends('layout.main')
 @section('title','chart')
 @section('content')
 <!DOCTYPE html>

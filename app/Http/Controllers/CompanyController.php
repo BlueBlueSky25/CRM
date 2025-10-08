@@ -12,7 +12,7 @@ class CompanyController extends Controller
     {
         $companies = Company::with('companyType')->paginate(5);
         $types = CompanyType::where('is_active', true)->get();
-        return view('layout.company', compact('companies', 'types'));
+        return view('pages.company', compact('companies', 'types'));
     }
 
     public function store(Request $request)
