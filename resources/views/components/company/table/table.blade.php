@@ -1,4 +1,3 @@
-{{-- FILE: resources/views/components/company/table/table.blade.php --}}
 @props(['companies','types'])
 
 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden fade-in">
@@ -98,9 +97,9 @@
                         Nama Perusahaan <span style="color: #ef4444;">*</span>
                     </label>
                     <input type="text" 
-                           name="company_name" 
-                           style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem 1rem; font-size: 0.875rem;" 
-                           required>
+                        name="company_name" 
+                        style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem 1rem; font-size: 0.875rem;" 
+                        required>
                 </div>
                 
                 <!-- Jenis -->
@@ -123,10 +122,14 @@
                     <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
                         Tier
                     </label>
-                    <input type="text" 
-                           name="tier" 
-                           style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem 1rem; font-size: 0.875rem;" 
-                           placeholder="Contoh: A, B, C">
+                    <select name="tier" 
+                            style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem 1rem; font-size: 0.875rem;">
+                        <option value="">-- Pilih Tier --</option>
+                        <option value="A">Tier A</option>
+                        <option value="B">Tier B</option>
+                        <option value="C">Tier C</option>
+                        <option value="D">Tier D</option>
+                    </select>
                 </div>
                 
                 <!-- Deskripsi -->

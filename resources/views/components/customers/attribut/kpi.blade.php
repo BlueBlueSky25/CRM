@@ -1,5 +1,5 @@
 <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             <div class="bg-white rounded-xl shadow-lg p-4 card-hover fade-in border-l-4 border-blue-500">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">

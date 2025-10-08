@@ -7,6 +7,7 @@ import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import axios from "axios";
+import { Calendar as CalIcon, Clock, AlignLeft, X, Trash2, Save, Plus } from "lucide-react";
 
 // ============================================
 // SETUP AXIOS DENGAN CSRF TOKEN
@@ -33,7 +34,274 @@ const localizer = dateFnsLocalizer({
 });
 
 // ============================================
-// COMPONENT MODAL (PORTAL)
+// STYLES
+// ============================================
+const styles = {
+    container: {
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #f8fafc 0%, #e0f2fe 50%, #ddd6fe 100%)',
+        padding: '32px',
+    },
+    header: {
+        marginBottom: '32px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '16px',
+    },
+    headerLeft: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px',
+    },
+    iconBox: {
+        background: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)',
+        padding: '12px',
+        borderRadius: '16px',
+        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+    },
+    title: {
+        fontSize: '36px',
+        fontWeight: 'bold',
+        background: 'linear-gradient(90deg, #2563eb 0%, #4f46e5 100%)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        margin: 0,
+    },
+    subtitle: {
+        color: '#475569',
+        fontSize: '14px',
+        marginTop: '4px',
+    },
+    addButton: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        background: 'linear-gradient(90deg, #2563eb 0%, #4f46e5 100%)',
+        color: 'white',
+        padding: '12px 24px',
+        borderRadius: '12px',
+        border: 'none',
+        fontWeight: '500',
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+    },
+    calendarCard: {
+        background: 'white',
+        borderRadius: '24px',
+        boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
+        padding: '32px',
+        border: '1px solid #e2e8f0',
+    },
+    modalOverlay: {
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0, 0, 0, 0.6)',
+        backdropFilter: 'blur(4px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '16px',
+        animation: 'fadeIn 0.2s ease-out',
+    },
+    modalContent: {
+        background: 'white',
+        borderRadius: '16px',
+        boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.25)',
+        width: '100%',
+        maxWidth: '600px',
+        maxHeight: '90vh',
+        overflow: 'hidden',
+        animation: 'slideUp 0.3s ease-out',
+    },
+    modalHeader: {
+        background: 'linear-gradient(90deg, #2563eb 0%, #4f46e5 100%)',
+        padding: '20px 24px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    modalHeaderLeft: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+    },
+    modalIconBox: {
+        background: 'rgba(255, 255, 255, 0.2)',
+        padding: '8px',
+        borderRadius: '8px',
+    },
+    modalTitle: {
+        fontSize: '24px',
+        fontWeight: 'bold',
+        color: 'white',
+        margin: 0,
+    },
+    closeButton: {
+        color: 'white',
+        background: 'transparent',
+        border: 'none',
+        padding: '8px',
+        borderRadius: '8px',
+        cursor: 'pointer',
+        transition: 'background 0.2s',
+    },
+    modalBody: {
+        padding: '24px',
+        maxHeight: 'calc(90vh - 140px)',
+        overflowY: 'auto',
+    },
+
+    label: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        fontSize: '14px',
+        fontWeight: '600',
+        color: '#334155',
+        marginBottom: '8px',
+    },
+    input: {
+        width: '100%',
+        border: '2px solid #e2e8f0',
+        borderRadius: '12px',
+        padding: '12px 16px',
+        fontSize: '14px',
+        transition: 'all 0.2s',
+        outline: 'none',
+        color: '#1e293b',
+    },
+    textarea: {
+        width: '100%',
+        border: '2px solid #e2e8f0',
+        borderRadius: '12px',
+        padding: '12px 16px',
+        fontSize: '14px',
+        transition: 'all 0.2s',
+        outline: 'none',
+        resize: 'none',
+        fontFamily: 'inherit',
+        color: '#1e293b',
+    },
+    checkboxContainer: {
+        background: '#f8fafc',
+        padding: '16px',
+        borderRadius: '12px',
+        border: '2px solid #e2e8f0',
+    },
+    checkboxLabel: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        cursor: 'pointer',
+    },
+    checkbox: {
+        width: '20px',
+        height: '20px',
+        cursor: 'pointer',
+    },
+    actions: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingTop: '20px',
+        marginTop: '20px',
+        borderTop: '2px solid #f1f5f9',
+    },
+    actionsRight: {
+        display: 'flex',
+        gap: '12px',
+    },
+    deleteButton: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        background: '#fef2f2',
+        color: '#dc2626',
+        border: '2px solid #fecaca',
+        padding: '10px 20px',
+        borderRadius: '12px',
+        fontWeight: '500',
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+    },
+    cancelButton: {
+        padding: '10px 24px',
+        borderRadius: '12px',
+        border: '2px solid #cbd5e1',
+        background: 'white',
+        color: '#475569',
+        fontWeight: '500',
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+    },
+    saveButton: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        background: 'linear-gradient(90deg, #2563eb 0%, #4f46e5 100%)',
+        color: 'white',
+        border: 'none',
+        padding: '10px 24px',
+        borderRadius: '12px',
+        fontWeight: '500',
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+    },
+    confirmModal: {
+        background: 'white',
+        borderRadius: '16px',
+        boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.25)',
+        maxWidth: '400px',
+        width: '100%',
+        overflow: 'hidden',
+        animation: 'slideUp 0.3s ease-out',
+    },
+    confirmHeader: {
+        background: 'linear-gradient(90deg, #ef4444 0%, #f43f5e 100%)',
+        padding: '16px 24px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+    },
+    confirmBody: {
+        padding: '24px',
+    },
+    confirmText: {
+        color: '#334155',
+        lineHeight: '1.6',
+        marginBottom: '16px',
+    },
+    confirmSubtext: {
+        fontSize: '14px',
+        color: '#64748b',
+    },
+    confirmActions: {
+        background: '#f8fafc',
+        padding: '16px 24px',
+        display: 'flex',
+        justifyContent: 'flex-end',
+        gap: '12px',
+        borderTop: '1px solid #e2e8f0',
+    },
+    confirmButton: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        background: 'linear-gradient(90deg, #ef4444 0%, #f43f5e 100%)',
+        color: 'white',
+        border: 'none',
+        padding: '10px 20px',
+        borderRadius: '12px',
+        fontWeight: '500',
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+    },
+};
+
+// ============================================
+// COMPONENT MODAL
 // ============================================
 function Modal({ children, onClose, zIndex = 10000 }) {
     useEffect(() => {
@@ -51,32 +319,12 @@ function Modal({ children, onClose, zIndex = 10000 }) {
 
     return createPortal(
         <div
-            onMouseDown={(e) => {
+            onClick={(e) => {
                 if (e.target === e.currentTarget) onClose && onClose();
             }}
-            style={{
-                position: "fixed",
-                inset: 0,
-                backgroundColor: "rgba(0, 0, 0, 0.6)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex,
-            }}
+            style={{ ...styles.modalOverlay, zIndex }}
         >
-            <div
-                onMouseDown={(e) => e.stopPropagation()}
-                style={{
-                    backgroundColor: "white",
-                    borderRadius: 8,
-                    padding: 24,
-                    width: "90%",
-                    maxWidth: 500,
-                    maxHeight: "90vh",
-                    overflow: "auto",
-                    position: "relative",
-                }}
-            >
+            <div onClick={(e) => e.stopPropagation()}>
                 {children}
             </div>
         </div>,
@@ -100,7 +348,6 @@ export default function CalendarPage() {
         description: "",
     });
 
-    // Fetch events dari backend
     useEffect(() => {
         fetchEvents();
     }, []);
@@ -120,7 +367,6 @@ export default function CalendarPage() {
         }
     };
 
-    // CREATE: Tambah event baru
     const handleSelectSlot = ({ start, end }) => {
         setSelectedEvent(null);
         setFormData({
@@ -133,9 +379,7 @@ export default function CalendarPage() {
         setShowModal(true);
     };
 
-    // OPEN EDIT MODAL: Klik event untuk edit
     const handleSelectEvent = (event) => {
-        console.log("Selected event:", event);
         setSelectedEvent(event);
         setFormData({
             title: event.title,
@@ -147,13 +391,11 @@ export default function CalendarPage() {
         setShowModal(true);
     };
 
-    // SAVE: Create atau Update
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
             if (selectedEvent) {
-                // UPDATE
                 const response = await axios.put(
                     `/api/calendar/events/${selectedEvent.id}`,
                     formData
@@ -171,7 +413,6 @@ export default function CalendarPage() {
                 );
                 alert("Event berhasil diupdate!");
             } else {
-                // CREATE
                 const response = await axios.post("/api/calendar/events", formData);
                 setEvents([
                     ...events,
@@ -201,12 +442,10 @@ export default function CalendarPage() {
         }
     };
 
-    // DELETE: Tampilkan popup konfirmasi
     const handleDeleteClick = () => {
         setShowDeleteConfirm(true);
     };
 
-    // DELETE: Proses delete setelah konfirmasi
     const confirmDelete = async () => {
         const idToDelete =
             selectedEvent?.id ??
@@ -216,7 +455,6 @@ export default function CalendarPage() {
 
         if (!idToDelete) {
             alert("Error: Event tidak valid (tidak ditemukan id).");
-            console.log("selectedEvent saat delete:", selectedEvent);
             return;
         }
 
@@ -245,7 +483,6 @@ export default function CalendarPage() {
         }
     };
 
-    // DRAG & DROP: Pindah atau resize event
     const moveEvent = async ({ event, start, end }) => {
         try {
             await axios.put(`/api/calendar/events/${event.id}`, {
@@ -276,193 +513,271 @@ export default function CalendarPage() {
     };
 
     return (
-        <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4">Kalender CRM</h2>
-
-            <DnDCalendar
-                localizer={localizer}
-                events={events}
-                startAccessor="start"
-                endAccessor="end"
-                style={{ height: 600 }}
-                selectable
-                resizable
-                onSelectSlot={handleSelectSlot}
-                onSelectEvent={handleSelectEvent}
-                onEventDrop={moveEvent}
-                onEventResize={moveEvent}
-                views={["month", "week", "day", "agenda"]}
-            />
-
-            {/* MODAL FORM */}
-            {showModal && (
-                <Modal
-                    onClose={() => {
-                        setShowModal(false);
-                        resetForm();
-                    }}
-                    zIndex={10001}
-                >
-                    <h3 className="text-xl font-bold mb-4">
-                        {selectedEvent ? "Edit Event" : "Tambah Event"}
-                    </h3>
-
-                    <form onSubmit={handleSubmit}>
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium mb-1">Judul</label>
-                            <input
-                                type="text"
-                                className="w-full border border-gray-300 rounded px-3 py-2"
-                                value={formData.title}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, title: e.target.value })
-                                }
-                                required
-                            />
-                        </div>
-
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium mb-1">Mulai</label>
-                            <input
-                                type="datetime-local"
-                                className="w-full border border-gray-300 rounded px-3 py-2"
-                                value={formData.start}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, start: e.target.value })
-                                }
-                                required
-                            />
-                        </div>
-
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium mb-1">Selesai</label>
-                            <input
-                                type="datetime-local"
-                                className="w-full border border-gray-300 rounded px-3 py-2"
-                                value={formData.end}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, end: e.target.value })
-                                }
-                                required
-                            />
-                        </div>
-
-                        <div className="mb-4">
-                            <label className="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    className="mr-2"
-                                    checked={formData.allDay}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, allDay: e.target.checked })
-                                    }
-                                />
-                                <span className="text-sm">All Day Event</span>
-                            </label>
-                        </div>
-
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium mb-1">
-                                Deskripsi (Opsional)
-                            </label>
-                            <textarea
-                                className="w-full border border-gray-300 rounded px-3 py-2"
-                                rows="3"
-                                value={formData.description}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, description: e.target.value })
-                                }
-                            ></textarea>
-                        </div>
-
-                        <div className="flex justify-between">
+        <>
+            <style>{`
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes slideUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(20px) scale(0.95);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0) scale(1);
+                    }
+                }
+                button:hover {
+                    transform: scale(1.05);
+                    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+                }
+                input:focus, textarea:focus {
+                    border-color: #3b82f6;
+                    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+                }
+                .delete-btn:hover {
+                    background: #ef4444 !important;
+                    color: white !important;
+                }
+                .close-btn:hover {
+                    background: rgba(255, 255, 255, 0.2);
+                }
+                .cancel-btn:hover {
+                    background: #f1f5f9;
+                }
+            `}</style>
+            
+            <div style={styles.container}>
+                <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+                    <div style={styles.header}>
+                        <div style={styles.headerLeft}>
+                            <div style={styles.iconBox}>
+                                <CalIcon size={32} color="white" />
+                            </div>
                             <div>
-                                {selectedEvent && (
+                                <h1 style={styles.title}>Kalender CRM</h1>
+                                <p style={styles.subtitle}>Kelola jadwal dan event Anda</p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => {
+                                setSelectedEvent(null);
+                                setFormData({
+                                    title: "",
+                                    start: new Date().toISOString().slice(0, 16),
+                                    end: new Date(Date.now() + 3600000).toISOString().slice(0, 16),
+                                    allDay: false,
+                                    description: "",
+                                });
+                                setShowModal(true);
+                            }}
+                            style={styles.addButton}
+                        >
+                            <Plus size={20} />
+                            Tambah Event
+                        </button>
+                    </div>
+
+                    <div style={styles.calendarCard}>
+                        <DnDCalendar
+                            localizer={localizer}
+                            events={events}
+                            startAccessor="start"
+                            endAccessor="end"
+                            style={{ height: 600 }}
+                            selectable
+                            resizable
+                            onSelectSlot={handleSelectSlot}
+                            onSelectEvent={handleSelectEvent}
+                            onEventDrop={moveEvent}
+                            onEventResize={moveEvent}
+                            views={["month", "week", "day", "agenda"]}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {showModal && (
+                <Modal onClose={() => { setShowModal(false); resetForm(); }} zIndex={10001}>
+                    <div style={styles.modalContent}>
+                        <div style={styles.modalHeader}>
+                            <div style={styles.modalHeaderLeft}>
+                                <div style={styles.modalIconBox}>
+                                    {selectedEvent ? <CalIcon size={24} color="white" /> : <Plus size={24} color="white" />}
+                                </div>
+                                <h3 style={styles.modalTitle}>
+                                    {selectedEvent ? "Edit Event" : "Buat Event Baru"}
+                                </h3>
+                            </div>
+                            <button
+                                onClick={() => { setShowModal(false); resetForm(); }}
+                                style={styles.closeButton}
+                                className="close-btn"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div style={styles.modalBody}>
+                            <div style={{ marginBottom: '20px' }}>
+                                <label style={styles.label}>
+                                    <CalIcon size={16} color="#2563eb" />
+                                    Judul Event
+                                </label>
+                                <input
+                                    type="text"
+                                    style={styles.input}
+                                    placeholder="Masukkan judul event..."
+                                    value={formData.title}
+                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                    required
+                                />
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+                                <div>
+                                    <label style={styles.label}>
+                                        <Clock size={16} color="#16a34a" />
+                                        Waktu Mulai
+                                    </label>
+                                    <input
+                                        type="datetime-local"
+                                        style={styles.input}
+                                        value={formData.start}
+                                        onChange={(e) => setFormData({ ...formData, end: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label style={styles.label}>
+                                        <Clock size={16} color="#ea580c" />
+                                        Waktu Selesai
+                                    </label>
+                                    <input
+                                        type="datetime-local"
+                                        style={styles.input}
+                                        value={formData.end}
+                                        onChange={(e) => setFormData({ ...formData, start: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div style={{ marginBottom: '20px' }}>
+                                <div style={styles.checkboxContainer}>
+                                    <label style={styles.checkboxLabel}>
+                                        <input
+                                            type="checkbox"
+                                            style={styles.checkbox}
+                                            checked={formData.allDay}
+                                            onChange={(e) => setFormData({ ...formData, allDay: e.target.checked })}
+                                        />
+                                        <span style={{ fontSize: '14px', fontWeight: '500', color: '#334155' }}>
+                                            Event seharian penuh
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div style={{ marginBottom: '0' }}>
+                                <label style={styles.label}>
+                                    <AlignLeft size={16} color="#9333ea" />
+                                    Deskripsi <span style={{ color: '#94a3b8', fontWeight: 'normal' }}>(Opsional)</span>
+                                </label>
+                                <textarea
+                                    style={styles.textarea}
+                                    rows="4"
+                                    placeholder="Tambahkan catatan atau detail event..."
+                                    value={formData.description}
+                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                ></textarea>
+                            </div>
+
+                            <div style={styles.actions}>
+                                <div>
+                                    {selectedEvent && (
+                                        <button
+                                            type="button"
+                                            onClick={handleDeleteClick}
+                                            style={styles.deleteButton}
+                                            className="delete-btn"
+                                        >
+                                            <Trash2 size={16} />
+                                            Hapus Event
+                                        </button>
+                                    )}
+                                </div>
+                                <div style={styles.actionsRight}>
                                     <button
                                         type="button"
-                                        onClick={handleDeleteClick}
-                                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                                        onClick={() => { setShowModal(false); resetForm(); }}
+                                        style={styles.cancelButton}
+                                        className="cancel-btn"
                                     >
-                                        Hapus
+                                        Batal
                                     </button>
-                                )}
-                            </div>
-                            <div className="flex gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setShowModal(false);
-                                        resetForm();
-                                    }}
-                                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
-                                >
-                                    Batal
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                                >
-                                    Simpan
-                                </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleSubmit}
+                                        style={styles.saveButton}
+                                    >
+                                        <Save size={16} />
+                                        {selectedEvent ? "Update Event" : "Simpan Event"}
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </form>
+                    </div>
                 </Modal>
             )}
 
-            {/* MODAL DELETE CONFIRM - FIXED VERSION */}
-            {showDeleteConfirm &&
-                createPortal(
-                    <div
-                        onClick={(e) => {
-                            if (e.target === e.currentTarget) setShowDeleteConfirm(false);
-                        }}
-                        style={{
-                            position: "fixed",
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            backgroundColor: "rgba(0, 0, 0, 0.6)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            zIndex: 99999,
-                        }}
-                    >
-                        <div
-                            onClick={(e) => e.stopPropagation()}
-                            style={{
-                                backgroundColor: "white",
-                                borderRadius: 8,
-                                padding: 24,
-                                maxWidth: 400,
-                                width: "90%",
-                            }}
-                        >
-                            <h3 className="text-xl font-bold mb-4">Konfirmasi Hapus</h3>
-                            <p className="mb-6">
-                                Apakah Anda yakin ingin menghapus event{" "}
-                                <strong>"{selectedEvent?.title}"</strong>?
-                            </p>
-                            <div className="flex justify-end gap-2">
-                                <button
-                                    onClick={() => setShowDeleteConfirm(false)}
-                                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
-                                >
-                                    Batal
-                                </button>
-                                <button
-                                    onClick={confirmDelete}
-                                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                                >
-                                    Ya, Hapus
-                                </button>
+            {showDeleteConfirm && createPortal(
+                <div
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) setShowDeleteConfirm(false);
+                    }}
+                    style={{ ...styles.modalOverlay, zIndex: 99999 }}
+                >
+                    <div onClick={(e) => e.stopPropagation()} style={styles.confirmModal}>
+                        <div style={styles.confirmHeader}>
+                            <div style={styles.modalIconBox}>
+                                <Trash2 size={24} color="white" />
                             </div>
+                            <h3 style={{ ...styles.modalTitle, fontSize: '20px' }}>Konfirmasi Hapus</h3>
                         </div>
-                    </div>,
-                    document.body
-                )}
-        </div>
+
+                        <div style={styles.confirmBody}>
+                            <p style={styles.confirmText}>
+                                Apakah Anda yakin ingin menghapus event{" "}
+                                <strong style={{ color: '#0f172a' }}>"{selectedEvent?.title}"</strong>?
+                            </p>
+                            <p style={styles.confirmSubtext}>
+                                Tindakan ini tidak dapat dibatalkan.
+                            </p>
+                        </div>
+
+                        <div style={styles.confirmActions}>
+                            <button
+                                onClick={() => setShowDeleteConfirm(false)}
+                                style={styles.cancelButton}
+                                className="cancel-btn"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                style={styles.confirmButton}
+                            >
+                                <Trash2 size={16} />
+                                Ya, Hapus
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+        </>
     );
 }

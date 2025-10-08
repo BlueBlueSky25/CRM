@@ -2,7 +2,7 @@
 @section('title','All Customers')
 
 @section('content')
-<div class="container-expanded mx-auto px-6 lg:px-8 py-8">
+<div class="container-expanded mx-auto px-6 lg:px-8 py-8 pt-[80px]">
         
         <x-customers.attribut.kpi />
         <x-customers.action.action />

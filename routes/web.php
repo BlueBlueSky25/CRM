@@ -77,7 +77,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/menu', [MenuController::class, 'index'])->name('menu');
     Route::get('/pic', fn() => view('pages.pic'))->name('pic');
     Route::get('/salesvisit', fn() => view('pages.salesvisit'))->name('salesvisit');
-    
+
     // ==========================
     // CRUD - Users
     // ==========================
@@ -115,11 +115,20 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::put('/companies/{id}', [CompanyController::class, 'update'])->name('companies.update');
     Route::delete('/companies/{id}', [CompanyController::class, 'destroy'])->name('companies.destroy');
 
-    // ==========================
-    // Catch-all React (HARUS PALING BAWAH)
-    // ==========================
+    Route::prefix('api/geographic/bar')->group(function () {
+    Route::get('/distribution', [CompanyChartController::class, 'getGeoDistributionBar']);
+    Route::get('/tier/{tier}', [CompanyChartController::class, 'getTierDetailBar']);
+    Route::get('/export', [CompanyChartController::class, 'exportGeoDataBar']);
+});
 
-    // Route::get('/{any}', function () {
-    //     return view('react');
-    // })->where('any', '.*');
+// ==========================
+// PIE CHART ROUTES
+// ==========================
+Route::prefix('api/geographic/pie')->group(function () {
+    Route::get('/distribution', [CompanyChartController::class, 'getGeoDistributionPie']);
+    Route::get('/tier/{tier}', [CompanyChartController::class, 'getTierDetailPie']);
+    Route::get('/export', [CompanyChartController::class, 'exportGeoDataPie']);
+});
+
+
 });
