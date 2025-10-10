@@ -18,7 +18,7 @@
 
     <!-- Table -->
     <div class="overflow-x-auto">
-<table id="companyTable" class="w-full">
+        <table id="companyTable" class="w-full">
             <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
                     <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">No</th>
@@ -48,7 +48,7 @@
                         <div class="flex items-center space-x-2">
                             @if(auth()->user()->canAccess($currentMenuId, 'edit'))
                             <button 
-                                onclick="openEditModal('{{ $company->company_id }}', '{{ addslashes($company->company_name) }}', '{{ $company->company_type_id }}', '{{ $company->tier }}', '{{ addslashes($company->description ?? '') }}', '{{ $company->status }}')" 
+                                onclick="openEditCompanyModal('{{ $company->company_id }}', '{{ addslashes($company->company_name) }}', '{{ $company->company_type_id }}', '{{ $company->tier }}', '{{ addslashes($company->description ?? '') }}', '{{ $company->status }}')" 
                                 class="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 flex items-center" 
                                 title="Edit Perusahaan">
                                 <i class="fas fa-edit"></i>
@@ -76,6 +76,8 @@
         </table>
     </div>
 </div>
+
+
 
 <style>
 @keyframes modalSlideIn {

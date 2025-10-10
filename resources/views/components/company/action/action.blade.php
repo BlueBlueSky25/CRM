@@ -17,7 +17,7 @@
 
         <!-- Body -->
         <div class="overflow-y-auto max-h-[calc(90vh-140px)]" style="background-color: #f3f4f6; padding: 1.5rem;">
-            <form id="addCompanyForm" action="{{ route('companies.store') }}" method="POST" style="display: flex; flex-direction: column; gap: 1rem;">
+            <form id="addCompanyForm" action="{{ route('company.store') }}" method="POST" style="display: flex; flex-direction: column; gap: 1rem;">
                 @csrf
                 
                 <!-- Nama -->

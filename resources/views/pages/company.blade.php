@@ -34,8 +34,10 @@
 
     <!-- Company Table -->
     <div class="bg-white rounded-xl shadow-sm border mt-3">
+        <x-company.action.action :types="$types"/>
+        <x-company.action.edit :types="$types"/>
         <div class="p-6">
-            <x-company.table.table :companies="$companies" :types="$types"/>
+            <x-company.table.table :companies="$companies" />
             <x-globals.pagination :paginator="$companies" />
         </div>
     </div>
@@ -44,7 +46,7 @@
 @push('scripts')
 <!-- Load script dengan URUTAN YANG BENAR -->
  <script src="{{ asset('js/search.js') }}"></script>
-<script src="{{ asset('js/user-modal.js') }}"></script> <!-- FILE YANG SUDAH ADA -->
+
 
 
 
