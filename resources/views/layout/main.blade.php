@@ -53,7 +53,10 @@
 
     <x-dashboard.toast />
 
-    <script src="{{ asset('js/address-cascade.js') }}"></script>
+   <script src="{{ asset('js/address-cascade.js') }}"></script>
+    <script src="{{ asset('js/user-modal.js') }}"></script>
+    <script src="{{ asset('js/search.js') }}"></script>
+    
     <script>
         // Initialize cascade untuk CREATE form
         document.addEventListener('DOMContentLoaded', function() {

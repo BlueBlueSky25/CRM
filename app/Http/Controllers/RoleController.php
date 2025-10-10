@@ -163,4 +163,92 @@ public function assignAllPermissionsToSuperAdmin()
 
     $superAdmin->menus()->sync($syncData);
 }
+
+
+
+/**
+ * Search & Filter Role (AJAX)
+ */
+public function search(Request $request)
+{
+    $query = Role::query();
+
+    // === FILTER SEARCH (by role_name / description) ===
+    if ($request->filled('search')) {
+        $search = strtolower($request->search);
+        $query->where(function($q) use ($search) {
+            $q->whereRaw('LOWER(role_name) LIKE ?', ["%{$search}%"])
+              ->orWhereRaw('LOWER(description) LIKE ?', ["%{$search}%"]);
+        });
+    }
+
+    // === FILTER STATUS (optional, kalau nanti ditambah kolom is_active misalnya) ===
+    if ($request->filled('status')) {
+        $status = strtolower($request->status);
+        if ($status === 'active') {
+            $query->where('is_active', true);
+        } elseif ($status === 'inactive') {
+            $query->where('is_active', false);
+        }
+    }
+
+    $roles = $query->paginate(5);
+
+    return response()->json([
+        'items' => $roles->map(function($role, $index) use ($roles) {
+            return [
+                'number' => $roles->firstItem() + $index,
+                'role_name' => $role->role_name ?? '-',
+                'description' => $role->description ?? '-',
+                'actions' => $this->getRoleActions($role),
+            ];
+        })->toArray(),
+        'pagination' => [
+            'current_page' => $roles->currentPage(),
+            'last_page' => $roles->lastPage(),
+            'from' => $roles->firstItem(),
+            'to' => $roles->lastItem(),
+            'total' => $roles->total(),
+        ]
+    ]);
+}
+
+/**
+ * Aksi untuk tiap baris role
+ */
+private function getRoleActions($role)
+{
+    $isSuperAdmin = strtolower($role->role_name) === 'superadmin';
+
+    $canEdit = auth()->user()->canAccess($currentMenuId ?? 1, 'edit') && !$isSuperAdmin;
+    $canDelete = auth()->user()->canAccess($currentMenuId ?? 1, 'delete') && !$isSuperAdmin;
+
+    $actions = [];
+
+    if ($canEdit) {
+        $actions[] = [
+            'type' => 'edit',
+            'onclick' => "openEditModal(
+                '{$role->role_id}',
+                '" . addslashes($role->role_name) . "',
+                `" . addslashes($role->description ?? '') . "`
+            )",
+            'title' => 'Edit Role'
+        ];
+    }
+
+    if ($canDelete) {
+        $csrfToken = csrf_token();
+        $deleteRoute = route('role.destroy', $role->role_id);
+
+        $actions[] = [
+            'type' => 'delete',
+            'onclick' => "deleteRole('{$role->role_id}', '{$deleteRoute}', '{$csrfToken}')",
+            'title' => 'Delete Role'
+        ];
+    }
+
+    return $actions;
+}
+
 }

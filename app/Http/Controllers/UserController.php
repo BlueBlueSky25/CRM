@@ -198,9 +198,7 @@ public function destroy($id)
     }
     
 
-// Tambahkan method ini di UserController atau update method search yang ada
 
-// Tambahkan method ini di UserController atau update method search yang ada
 
 public function search(Request $request)
 {

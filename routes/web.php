@@ -68,6 +68,8 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/users/search', [UserController::class, 'search'])->name('users.search');
     Route::get('/roles/search', [RoleController::class, 'search'])->name('roles.search');
     Route::get('/menus/search', [MenuController::class, 'search'])->name('menus.search');
+
+    Route::get('/companies/search', [CompanyController::class, 'search'])->name('companies.search');
 });
 
 // ==========================
@@ -121,6 +123,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // Marketing (Sales)
     // ==========================
     Route::get('/marketing', [SalesController::class, 'index'])->name('marketing');
+    Route::get('/marketing/search', [SalesController::class, 'search'])->name('marketing.search'); 
     Route::post('/marketing/sales', [SalesController::class, 'store'])->name('marketing.sales.store');
     Route::put('/marketing/sales/{id}', [SalesController::class, 'update'])->name('marketing.sales.update');
     Route::delete('/marketing/sales/{id}', [SalesController::class, 'destroy'])->name('marketing.sales.destroy');

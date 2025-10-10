@@ -114,7 +114,7 @@ class SalesController extends Controller
         return redirect()->route('marketing')->with('success', 'Sales user berhasil dihapus!');
     }
 
-    // CASCADE DROPDOWN METHODS (COPY DARI UserController)
+    // CASCADE DROPDOWN METHODS
     
     public function getRegencies($provinceId)
     {
@@ -189,5 +189,188 @@ class SalesController extends Controller
             \Log::error("Error fetching villages: " . $e->getMessage());
             return response()->json(['error' => 'Server error'], 500);
         }
+    }
+
+    /**
+     * Search & Filter Sales (AJAX)
+     */
+    public function search(Request $request)
+    {
+        try {
+            \Log::info('Sales Search Request', $request->all());
+
+            $salesRole = Role::where('role_name', 'Sales')->first();
+            
+            if (!$salesRole) {
+                \Log::error('Sales role not found');
+                return response()->json(['error' => 'Role sales tidak ditemukan'], 404);
+            }
+
+            \Log::info('Sales Role Found', ['role_id' => $salesRole->role_id]);
+
+            $query = User::with('role', 'province', 'regency', 'district', 'village')
+                         ->where('role_id', $salesRole->role_id);
+
+            // Filter search
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('username', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%")
+                      ->orWhere('phone', 'like', "%{$search}%");
+                });
+                \Log::info('Search applied', ['search' => $search]);
+            }
+
+            // Filter by status
+            if ($request->filled('status')) {
+                $isActive = $request->status === 'active' ? 1 : 0;
+                $query->where('is_active', $isActive);
+                \Log::info('Status filter applied', ['status' => $request->status]);
+            }
+
+            // Filter by province
+            if ($request->filled('province_id')) {
+                $query->where('province_id', $request->province_id);
+                \Log::info('Province filter applied', ['province_id' => $request->province_id]);
+            }
+
+            $users = $query->paginate(5);
+            \Log::info('Users found', ['count' => $users->count()]);
+
+            $items = $users->map(function($user, $index) use ($users) {
+                \Log::info('Processing user', ['user_id' => $user->user_id]);
+
+                // Format alamat
+                $alamatWilayah = collect([
+                    optional($user->village)->name,
+                    optional($user->district)->name,
+                    optional($user->regency)->name,
+                    optional($user->province)->name,
+                ])->filter()->implode(', ');
+                
+                $alamatDisplay = $alamatWilayah ?: ($user->address ?? '-');
+                if ($alamatWilayah && $user->address) {
+                    $alamatDisplay = $alamatWilayah . ' - ' . $user->address;
+                }
+
+                $actions = [];
+                try {
+                    $actions = $this->getSalesActions($user);
+                    \Log::info('Actions generated', ['user_id' => $user->user_id, 'actions_count' => count($actions)]);
+                } catch (\Exception $e) {
+                    \Log::error('Error generating actions for user', [
+                        'user_id' => $user->user_id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+
+                return [
+                    'number' => $users->firstItem() + $index,
+                    'user' => [
+                        'username' => $user->username ?? '-',
+                        'email' => $user->email ?? '-'
+                    ],
+                    'phone' => $user->phone ?? '-',
+                    'date_birth' => $user->birth_date 
+                        ? \Carbon\Carbon::parse($user->birth_date)->format('d M Y') 
+                        : '-',
+                    'alamat' => $alamatDisplay,
+                    'role' => optional($user->role)->role_name ?? 'No Role',
+                    'status' => $user->is_active ? 'Active' : 'Inactive',
+                    'actions' => $actions
+                ];
+            })->toArray();
+
+            \Log::info('Response prepared successfully');
+
+            return response()->json([
+                'items' => $items,
+                'pagination' => [
+                    'current_page' => $users->currentPage(),
+                    'last_page' => $users->lastPage(),
+                    'from' => $users->firstItem(),
+                    'to' => $users->lastItem(),
+                    'total' => $users->total()
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            // Log error untuk debugging
+            \Log::error('Sales Search Error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            \Log::error('File: ' . $e->getFile());
+            \Log::error('Line: ' . $e->getLine());
+            
+            return response()->json([
+                'error' => 'Server error',
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
+        }
+    }
+
+    /**
+     * Aksi untuk tiap baris Sales
+     */
+    private function getSalesActions($user)
+    {
+        $actions = [];
+
+        // Cek apakah user login
+        if (!auth()->check()) {
+            return $actions;
+        }
+
+        // TEMPORARY: Bypass permission checking untuk debug
+        // Nanti aktifkan lagi setelah masalah resolved
+        $canEdit = true;
+        $canDelete = true;
+
+        // COMMENTED OUT - Untuk production nanti aktifkan ini:
+    
+        try {
+            $currentMenuId = view()->shared('currentMenuId') ?? 1;
+            $canEdit = auth()->user()->canAccess($currentMenuId, 'edit');
+            $canDelete = auth()->user()->canAccess($currentMenuId, 'delete');
+        } catch (\Exception $e) {
+            \Log::error('Error checking permissions: ' . $e->getMessage());
+            $canEdit = true;
+            $canDelete = true;
+        }
+        
+
+        if ($canEdit) {
+            $actions[] = [
+                'type' => 'edit', 
+                'onclick' => "openEditSalesModal(
+                    '{$user->user_id}',
+                    '" . addslashes($user->username ?? '') . "',
+                    '" . addslashes($user->email ?? '') . "',
+                    '" . addslashes($user->phone ?? '') . "',
+                    '" . addslashes($user->birth_date ?? '') . "',
+                    '" . addslashes($user->address ?? '') . "',
+                    '{$user->province_id}',
+                    '{$user->regency_id}',
+                    '{$user->district_id}',
+                    '{$user->village_id}'
+                )",
+                'title' => 'Edit Sales'
+            ];
+        }
+
+        if ($canDelete) {
+            $csrfToken = csrf_token();
+            $deleteRoute = route('marketing.destroy', $user->user_id);
+            
+            $actions[] = [
+                'type' => 'delete',
+                'onclick' => "deleteSales('{$user->user_id}', '{$deleteRoute}', '{$csrfToken}')",
+                'title' => 'Delete Sales'
+            ];
+        }
+
+        return $actions;
     }
 }

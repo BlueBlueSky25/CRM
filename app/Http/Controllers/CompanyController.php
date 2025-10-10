@@ -36,7 +36,13 @@ class CompanyController extends Controller
         // Filter search - nama perusahaan
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where('company_name', 'like', "%{$search}%");
+            $query->where(function($q) use ($search) {
+                $q->where('company_name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhereHas('companyType', function($qt) use ($search) {
+                      $qt->where('type_name', 'like', "%{$search}%");
+                  });
+            });
         }
 
         // Filter by type
@@ -55,19 +61,28 @@ class CompanyController extends Controller
         }
 
         // Pagination
-        $perPage = 10;
-        $companies = $query->orderBy('company_name', 'asc')->paginate($perPage);
+        $companies = $query->orderBy('company_name', 'asc')->paginate(10);
 
         // Format response untuk AJAX
         return response()->json([
-            'data' => $companies->items(),
-            'meta' => [
+            'items' => $companies->map(function($company, $index) use ($companies) {
+                return [
+                    'number' => $companies->firstItem() + $index,
+                    'company_id' => $company->company_id,
+                    'company_name' => $company->company_name ?? '-',
+                    'company_type' => $company->companyType->type_name ?? '-',
+                    'tier' => $company->tier ?? '-',
+                    'description' => $company->description ?? '-',
+                    'status' => ucfirst($company->status ?? 'inactive'),
+                    'actions' => $this->getCompanyActions($company)
+                ];
+            })->toArray(),
+            'pagination' => [
                 'current_page' => $companies->currentPage(),
                 'last_page' => $companies->lastPage(),
-                'per_page' => $companies->perPage(),
-                'total' => $companies->total(),
-                'from' => $companies->firstItem() ?? 0,
-                'to' => $companies->lastItem() ?? 0,
+                'from' => $companies->firstItem(),
+                'to' => $companies->lastItem(),
+                'total' => $companies->total()
             ]
         ]);
     }
@@ -126,5 +141,43 @@ class CompanyController extends Controller
         } catch (\Exception $e) {
             return redirect()->route('company')->with('error', 'Gagal menghapus perusahaan');
         }
+    }
+
+    private function getCompanyActions($company)
+    {
+        $currentMenuId = view()->shared('currentMenuId', null);
+        
+        $canEdit = auth()->check() && auth()->user()->canAccess($currentMenuId ?? 1, 'edit');
+        $canDelete = auth()->check() && auth()->user()->canAccess($currentMenuId ?? 1, 'delete');
+
+        $actions = [];
+
+        if ($canEdit) {
+            $actions[] = [
+                'type' => 'edit',
+                'onclick' => "openEditModal(
+                    '{$company->company_id}',
+                    '" . addslashes($company->company_name) . "',
+                    '{$company->company_type_id}',
+                    '{$company->tier}',
+                    '" . addslashes($company->description ?? '') . "',
+                    '{$company->status}'
+                )",
+                'title' => 'Edit Company'
+            ];
+        }
+
+        if ($canDelete) {
+            $csrfToken = csrf_token();
+            $deleteRoute = route('company.destroy', $company->company_id);
+            
+            $actions[] = [
+                'type' => 'delete',
+                'onclick' => "deleteCompany('{$company->company_id}', '{$deleteRoute}', '{$csrfToken}')",
+                'title' => 'Delete Company'
+            ];
+        }
+
+        return $actions;
     }
 }

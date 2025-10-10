@@ -109,6 +109,106 @@ class MenuController extends Controller
         return response()->json($parentMenus);
     }
 
+    /**
+ * Search & Filter Menu (AJAX)
+ */
+public function search(Request $request)
+{
+    $query = Menu::with('parent', 'roles')->orderBy('order', 'asc');
+
+    // === FILTER SEARCH (by nama_menu, route, icon) ===
+    if ($request->filled('search')) {
+        $search = strtolower($request->search);
+        $query->where(function($q) use ($search) {
+            $q->whereRaw('LOWER(nama_menu) LIKE ?', ["%{$search}%"])
+              ->orWhereRaw('LOWER(route) LIKE ?', ["%{$search}%"])
+              ->orWhereRaw('LOWER(icon) LIKE ?', ["%{$search}%"]);
+        });
+    }
+
+    // === FILTER PARENT ===
+    if ($request->filled('parent')) {
+        $parent = strtolower($request->parent);
+        if ($parent === 'root') {
+            $query->whereNull('parent_id');
+        } else {
+            $query->whereHas('parent', function($q) use ($parent) {
+                $q->whereRaw('LOWER(nama_menu) LIKE ?', ["%{$parent}%"]);
+            });
+        }
+    }
+
+    // === FILTER ROLE (opsional: jika menu punya relasi ke role) ===
+    if ($request->filled('role')) {
+        $role = strtolower($request->role);
+        $query->whereHas('roles', function($q) use ($role) {
+            $q->whereRaw('LOWER(role_name) LIKE ?', ["%{$role}%"]);
+        });
+    }
+
+    $menus = $query->paginate(5);
+
+    return response()->json([
+        'items' => $menus->map(function($menu, $index) use ($menus) {
+            return [
+                'number' => $menus->firstItem() + $index,
+                'nama_menu' => $menu->nama_menu ?? '-',
+                'route' => $menu->route ?? '-',
+                'icon' => $menu->icon ?? '-',
+                'parent' => $menu->parent ? $menu->parent->nama_menu : 'Root',
+                'order' => $menu->order ?? '-',
+                'actions' => $this->getMenuActions($menu),
+            ];
+        })->toArray(),
+        'pagination' => [
+            'current_page' => $menus->currentPage(),
+            'last_page' => $menus->lastPage(),
+            'from' => $menus->firstItem(),
+            'to' => $menus->lastItem(),
+            'total' => $menus->total(),
+        ]
+    ]);
+}
+
+/**
+ * Aksi untuk tiap baris menu
+ */
+private function getMenuActions($menu)
+{
+    $canEdit = auth()->user()->canAccess($currentMenuId ?? 1, 'edit');
+    $canDelete = auth()->user()->canAccess($currentMenuId ?? 1, 'delete');
+
+    $actions = [];
+
+    if ($canEdit) {
+        $actions[] = [
+            'type' => 'edit',
+            'onclick' => "openEditModal(
+                '{$menu->menu_id}',
+                '" . addslashes($menu->nama_menu) . "',
+                '" . addslashes($menu->route ?? '') . "',
+                '" . addslashes($menu->icon ?? '') . "',
+                '{$menu->order}',
+                '{$menu->parent_id}'
+            )",
+            'title' => 'Edit Menu'
+        ];
+    }
+
+    if ($canDelete) {
+        $csrfToken = csrf_token();
+        $deleteRoute = route('menu.destroy', $menu->menu_id);
+
+        $actions[] = [
+            'type' => 'delete',
+            'onclick' => "deleteMenu('{$menu->menu_id}', '{$deleteRoute}', '{$csrfToken}')",
+            'title' => 'Delete Menu'
+        ];
+    }
+
+    return $actions;
+}
+
 
 
     

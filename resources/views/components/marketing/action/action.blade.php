@@ -1,92 +1,76 @@
-<!-- Quick Actions Section -->
-<div class="fade-in">
-    <div class="flex justify-between items-center mb-8">
-        <div>
-            <h3 class="text-lg font-semibold text-gray-800 mb-2">Quick Actions</h3>
-            <div class="flex gap-3">
-                <button onclick="openSalesModal()"
-                    class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
-                    <i class="fas fa-plus"></i>
-                    Tambah Sales
-                </button>
-                
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Tambah Sales Modal - SUDAH SAMA TEMA DENGAN MENU MODAL -->
-<div id="salesModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+<!-- Modal Add Sales -->
+<div id="addSalesModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-modal-in">
-        <!-- Modal Header (PASTIKAN INI GRADIENT) -->
-        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
+        <!-- Header -->
+        <div style="background: linear-gradient(to right, #4f46e5, #7c3aed); padding: 1.25rem 1.5rem;">
             <div class="flex justify-between items-center">
                 <div>
-                    <h2 class="text-xl font-semibold text-white">Tambah Sales Baru</h2>
-                    <p class="text-indigo-100 text-sm mt-1">Lengkapi formulir untuk menambahkan sales</p>
+                    <h3 class="text-xl font-semibold text-white">Tambah Marketing Baru</h3>
+                    <p class="text-sm text-indigo-100 mt-1">Lengkapi formulir berikut untuk menambahkan marketing</p>
                 </div>
-                <button onclick="closeSalesModal()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
+                <button onclick="closeAddSalesModal()" 
+                    class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
                     <i class="fas fa-times text-lg"></i>
                 </button>
             </div>
         </div>
-        <!-- Modal Body -->
-        <div class="overflow-y-auto max-h-[calc(90vh-140px)] p-6">
-            <form action="{{ route('marketing.sales.store') }}" method="POST" class="space-y-4">
+
+        <!-- Body -->
+        <div class="overflow-y-auto max-h-[calc(90vh-140px)]" style="background-color: #f3f4f6; padding: 1.5rem;">
+            <form id="addSalesForm" action="{{ route('marketing.sales.store') }}" method="POST" style="display: flex; flex-direction: column; gap: 1rem;">
                 @csrf
+                
+                <!-- Nama -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Nama Lengkap <span class="text-red-500">*</span>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
+                        Nama Lengkap <span style="color: #ef4444;">*</span>
                     </label>
-                    <div class="relative">
-                        <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <input type="text" id="username" name="username"
-                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                            placeholder="Masukkan nama lengkap" required>
+                    <div style="position: relative;">
+                        <i class="fas fa-user" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
+                        <input type="text" 
+                            name="username" 
+                            style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem 1rem 0.75rem 2.5rem; font-size: 0.875rem;" 
+                            required>
                     </div>
                 </div>
+                
+                <!-- Email -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Email <span class="text-red-500">*</span>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
+                        Email <span style="color: #ef4444;">*</span>
                     </label>
-                    <div class="relative">
-                        <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <input type="email" id="email" name="email"
-                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                            placeholder="contoh@email.com" required>
+                    <div style="position: relative;">
+                        <i class="fas fa-envelope" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
+                        <input type="email" 
+                            name="email" 
+                            style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem 1rem 0.75rem 2.5rem; font-size: 0.875rem;" 
+                            required>
                     </div>
                 </div>
+
+                <!-- Phone -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">No. Telepon</label>
-                    <div class="relative">
-                        <i class="fas fa-phone absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <input type="text" id="phone" name="phone"
-                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                            placeholder="+62 812-3456-7890">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Password <span class="text-red-500">*</span>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
+                        No. Telepon
                     </label>
-                    <div class="relative">
-                        <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <input type="password" id="password" name="password"
-                            class="w-full border border-gray-300 rounded-lg pl-10 pr-10 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                            placeholder="Minimal 6 karakter" required>
-                        <button type="button" onclick="togglePassword('password')"
-                            class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                            <i class="fas fa-eye" id="password-toggle"></i>
-                        </button>
+                    <div style="position: relative;">
+                        <i class="fas fa-phone" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
+                        <input type="text" 
+                            name="phone" 
+                            style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem 1rem 0.75rem 2.5rem; font-size: 0.875rem;">
                     </div>
-                    <p class="text-xs text-gray-500 mt-1">Password minimal 6 karakter, kombinasi huruf dan angka</p>
                 </div>
+
+                <!-- Birth Date -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Lahir</label>
-                    <div class="relative">
-                        <i class="fas fa-calendar absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <input type="date" id="birth_date" name="birth_date"
-                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
+                        Tanggal Lahir
+                    </label>
+                    <div style="position: relative;">
+                        <i class="fas fa-calendar" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
+                        <input type="date" 
+                            name="birth_date" 
+                            style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem 1rem 0.75rem 2.5rem; font-size: 0.875rem;"
                             max="{{ date('Y-m-d') }}">
                     </div>
                 </div>
@@ -145,21 +129,30 @@
                     </div>
                 </div>
 
-
+                <!-- Password -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Alamat</label>
-                    <div class="relative">
-                        <i class="fas fa-map-marker-alt absolute left-3 top-4 text-gray-400"></i>
-                        <textarea id="address" name="address" rows="3"
-                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none transition-all"
-                            placeholder="Masukkan alamat lengkap..."></textarea>
+                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
+                        Password <span style="color: #ef4444;">*</span>
+                    </label>
+                    <div style="position: relative;">
+                        <i class="fas fa-lock" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
+                        <input type="password" 
+                            name="password" 
+                            style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem 1rem 0.75rem 2.5rem; font-size: 0.875rem;" 
+                            required>
                     </div>
-
                 </div>
-                <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 mt-6">
-                    <button type="button" onclick="closeSalesModal()" class="px-6 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">Batal</button>
-                    <button type="submit" class="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 font-medium shadow-md hover:shadow-lg">
-                        <i class="fas fa-save mr-2"></i>
+                
+                <!-- Tombol -->
+                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; margin-top: 1.5rem;">
+                    <button type="button" 
+                            onclick="closeAddSalesModal()" 
+                            style="background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.625rem 1.5rem; font-weight: 500; font-size: 0.875rem; cursor: pointer; transition: all 0.2s;">
+                        Batal
+                    </button>
+                    <button type="submit" 
+                            style="background-color: #4f46e5; color: white; border: none; border-radius: 0.5rem; padding: 0.625rem 1.5rem; font-weight: 500; font-size: 0.875rem; cursor: pointer; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); transition: all 0.2s;">
+                        <i class="fas fa-save" style="margin-right: 0.5rem;"></i>
                         Simpan Data
                     </button>
                 </div>
@@ -168,133 +161,136 @@
     </div>
 </div>
 
+
+
 <style>
-.bg-gradient-to-r {
-background-image: linear-gradient(to right, #4f46e5, #a21caf) !important;
-}
-.bg-white {
-    background-color: #fff !important;
-}
-
-/* Modal Animation */
-@keyframes modal-in {
-    from {
-        opacity: 0;
-        transform: scale(0.9) translateY(-20px);
+    .bg-gradient-to-r {
+    background-image: linear-gradient(to right, #4f46e5, #a21caf) !important;
     }
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
+    .bg-white {
+        background-color: #fff !important;
     }
-}
 
-.animate-modal-in {
-    animation: modal-in 0.3s ease-out;
-}
-
-/* Form Enhancements */
-.form-input:focus {
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-/* Custom Scrollbar for Modal */
-.overflow-y-auto::-webkit-scrollbar {
-    width: 6px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 3px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 3px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-}
-
-/* Responsive adjustments */
-@media (max-width: 640px) {
-    #salesModal .bg-white {
-        margin: 1rem;
-        max-width: calc(100% - 2rem);
+    /* Modal Animation */
+    @keyframes modal-in {
+        from {
+            opacity: 0;
+            transform: scale(0.9) translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
     }
-}
 
-/* Loading state for submit button */
-.btn-loading {
-    position: relative;
-    pointer-events: none;
-}
-
-.btn-loading::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 16px;
-    height: 16px;
-    border: 2px solid transparent;
-    border-top: 2px solid currentColor;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: translate(-50%, -50%) rotate(360deg);
+    .animate-modal-in {
+        animation: modal-in 0.3s ease-out;
     }
-}
 
-/* Enhanced focus states */
-input:focus, textarea:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
+    /* Form Enhancements */
+    .form-input:focus {
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
 
-/* Icon styling */
-.fa-user, .fa-envelope, .fa-phone, .fa-lock, .fa-calendar, .fa-map-marker-alt {
-    font-size: 14px;
-}
+    /* Custom Scrollbar for Modal */
+    .overflow-y-auto::-webkit-scrollbar {
+        width: 6px;
+    }
 
-/* Form validation styling */
-.error {
-    border-color: #ef4444;
-}
+    .overflow-y-auto::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 3px;
+    }
 
-.error:focus {
-    border-color: #ef4444;
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-}
+    .overflow-y-auto::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
+    }
 
-.success {
-    border-color: #10b981;
-}
+    .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+        #salesModal .bg-white {
+            margin: 1rem;
+            max-width: calc(100% - 2rem);
+        }
+    }
+
+    /* Loading state for submit button */
+    .btn-loading {
+        position: relative;
+        pointer-events: none;
+    }
+
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 16px;
+        height: 16px;
+        border: 2px solid transparent;
+        border-top: 2px solid currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to {
+            transform: translate(-50%, -50%) rotate(360deg);
+        }
+    }
+
+    /* Enhanced focus states */
+    input:focus, textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Icon styling */
+    .fa-user, .fa-envelope, .fa-phone, .fa-lock, .fa-calendar, .fa-map-marker-alt {
+        font-size: 14px;
+    }
+
+    /* Form validation styling */
+    .error {
+        border-color: #ef4444;
+    }
+
+    .error:focus {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .success {
+        border-color: #10b981;
+    }
 </style>
 
 <script>
-// Modal Functions
-function openSalesModal() {
-    document.getElementById('salesModal').classList.remove('hidden');
+// Modal Functions untuk Add Sales Modal
+function openAddSalesModal() {
+    document.getElementById('addSalesModal').classList.remove('hidden');
     document.body.style.overflow = 'hidden'; // Prevent background scrolling
     
     // Focus on first input after animation
     setTimeout(() => {
-        document.getElementById('username').focus();
+        const firstInput = document.querySelector('#addSalesModal input[name="username"]');
+        if (firstInput) firstInput.focus();
     }, 300);
 }
 
-function closeSalesModal() {
-    document.getElementById('salesModal').classList.add('hidden');
+function closeAddSalesModal() {
+    document.getElementById('addSalesModal').classList.add('hidden');
     document.body.style.overflow = 'auto'; // Restore scrolling
     
     // Reset form
-    document.querySelector('#salesModal form').reset();
+    document.querySelector('#addSalesModal form').reset();
     clearValidation();
 }
 
@@ -316,8 +312,8 @@ function togglePassword(fieldId) {
 
 // Form validation
 function validateForm() {
-    const form = document.querySelector('#salesModal form');
-    const inputs = form.querySelectorAll('input[required]');
+    const form = document.querySelector('#addSalesModal form');
+    const inputs = form.querySelectorAll('input[required], select[required]');
     let isValid = true;
     
     inputs.forEach(input => {
@@ -330,16 +326,16 @@ function validateForm() {
     });
     
     // Email validation
-    const email = document.getElementById('email');
+    const email = document.querySelector('#addSalesModal input[name="email"]');
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (email.value && !emailRegex.test(email.value)) {
+    if (email && email.value && !emailRegex.test(email.value)) {
         showFieldError(email, 'Format email tidak valid');
         isValid = false;
     }
     
     // Password validation
-    const password = document.getElementById('password');
-    if (password.value && password.value.length < 6) {
+    const password = document.querySelector('#addSalesModal input[name="password"]');
+    if (password && password.value && password.value.length < 6) {
         showFieldError(password, 'Password minimal 6 karakter');
         isValid = false;
     }
@@ -375,46 +371,34 @@ function clearFieldError(field) {
 }
 
 function clearValidation() {
-    const fields = document.querySelectorAll('#salesModal input, #salesModal textarea');
+    const fields = document.querySelectorAll('#addSalesModal input, #addSalesModal textarea, #addSalesModal select');
     fields.forEach(field => {
         field.classList.remove('error', 'success');
     });
     
-    const errorMessages = document.querySelectorAll('#salesModal .error-message');
+    const errorMessages = document.querySelectorAll('#addSalesModal .error-message');
     errorMessages.forEach(msg => msg.remove());
 }
 
 // Form submission with loading state
-// document.querySelector('#salesModal form').addEventListener('submit', function(e) {
-//     e.preventDefault();
+document.querySelector('#addSalesModal form').addEventListener('submit', function(e) {
+    e.preventDefault();
     
-//     if (!validateForm()) {
-//         return;
-//     }
+    if (!validateForm()) {
+        return;
+    }
     
-//     const submitBtn = this.querySelector('button[type="submit"]');
-//     const originalText = submitBtn.innerHTML;
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
     
-//     // Show loading state
-//     submitBtn.classList.add('btn-loading');
-//     submitBtn.innerHTML = 'Menyimpan...';
-//     submitBtn.disabled = true;
+    // Show loading state
+    submitBtn.classList.add('btn-loading');
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
+    submitBtn.disabled = true;
     
-//     // Simulate API call (replace with actual form submission)
-//     setTimeout(() => {
-//         // Reset button state
-//         submitBtn.classList.remove('btn-loading');
-//         submitBtn.innerHTML = originalText;
-//         submitBtn.disabled = false;
-        
-//         // Show success message
-//         showNotification('Sales berhasil ditambahkan!', 'success');
-//         closeSalesModal();
-        
-//         // Here you would normally submit the form:
-//         // this.submit();
-//     }, 2000);
-// });
+    // Submit form
+    this.submit();
+});
 
 // Notification system
 function showNotification(message, type = 'info') {
@@ -455,21 +439,21 @@ function showNotification(message, type = 'info') {
 
 // Close modal on ESC key
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && !document.getElementById('salesModal').classList.contains('hidden')) {
-        closeSalesModal();
+    if (e.key === 'Escape' && !document.getElementById('addSalesModal').classList.contains('hidden')) {
+        closeAddSalesModal();
     }
 });
 
 // Close modal on backdrop click
-document.getElementById('salesModal').addEventListener('click', function(e) {
+document.getElementById('addSalesModal').addEventListener('click', function(e) {
     if (e.target === this) {
-        closeSalesModal();
+        closeAddSalesModal();
     }
 });
 
 // Real-time validation
 document.addEventListener('input', function(e) {
-    if (e.target.matches('#salesModal input, #salesModal textarea')) {
+    if (e.target.matches('#addSalesModal input, #addSalesModal textarea, #addSalesModal select')) {
         clearFieldError(e.target);
     }
 });
