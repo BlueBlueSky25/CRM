@@ -9,6 +9,7 @@ use App\Http\Controllers\SalesController;
 use App\Http\Controllers\CompanyChartController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CompanyController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -39,8 +40,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // ==========================
     // Dashboard
     // ==========================
-    Route::get('/dashboard', [CompanyChartController::class, 'index'])
-        ->name('dashboard');
+    Route::get('/dashboard', [CompanyChartController::class, 'index'])->name('dashboard');
 
     Route::get('/customers', fn() => view('pages.customers'))->name('customers');
     Route::get('/company', [CompanyController::class, 'index'])->name('company');
@@ -68,6 +68,23 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/users/search', [UserController::class, 'search'])->name('users.search');
     Route::get('/roles/search', [RoleController::class, 'search'])->name('roles.search');
     Route::get('/menus/search', [MenuController::class, 'search'])->name('menus.search');
+});
+
+// ==========================
+// COMPANY ROUTES (auth only)
+// ==========================
+Route::middleware(['auth'])->group(function () {
+    // AJAX route HARUS di atas resource
+    Route::get('/companies/search', [CompanyController::class, 'search'])->name('companies.search');
+    
+    // Resource routes
+    Route::resource('companies', CompanyController::class);
+});
+
+// ==========================
+// Routes with Permission Middleware
+// ==========================
+Route::middleware(['auth', 'permission'])->group(function () {
 
     // ==========================
     // Settings Pages
@@ -109,26 +126,20 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::delete('/marketing/sales/{id}', [SalesController::class, 'destroy'])->name('marketing.sales.destroy');
 
     // ==========================
-    // CRUD Operations - COMPANY
+    // BAR CHART ROUTES
     // ==========================
-    Route::post('/companies', [CompanyController::class, 'store'])->name('companies.store');
-    Route::put('/companies/{id}', [CompanyController::class, 'update'])->name('companies.update');
-    Route::delete('/companies/{id}', [CompanyController::class, 'destroy'])->name('companies.destroy');
-
     Route::prefix('api/geographic/bar')->group(function () {
-    Route::get('/distribution', [CompanyChartController::class, 'getGeoDistributionBar']);
-    Route::get('/tier/{tier}', [CompanyChartController::class, 'getTierDetailBar']);
-    Route::get('/export', [CompanyChartController::class, 'exportGeoDataBar']);
-});
+        Route::get('/distribution', [CompanyChartController::class, 'getGeoDistributionBar']);
+        Route::get('/tier/{tier}', [CompanyChartController::class, 'getTierDetailBar']);
+        Route::get('/export', [CompanyChartController::class, 'exportGeoDataBar']);
+    });
 
-// ==========================
-// PIE CHART ROUTES
-// ==========================
-Route::prefix('api/geographic/pie')->group(function () {
-    Route::get('/distribution', [CompanyChartController::class, 'getGeoDistributionPie']);
-    Route::get('/tier/{tier}', [CompanyChartController::class, 'getTierDetailPie']);
-    Route::get('/export', [CompanyChartController::class, 'exportGeoDataPie']);
-});
-
-
+    // ==========================
+    // PIE CHART ROUTES
+    // ==========================
+    Route::prefix('api/geographic/pie')->group(function () {
+        Route::get('/distribution', [CompanyChartController::class, 'getGeoDistributionPie']);
+        Route::get('/tier/{tier}', [CompanyChartController::class, 'getTierDetailPie']);
+        Route::get('/export', [CompanyChartController::class, 'exportGeoDataPie']);
+    });
 });

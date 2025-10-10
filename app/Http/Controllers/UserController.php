@@ -198,38 +198,129 @@ public function destroy($id)
     }
     
 
+// Tambahkan method ini di UserController atau update method search yang ada
+
+// Tambahkan method ini di UserController atau update method search yang ada
+
 public function search(Request $request)
-    {
-        $query = User::with('role');
+{
+    $query = User::with('role', 'province', 'regency', 'district', 'village');
 
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('username', 'like', "%{$search}%")
-                ->orWhere('email', 'like', "%{$search}%")
-                ->orWhere('phone', 'like', "%{$search}%");
-            });
-        }
-
-        if ($request->filled('role')) {
-            $role = $request->role;
-            $query->whereHas('role', function($q) use ($role) {
-                $q->whereRaw('LOWER(role_name) = ?', [$role]);
-            });
-        }
-
-        $users = $query->paginate(5);
-
-        return response()->json([
-            'users' => $users->items(),
-            'pagination' => [
-                'current_page' => $users->currentPage(),
-                'last_page'    => $users->lastPage(),
-                'per_page'     => $users->perPage(),
-                'from'         => $users->firstItem(),
-                'to'           => $users->lastItem(),
-            ]
-        ]);
+    // Filter search
+    if ($request->filled('search')) {
+        $search = strtolower($request->search);
+        $query->where(function($q) use ($search) {
+            $q->where('username', 'like', "%{$search}%")
+              ->orWhere('email', 'like', "%{$search}%")
+              ->orWhere('phone', 'like', "%{$search}%");
+        });
     }
 
+    // Filter role
+    if ($request->filled('role')) {
+        $role = $request->role;
+        $query->whereHas('role', function($q) use ($role) {
+            // Jika role adalah numeric ID
+            if (is_numeric($role)) {
+                $q->where('role_id', $role);
+            } else {
+                // Jika role adalah string name
+                $q->whereRaw('LOWER(role_name) = ?', [strtolower($role)]);
+            }
+        });
+    }
+
+    $users = $query->paginate(5);
+
+    return response()->json([
+        'items' => $users->map(function($user, $index) use ($users) {
+            // Format alamat
+            $alamatWilayah = collect([
+                optional($user->village)->name,
+                optional($user->district)->name,
+                optional($user->regency)->name,
+                optional($user->province)->name,
+            ])->filter()->implode(', ');
+            
+            $alamatDisplay = $alamatWilayah ?: ($user->address ?? '-');
+            if ($alamatWilayah && $user->address) {
+                $alamatDisplay = $alamatWilayah . ' - ' . $user->address;
+            }
+
+            return [
+                'number' => $users->firstItem() + $index,
+                'user' => [
+                    'username' => $user->username ?? '-',
+                    'email' => $user->email ?? '-'
+                ],
+                'phone' => $user->phone ?? '-',
+                'date_birth' => $user->birth_date 
+                    ? \Carbon\Carbon::parse($user->birth_date)->format('d M Y') 
+                    : '-',
+                'alamat' => $alamatDisplay,
+                'role' => $user->role->role_name ?? 'No Role',
+                'status' => $user->is_active ? 'Active' : 'Inactive',
+                'actions' => $this->getUserActions($user)
+            ];
+        })->toArray(),
+        'pagination' => [
+            'current_page' => $users->currentPage(),
+            'last_page' => $users->lastPage(),
+            'from' => $users->firstItem(),
+            'to' => $users->lastItem(),
+            'total' => $users->total()
+        ]
+    ]);
+}
+
+private function getUserActions($user)
+{
+    $isSuperAdmin = auth()->user()->role && 
+                   (strtolower(auth()->user()->role->role_name) === 'superadmin');
+    
+    $isTargetSuperAdmin = $user->role && 
+                         (strtolower($user->role->role_name) === 'superadmin');
+    
+    $canEdit = auth()->user()->canAccess($currentMenuId ?? 1, 'edit') && 
+              (!$isTargetSuperAdmin || $isSuperAdmin);
+    
+    $canDelete = auth()->user()->canAccess($currentMenuId ?? 1, 'delete') && 
+                (!$isTargetSuperAdmin || $isSuperAdmin);
+
+    $actions = [];
+
+    if ($canEdit) {
+        $actions[] = [
+            'type' => 'edit', 
+            'onclick' => "openEditModal(
+                '{$user->user_id}',
+                '" . addslashes($user->username) . "',
+                '" . addslashes($user->email) . "',
+                '{$user->role_id}',
+                " . ($user->is_active ? 'true' : 'false') . ",
+                '" . addslashes($user->phone ?? '') . "',
+                '" . addslashes($user->birth_date ?? '') . "',
+                `" . addslashes($user->address ?? '') . "`,
+                '{$user->province_id}',
+                '{$user->regency_id}',
+                '{$user->district_id}',
+                '{$user->village_id}'
+            )",
+            'title' => 'Edit User'
+        ];
+    }
+
+    if ($canDelete) {
+        $csrfToken = csrf_token();
+        $deleteRoute = route('users.destroy', $user->user_id);
+        
+                $actions[] = [
+            'type' => 'delete',
+            'onclick' => "deleteUser('{$user->user_id}', '{$deleteRoute}', '{$csrfToken}')",
+            'title' => 'Delete User'
+        ];
+    }
+
+    return $actions;
+}
 }

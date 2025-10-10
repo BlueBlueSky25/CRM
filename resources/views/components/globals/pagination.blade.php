@@ -1,4 +1,9 @@
-@if ($paginator->hasPages())
+@props([
+    'paginator' => null,
+    'containerId' => 'pagination-container'
+])
+
+@if ($paginator && $paginator->hasPages())
     <div class="flex items-center justify-between px-6 py-4 bg-white border-t border-gray-200">
         {{-- Info --}}
         <div class="text-sm text-gray-700">
