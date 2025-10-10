@@ -8,5 +8,6 @@
 </div>
 
 <x-settingsm.role.rform />
+<x-settingsm.role.redit />
 <x-settingsm.role.assign-menu :menus="$menus" />
 @endsection

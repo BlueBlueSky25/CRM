@@ -8,4 +8,5 @@
 </div>
 
 <x-settingsm.menu.mform />
+<x-settingsm.menu.medit />
 @endsection
