@@ -6,7 +6,7 @@
     'placeholder' => 'Cari sesuatu...',
 ])
 
-<div class="bg-white rounded-xl shadow-sm p-6 mb-4 border border-gray-200">
+<div class="bg-white rounded-xl shadow-sm p-6 mb-4 border border-gray-200 fade-in">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
         <div class="flex flex-wrap items-center gap-4">
             {{-- Search Input --}}

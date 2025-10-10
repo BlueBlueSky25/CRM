@@ -10,8 +10,9 @@
         :tierCompanies="$tierCompanies"
         :activeCompanies="$activeCompanies"
     />
-
-    <div class="mt-3">
+    
+    <!-- Company Table -->
+    <div class="bg-white rounded-xl shadow-sm border mt-3">
         <x-globals.filtersearch
             tableId="companyTable"
             :columns="[
@@ -31,9 +32,6 @@
             ajaxUrl="{{ route('company.search') }}"
             placeholder="Cari nama perusahaan, deskripsi, atau tipe..."
         />
-
-    <!-- Company Table -->
-    <div class="bg-white rounded-xl shadow-sm border mt-3">
         <x-company.action.action :types="$types"/>
         <x-company.action.edit :types="$types"/>
         <div class="p-6">

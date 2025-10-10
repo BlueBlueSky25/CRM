@@ -26,7 +26,7 @@
                 placeholder="Cari nama sales, email, atau nomor telepon..."
             />
             <!-- Tombol Add Component -->
-            <div class="flex justify-between mb-4">
+            <div class="flex justify-between mb-0">
                 <x-marketing.action.action :provinces="$provinces" :currentMenuId="$currentMenuId"/>
             </div>
 
