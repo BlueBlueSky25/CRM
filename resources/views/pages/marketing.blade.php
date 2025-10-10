@@ -4,7 +4,7 @@
 @section('content')
 <div class="container-expanded mx-auto px-6 lg:px-8 py-8 pt-[60px]">
     <!-- KPI Section (kalau ada) -->
-    {{-- <x-marketing.attribut.kpi /> --}}
+
 
     <!-- Marketing Table dengan tombol Add -->
     <div class="bg-white rounded-xl shadow-sm border mt-4">
@@ -34,7 +34,6 @@
             <x-marketing.table.table :salesUsers="$salesUsers" :currentMenuId="$currentMenuId" />
 
             <!-- Pagination -->
-            <x-globals.pagination :paginator="$salesUsers" />
         </div>
     </div>
 </div>
@@ -43,6 +42,13 @@
 <x-marketing.action.edit :provinces="$provinces"  />
 
 
+@push('scripts')
+<!-- Load script dengan URUTAN YANG BENAR -->
+<script src="{{ asset('js/address-cascade.js') }}"></script> <!-- FILE YANG SUDAH ADA -->
+<script src="{{ asset('js/search.js') }}"></script>
+
+
+@endpush
 
 
 <script>
@@ -74,5 +80,15 @@
             columns: ['number', 'user', 'phone', 'date_birth', 'alamat', 'status', 'actions']
         });
     });
+
+    // Initialize cascade SETELAH semua script loaded
+document.addEventListener('DOMContentLoaded', function() {
+    const createCascade = new AddressCascade({
+        provinceId: 'create-province',
+        regencyId: 'create-regency',
+        districtId: 'create-district',
+        villageId: 'create-village'
+    });
+});
 </script>
 @endsection

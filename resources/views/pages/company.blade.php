@@ -12,13 +12,25 @@
     />
 
     <div class="mt-3">
-        <x-company.attribut.filtersearch
+        <x-globals.filtersearch
             tableId="companyTable"
-            :searchFields="[2,3,4,5]"
-            :showRoleFilter="false"
-            ajaxUrl="{{ route('companies.search') }}"
+            :columns="[
+                'number',
+                'company_name', 
+                'company_type',
+                'tier',
+                'description', 
+                'status',
+                'actions'
+            ]"
+            :filters="[
+                'Type' => $types->pluck('type_name', 'company_type_id')->toArray(),
+                'Tier' => ['A', 'B', 'C', 'D'],
+                'Status' => ['Active', 'Inactive']
+            ]"
+            ajaxUrl="{{ route('company.search') }}"
+            placeholder="Cari nama perusahaan, deskripsi, atau tipe..."
         />
-    </div>
 
     <!-- Company Table -->
     <div class="bg-white rounded-xl shadow-sm border mt-3">
@@ -28,4 +40,60 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<!-- Load script dengan URUTAN YANG BENAR -->
+ <script src="{{ asset('js/search.js') }}"></script>
+<script src="{{ asset('js/user-modal.js') }}"></script> <!-- FILE YANG SUDAH ADA -->
+
+
+
+@endpush
+
+
+<script>
+
+    // Function untuk delete company
+function deleteCompany(companyId, deleteRoute, csrfToken) {
+    console.log('deleteCompany called:', {companyId, deleteRoute, csrfToken});
+    
+    deleteRecord(companyId, deleteRoute, csrfToken, (data) => {
+        console.log('Delete success:', data);
+        // Refresh table setelah delete sukses
+        if (window.companyTableHandler) {
+            console.log('Refreshing table...');
+            window.companyTableHandler.refresh();
+        } else {
+            console.warn('companyTableHandler not found, reloading page');
+            location.reload();
+        }
+    });
+}
+
+// Initialize setelah DOM siap
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOMContentLoaded fired');
+    
+    // Cek apakah TableHandler ada
+    if (typeof TableHandler === 'undefined') {
+        console.error('TableHandler class not found. search.js may not be loaded.');
+        return;
+    }
+
+    console.log('Creating TableHandler instance...');
+    
+    try {
+        window.companyTableHandler = new TableHandler({
+            tableId: 'companyTable',
+            ajaxUrl: '{{ route("company.search") }}',
+            filters: ['Type', 'Tier', 'Status'],
+            columns: ['number', 'company_name', 'company_type', 'tier', 'description', 'status', 'actions']
+        });
+        
+        console.log('TableHandler initialized successfully:', window.companyTableHandler);
+    } catch (error) {
+        console.error('Error initializing TableHandler:', error);
+    }
+});
+</script>
 @endsection

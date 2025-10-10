@@ -296,7 +296,7 @@ function toggleEditPassword() {
 }
 
 // ========================================
-// EVENT LISTENERS - HANYA 1 BLOK!
+// EVENT LISTENERS - SEMUA DIGABUNG
 // ========================================
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -332,6 +332,22 @@ document.addEventListener('DOMContentLoaded', function() {
             if (e.target === this) {
                 closeEditModal();
             }
+        });
+    }
+    
+    // Uppercase username for CREATE modal
+    const createUsernameInput = document.querySelector('#userModal input[name="username"]');
+    if (createUsernameInput) {
+        createUsernameInput.addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+    }
+    
+    // Uppercase username for EDIT modal  
+    const editUsernameInput = document.querySelector('#editUsername');
+    if (editUsernameInput) {
+        editUsernameInput.addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
         });
     }
 });
@@ -375,24 +391,5 @@ document.addEventListener('input', function(e) {
 document.addEventListener('change', function(e) {
     if (e.target.matches('#userModal select[name="role_id"]')) {
         showRolePreview(e.target.value);
-    }
-});
-document.addEventListener('DOMContentLoaded', function() {
-    const createUsernameInput = document.querySelector('#userModal input[name="username"]');
-    
-    if (createUsernameInput) {
-        createUsernameInput.addEventListener('input', function(e) {
-            e.target.value = e.target.value.toUpperCase();
-        });
-    }
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    const editUsernameInput = document.querySelector('#editUsername');
-    
-    if (editUsernameInput) {
-        editUsernameInput.addEventListener('input', function(e) {
-            e.target.value = e.target.value.toUpperCase();
-        });
     }
 });

@@ -10,12 +10,6 @@ use App\Http\Controllers\CompanyChartController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CompanyController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
-
 // ==========================
 // Public Routes (Login / Logout)
 // ==========================
@@ -24,7 +18,7 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.process');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // ==========================
-// CASCADE DROPDOWN ROUTES - BUTUH AUTH
+// CASCADE DROPDOWN ROUTES
 // ==========================
 Route::middleware('auth')->group(function () {
     Route::get('/get-regencies/{provinceId}', [UserController::class, 'getRegencies']);
@@ -33,24 +27,28 @@ Route::middleware('auth')->group(function () {
 });
 
 // ==========================
-// Protected Routes (Harus Login & Permission)
+// Protected Routes (Login + Permission)
 // ==========================
 Route::middleware(['auth', 'permission'])->group(function () {
-    
+
     // ==========================
     // Dashboard
     // ==========================
     Route::get('/dashboard', [CompanyChartController::class, 'index'])->name('dashboard');
 
-    Route::get('/customers', fn() => view('pages.customers'))->name('customers');
+    // ==========================
+    // Company Management
+    // ==========================
     Route::get('/company', [CompanyController::class, 'index'])->name('company');
+    Route::post('/company', [CompanyController::class, 'store'])->name('company.store');
+    Route::put('/company/{id}', [CompanyController::class, 'update'])->name('company.update');
+    Route::delete('/company/{id}', [CompanyController::class, 'destroy'])->name('company.destroy');
+    Route::get('/company/search', [CompanyController::class, 'search'])->name('company.search');
 
     // ==========================
     // Calendar Page (React)
     // ==========================
-    Route::get('/calendar', function () {
-        return view('layout.react'); 
-    })->name('calendar');
+    Route::get('/calendar', fn() => view('layout.react'))->name('calendar');
 
     // ==========================
     // Calendar API Routes
@@ -69,25 +67,6 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/roles/search', [RoleController::class, 'search'])->name('roles.search');
     Route::get('/menus/search', [MenuController::class, 'search'])->name('menus.search');
 
-    Route::get('/companies/search', [CompanyController::class, 'search'])->name('companies.search');
-});
-
-// ==========================
-// COMPANY ROUTES (auth only)
-// ==========================
-Route::middleware(['auth'])->group(function () {
-    // AJAX route HARUS di atas resource
-    Route::get('/companies/search', [CompanyController::class, 'search'])->name('companies.search');
-    
-    // Resource routes
-    Route::resource('companies', CompanyController::class);
-});
-
-// ==========================
-// Routes with Permission Middleware
-// ==========================
-Route::middleware(['auth', 'permission'])->group(function () {
-
     // ==========================
     // Settings Pages
     // ==========================
@@ -103,27 +82,27 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
     Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
-    
+
     // ==========================
     // CRUD - Roles
     // ==========================
-    Route::post('/roles', [RoleController::class, 'store'])->name('roles.store'); 
-    Route::put('/roles/{id}', [RoleController::class, 'update'])->name('roles.update'); 
-    Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->name('roles.destroy'); 
+    Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+    Route::put('/roles/{id}', [RoleController::class, 'update'])->name('roles.update');
+    Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->name('roles.destroy');
     Route::post('/roles/{id}/assign-menu', [RoleController::class, 'assignMenu'])->name('roles.assignMenu');
 
     // ==========================
     // CRUD - Menus
     // ==========================
-    Route::post('/menus', [MenuController::class, 'store'])->name('menus.store'); 
-    Route::put('/menus/{id}', [MenuController::class, 'update'])->name('menus.update'); 
-    Route::delete('/menus/{id}', [MenuController::class, 'destroy'])->name('menus.destroy'); 
+    Route::post('/menus', [MenuController::class, 'store'])->name('menus.store');
+    Route::put('/menus/{id}', [MenuController::class, 'update'])->name('menus.update');
+    Route::delete('/menus/{id}', [MenuController::class, 'destroy'])->name('menus.destroy');
 
     // ==========================
     // Marketing (Sales)
     // ==========================
     Route::get('/marketing', [SalesController::class, 'index'])->name('marketing');
-    Route::get('/marketing/search', [SalesController::class, 'search'])->name('marketing.search'); 
+    Route::get('/marketing/search', [SalesController::class, 'search'])->name('marketing.search');
     Route::post('/marketing/sales', [SalesController::class, 'store'])->name('marketing.sales.store');
     Route::put('/marketing/sales/{id}', [SalesController::class, 'update'])->name('marketing.sales.update');
     Route::delete('/marketing/sales/{id}', [SalesController::class, 'destroy'])->name('marketing.sales.destroy');

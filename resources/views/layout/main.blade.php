@@ -12,6 +12,9 @@
     {{-- Vite --}}
     @vite(['resources/css/app.css', 'resources/js/app.jsx'])
 
+    {{-- Di layout utama --}}
+    @stack('scripts')
+
     <style>
         .gradient-bg {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -53,21 +56,7 @@
 
     <x-dashboard.toast />
 
-   <script src="{{ asset('js/address-cascade.js') }}"></script>
-    <script src="{{ asset('js/user-modal.js') }}"></script>
-    <script src="{{ asset('js/search.js') }}"></script>
-    
-    <script>
-        // Initialize cascade untuk CREATE form
-        document.addEventListener('DOMContentLoaded', function() {
-            const createCascade = new AddressCascade({
-                provinceId: 'create-province',
-                regencyId: 'create-regency',
-                districtId: 'create-district',
-                villageId: 'create-village'
-            });
-        });
-    </script>   
+     
 
     <script src="{{ asset('js/geo-chart.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

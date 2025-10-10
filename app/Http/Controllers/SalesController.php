@@ -362,7 +362,7 @@ class SalesController extends Controller
 
         if ($canDelete) {
             $csrfToken = csrf_token();
-            $deleteRoute = route('marketing.destroy', $user->user_id);
+            $deleteRoute = route('marketing.sales.destroy', $user->user_id);
             
             $actions[] = [
                 'type' => 'delete',

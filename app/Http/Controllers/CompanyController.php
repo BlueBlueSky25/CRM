@@ -30,20 +30,22 @@ class CompanyController extends Controller
     }
 
     public function search(Request $request)
-    {
-        $query = Company::with('companyType');
+{
+    $query = Company::with('companyType');
 
-        // Filter search - nama perusahaan
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('company_name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhereHas('companyType', function($qt) use ($search) {
-                      $qt->where('type_name', 'like', "%{$search}%");
-                  });
-            });
-        }
+    // Gunakan parameter 'search' atau 'query'
+    $search = $request->input('search') ?? $request->input('query');
+
+    if ($search) {
+        $query->where(function($q) use ($search) {
+            $q->where('company_name', 'like', "%{$search}%")
+              ->orWhere('description', 'like', "%{$search}%")
+              ->orWhereHas('companyType', function($qt) use ($search) {
+                  $qt->where('type_name', 'like', "%{$search}%");
+              });
+        });
+    }
+
 
         // Filter by type
         if ($request->filled('type')) {
@@ -155,14 +157,14 @@ class CompanyController extends Controller
         if ($canEdit) {
             $actions[] = [
                 'type' => 'edit',
-                'onclick' => "openEditModal(
-                    '{$company->company_id}',
-                    '" . addslashes($company->company_name) . "',
-                    '{$company->company_type_id}',
-                    '{$company->tier}',
-                    '" . addslashes($company->description ?? '') . "',
-                    '{$company->status}'
-                )",
+                'onclick' => "openEditCompanyModal(
+    '{$company->company_id}',
+    '" . addslashes($company->company_name) . "',
+    '{$company->company_type_id}',
+    '{$company->tier}',
+    '" . addslashes($company->description ?? '') . "',
+    '{$company->status}'
+)",
                 'title' => 'Edit Company'
             ];
         }
