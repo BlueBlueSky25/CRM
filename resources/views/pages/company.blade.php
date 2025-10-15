@@ -43,17 +43,12 @@
 
 @push('scripts')
 <!-- Load script dengan URUTAN YANG BENAR -->
- <script src="{{ asset('js/search.js') }}"></script>
-
-
-
+<script src="{{ asset('js/search.js') }}"></script>
 
 @endpush
 
-
 <script>
-
-    // Function untuk delete company
+// Function untuk delete company
 function deleteCompany(companyId, deleteRoute, csrfToken) {
     console.log('deleteCompany called:', {companyId, deleteRoute, csrfToken});
     

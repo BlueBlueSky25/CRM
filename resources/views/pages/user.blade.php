@@ -5,26 +5,28 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
 
     <!-- Filters and Search -->
-   <x-globals.filtersearch
-    tableId="userTable"
-    :columns="[
-        'number',
-        'user',      
-        'phone', 
-        'date_birth',
-        'alamat',
-        'role',
-        'status',
-        'actions'
-    ]"
-    :filters="['Role' => $roles]"
-    ajaxUrl="{{ route('users.search') }}"
-    placeholder="Cari username, email, atau phone..."
-/>
+    <x-globals.filtersearch
+        tableId="userTable"
+        :columns="[
+            'number',
+            'user',      
+            'phone', 
+            'date_birth',
+            'alamat',
+            'role',
+            'status',
+            'actions'
+        ]"
+        :filters="['Role' => $roles]"
+        ajaxUrl="{{ route('users.search') }}"
+        placeholder="Cari username, email, atau phone..."
+    />
 
-    <!-- User Management Table (dengan pagination sudah di dalam) -->
-    <x-settingsm.user.utable :users="$users" />
-
+    <!-- User Management Table + Pagination di dalam 1 card -->
+    <div class="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+        <x-settingsm.user.utable :users="$users" />
+        <x-globals.pagination :paginator="$users" />
+    </div>
 </div>
 
 <!-- User Form -->
@@ -40,7 +42,6 @@
         
         deleteRecord(userId, deleteRoute, csrfToken, (data) => {
             console.log('Delete success:', data);
-            // Refresh table setelah delete sukses
             if (window.userTableHandler) {
                 console.log('Refreshing table...');
                 window.userTableHandler.refresh();
@@ -51,11 +52,9 @@
         });
     }
 
-    // Initialize setelah DOM siap
     document.addEventListener('DOMContentLoaded', () => {
         console.log('DOMContentLoaded fired');
         
-        // Cek apakah TableHandler ada
         if (typeof TableHandler === 'undefined') {
             console.error('TableHandler class not found. search.js may not be loaded.');
             return;

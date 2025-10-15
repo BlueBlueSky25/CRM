@@ -145,11 +145,6 @@
             </tbody>
         </table>
     </div>
-    
-    <!-- Pagination container dengan ID yang sesuai -->
-    <div id="userTable-pagination" class="bg-white border-t border-gray-200">
-        
-        <x-globals.pagination :paginator="$users" />
     </div>
     
 </div>
