@@ -1,33 +1,40 @@
-    <div class="fade-in">
-        <div class="flex flex-col lg:flex-row gap-4">
-            <div class="flex-1">
-                <div class="relative">
-                    <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
-                    <input
-                        type="text"
-                        id="searchInput"
-                        placeholder="Cari customer, PIC, atau kategori..."
-                        class="pl-10 pr-4 py-3 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"/>
-                </div>
-            </div>
-            <div class="flex gap-3">
-                <select id="categoryFilter" class="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Semua Kategori</option>
-                    <option value="Rumah Sakit">Rumah Sakit</option>
-                    <option value="Hotel">Hotel</option>
-                    <option value="Cafe & Restaurant">Cafe & Restaurant</option>
-                    <option value="Retail">Retail</option>
-                </select>
-                <select id="provinceFilter" class="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Semua Provinsi</option>
-                    <option value="DKI Jakarta">DKI Jakarta</option>
-                    <option value="Jawa Barat">Jawa Barat</option>
-                    <option value="Jawa Timur">Jawa Timur</option>
-                </select>
-                <button class="flex items-center gap-2 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50">
-                    <i data-lucide="filter" class="w-4 h-4"></i>
-                    Filter Lanjut
-                </button>
-            </div>
+<!-- Filters -->
+<div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+            <input 
+                type="text" 
+                id="searchInput"
+                placeholder="Cari customer..."
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onkeyup="filterCustomers()"
+            />
+        </div>
+        <div>
+            <select id="filterType" onchange="filterCustomers()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="">Semua Tipe</option>
+                <option value="Personal">Personal</option>
+                <option value="Company">Company</option>
+            </select>
+        </div>
+        <div>
+            <select id="filterStatus" onchange="filterCustomers()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="">Semua Status</option>
+                <option value="Lead">Lead</option>
+                <option value="Prospect">Prospect</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+            </select>
+        </div>
+        <div>
+            <select id="filterSource" onchange="filterCustomers()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="">Semua Source</option>
+                <option value="Website">Website</option>
+                <option value="Referral">Referral</option>
+                <option value="Ads">Ads</option>
+                <option value="Walk-in">Walk-in</option>
+                <option value="Social Media">Social Media</option>
+            </select>
         </div>
     </div>
+</div>

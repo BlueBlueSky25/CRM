@@ -9,6 +9,7 @@ use App\Http\Controllers\SalesController;
 use App\Http\Controllers\CompanyChartController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\CustomerController;
 
 // ==========================
 // Public Routes (Login / Logout)
@@ -45,6 +46,18 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::delete('/company/{id}', [CompanyController::class, 'destroy'])->name('company.destroy');
     Route::get('/company/search', [CompanyController::class, 'search'])->name('company.search');
 
+    // ==========================
+    // ✅ Customer Management
+    // ==========================
+    Route::get('/customers', [CustomerController::class, 'customers'])->name('customers');
+    Route::get('/customers/export', [CustomerController::class, 'export'])->name('customers.export');
+    Route::post('/customers/import', [CustomerController::class, 'import'])->name('customers.import');
+    Route::post('/customers/bulk-delete', [CustomerController::class, 'bulkDelete'])->name('customers.bulkDelete');
+    Route::get('/customers/{id}', [CustomerController::class, 'show'])->name('customers.show');
+    Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
+    Route::put('/customers/{id}', [CustomerController::class, 'update'])->name('customers.update');
+    Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+    
     // ==========================
     // Calendar Page (React)
     // ==========================
