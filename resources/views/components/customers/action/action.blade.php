@@ -80,11 +80,59 @@
                 </div>
             </div>
 
-            <!-- Alamat -->
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Alamat *</label>
-                <textarea id="customerAddress" name="address" required rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
-            </div>
+            <!-- Address Section -->
+                <div class="mb-6">
+                    <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-map-marker-alt text-indigo-500 mr-2"></i>
+                        Address Information
+                    </h4>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Provinsi <span class="text-red-500">*</span></label>
+                        <select id="create-province" name="province_id" class="cascade-province w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                            <option value="">-- Pilih Provinsi --</option>
+                            @foreach($provinces as $province)
+                                <option value="{{ $province->id }}">{{ $province->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Kabupaten/Kota -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kabupaten/Kota <span class="text-red-500">*</span></label>
+                        <select id="create-regency" name="regency_id" class="cascade-regency w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                            <option value="">-- Pilih Kabupaten/Kota --</option>
+                        </select>
+                    </div>
+
+                    <!-- Kecamatan -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kecamatan <span class="text-red-500">*</span></label>
+                        <select id="create-district" name="district_id" class="cascade-district w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                            <option value="">-- Pilih Kecamatan --</option>
+                        </select>
+                    </div>
+
+                    <!-- Kelurahan/Desa -->
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kelurahan/Desa <span class="text-red-500">*</span></label>
+                        <select id="create-village" name="village_id" class="cascade-village w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
+                            <option value="">-- Pilih Kelurahan/Desa --</option>
+                        </select>
+                    </div>
+        
+
+                    <!-- Detail Alamat (full width) -->
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Detail Alamat</label>
+                        <div class="relative">
+                            <i class="fas fa-home absolute left-3 top-3 text-gray-400"></i>
+                            <textarea id="customerAddress" name="address" rows="3" placeholder="Contoh: Jl. Merdeka No. 123, RT 01/RW 02" 
+                                    class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"></textarea>
+                        </div>
+                        <small class="text-gray-500">Isi dengan detail alamat seperti nama jalan, nomor rumah, RT/RW</small>
+                    </div>
+                </div>
 
             <!-- Company Fields -->
             <div id="companyFields" class="hidden">

@@ -11,4 +11,10 @@
 <x-settingsm.role.rform />
 <x-settingsm.role.redit />
 <x-settingsm.role.assign-menu :menus="$menus" />
+
+@push('scripts')
+
+<script src="{{ asset('js/global-toast.js') }}"></script>
+
+@endpush
 @endsection

@@ -8,7 +8,8 @@
     <x-customers.attribut.kpi />
 
     <!-- Action Button -->
-    <x-customers.action.action />
+    <x-customers.action.action :provinces="$provinces"/>
+    <x-customers.action.edit :provinces="$provinces"/>
 
     <!-- Filter + Table Section -->
     <div class="bg-white rounded-xl shadow-sm border">
@@ -16,7 +17,7 @@
 
             <!-- Filter + Bulk Action -->
             <x-customers.attribut.filter />
-            <x-customers.action.bulkaction />
+            <x-customers.action.bulkaction :provinces="$provinces"/>
 
             <!-- Table -->
             <div class="bg-white rounded-xl shadow-sm border">
@@ -33,11 +34,24 @@
 
 @push('scripts')
 <script src="{{ asset('js/customers.js') }}"></script>
+<script src="{{ asset('js/address-cascade.js') }}"></script>
+<script src="{{ asset('js/search.js') }}"></script>
+@endpush
 
 <script>
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Customer Management System Loaded');
 });
+
+    // Initialize cascade untuk CREATE form
+        document.addEventListener('DOMContentLoaded', function() {
+            const createCascade = new AddressCascade({
+                provinceId: 'create-province',
+                regencyId: 'create-regency',
+                districtId: 'create-district',
+                villageId: 'create-village'
+            });
+        });
+
 </script>
-@endpush

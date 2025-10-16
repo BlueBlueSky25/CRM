@@ -10,4 +10,10 @@
 
 <x-settingsm.menu.mform />
 <x-settingsm.menu.medit />
+
+@push('scripts')
+<script src="{{ asset('js/user-modal.js') }}"></script>
+<script src="{{ asset('js/global-toast.js') }}"></script>
+
+@endpush
 @endsection

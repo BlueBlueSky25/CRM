@@ -17,4 +17,22 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script src="{{ asset('js/address-cascade.js') }}"></script>
+
+<script src="{{ asset('js/search.js') }}"></script>
+@endpush
+
+<script>
+    // Initialize cascade untuk CREATE form
+        document.addEventListener('DOMContentLoaded', function() {
+            const createCascade = new AddressCascade({
+                provinceId: 'create-province',
+                regencyId: 'create-regency',
+                districtId: 'create-district',
+                villageId: 'create-village'
+            });
+        });
+</script>
 @endsection

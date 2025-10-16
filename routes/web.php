@@ -49,14 +49,25 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // ==========================
     // ✅ Customer Management
     // ==========================
-    Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+    // ==========================
+    // ✅ Customer Management (FIXED)
+    // ==========================
+    // Halaman utama
+    Route::get('/customers', [CustomerController::class, 'index'])->name('customers');
+    
+    // API endpoints - HARUS di atas route {id}
+    Route::get('/customers/export/csv', [CustomerController::class, 'export'])->name('customers.export');
+    Route::post('/customers/import', [CustomerController::class, 'import'])->name('customers.import');
+    Route::post('/customers/bulk-delete', [CustomerController::class, 'bulkDelete'])->name('customers.bulkDelete');
+    
+    // Get all customers (AJAX) - TAMBAHAN INI YANG PENTING
+    Route::get('/customers/list', [CustomerController::class, 'customers'])->name('customers.list');
+    
+    // CRUD individual
     Route::get('/customers/{id}', [CustomerController::class, 'show'])->name('customers.show');
     Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
     Route::put('/customers/{id}', [CustomerController::class, 'update'])->name('customers.update');
     Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('customers.destroy');
-    Route::post('/customers/bulk-delete', [CustomerController::class, 'bulkDelete'])->name('customers.bulkDelete');
-    Route::post('/customers/import', [CustomerController::class, 'import'])->name('customers.import');
-    Route::get('/customers/export/csv', [CustomerController::class, 'export'])->name('customers.export');
     
     // ==========================
     // Calendar Page (React)

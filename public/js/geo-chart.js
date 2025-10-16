@@ -429,15 +429,15 @@ function exportGeoData() {
 /**
  * Show notification (if notification system exists)
  */
-function showNotification(message, type = 'info') {
-    // Check if notification system exists
-    if (typeof window.showNotification === 'function') {
-        window.showNotification(message, type);
-    } else {
-        // Fallback to console
-        console.log(`[${type.toUpperCase()}] ${message}`);
-    }
-}
+// function showNotification(message, type = 'info') {
+//     // Check if notification system exists
+//     if (typeof window.showNotification === 'function') {
+//         window.showNotification(message, type);
+//     } else {
+//         // Fallback to console
+//         console.log(`[${type.toUpperCase()}] ${message}`);
+//     }
+// }
 
 // ==========================
 // AUTO INITIALIZATION

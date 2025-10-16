@@ -57,7 +57,7 @@ function setupEventListeners() {
 // ===================================
 async function loadCustomers() {
     try {
-        const response = await fetch('/customers', {
+        const response = await fetch('/customers/list', {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json',

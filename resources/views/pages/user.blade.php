@@ -33,6 +33,14 @@
 <x-settingsm.user.uform :roles="$roles" :provinces="$provinces" />
 <x-settingsm.user.uedit :roles="$roles" :provinces="$provinces" />
 
+
+@push('scripts')
+<script src="{{ asset('js/address-cascade.js') }}"></script>
+<script src="{{ asset('js/global-toast.js') }}"></script>
+<script src="{{ asset('js/user-modal.js') }}"></script>
+<script src="{{ asset('js/search.js') }}"></script>
+@endpush
+
 <script>
     window.Laravel = {!! json_encode(['csrfToken' => csrf_token()]) !!};
 
@@ -75,5 +83,15 @@
             console.error('Error initializing TableHandler:', error);
         }
     });
+
+    // Initialize cascade untuk CREATE form
+        document.addEventListener('DOMContentLoaded', function() {
+            const createCascade = new AddressCascade({
+                provinceId: 'create-province',
+                regencyId: 'create-regency',
+                districtId: 'create-district',
+                villageId: 'create-village'
+            });
+        });
 </script>
 @endsection

@@ -14,6 +14,10 @@ class Customer extends Model
         'email',
         'phone',
         'address',
+        'province_id',
+        'regency_id',
+        'district_id',
+        'village_id',
         'status',
         'source',
         'pic',
@@ -40,6 +44,27 @@ class Customer extends Model
         });
     }
 
+    // Relationships untuk Address
+    public function province()
+    {
+        return $this->belongsTo(Province::class, 'province_id', 'id');
+    }
+
+    public function regency()
+    {
+        return $this->belongsTo(Regency::class, 'regency_id', 'id');
+    }
+
+    public function district()
+    {
+        return $this->belongsTo(District::class, 'district_id', 'id');
+    }
+
+    public function village()
+    {
+        return $this->belongsTo(Village::class, 'village_id', 'id');
+    }
+
     // Accessor untuk contact_person
     public function getContactPersonAttribute()
     {
@@ -48,6 +73,20 @@ class Customer extends Model
             'email' => $this->contact_person_email,
             'phone' => $this->contact_person_phone,
         ];
+    }
+
+    // Accessor untuk full address
+    public function getFullAddressAttribute()
+    {
+        $addressParts = collect([
+            $this->address,
+            optional($this->village)->name,
+            optional($this->district)->name,
+            optional($this->regency)->name,
+            optional($this->province)->name,
+        ])->filter()->implode(', ');
+
+        return $addressParts ?: '-';
     }
 
     // Scope untuk filter

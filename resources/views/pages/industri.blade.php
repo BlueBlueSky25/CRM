@@ -18,4 +18,8 @@
                     <x-industri.table.table />
                     <x-industri.action.edit />
                     
+                @push('scripts')
+
+                <script src="{{ asset('js/search.js') }}"></script>
+                @endpush
 @endsection
