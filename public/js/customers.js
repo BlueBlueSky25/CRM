@@ -5,29 +5,29 @@
 // Global Variables
 let customersData = [];
 let selectedCustomers = [];
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
 // ===================================
 // INITIALIZATION
 // ===================================
 document.addEventListener('DOMContentLoaded', function() {
-    setupCSRFToken();
     loadCustomers();
     setupEventListeners();
 });
 
-// Setup CSRF Token for all AJAX requests
-function setupCSRFToken() {
-    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    window.csrfToken = token;
-}
-
 // Setup all event listeners
 function setupEventListeners() {
     // Form submission
-    document.getElementById('customerForm').addEventListener('submit', handleFormSubmit);
+    const customerForm = document.getElementById('customerForm');
+    if (customerForm) {
+        customerForm.addEventListener('submit', handleFormSubmit);
+    }
     
     // Import form
-    document.getElementById('importForm').addEventListener('submit', handleImportSubmit);
+    const importForm = document.getElementById('importForm');
+    if (importForm) {
+        importForm.addEventListener('submit', handleImportSubmit);
+    }
     
     // Select all checkbox
     const selectAllCheckbox = document.getElementById('selectAll');
@@ -35,14 +35,21 @@ function setupEventListeners() {
         selectAllCheckbox.addEventListener('change', handleSelectAll);
     }
     
-    // Close modal on outside click
-    document.getElementById('customerModal').addEventListener('click', function(e) {
-        if (e.target === this) closeModal();
-    });
+    // Close modal on outside click (untuk modal tanpa Bootstrap)
+    const customerModal = document.getElementById('customerModal');
+    const importModal = document.getElementById('importModal');
     
-    document.getElementById('importModal').addEventListener('click', function(e) {
-        if (e.target === this) closeImportModal();
-    });
+    if (customerModal) {
+        customerModal.addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    }
+    
+    if (importModal) {
+        importModal.addEventListener('click', function(e) {
+            if (e.target === this) closeImportModal();
+        });
+    }
 }
 
 // ===================================
@@ -53,7 +60,8 @@ async function loadCustomers() {
         const response = await fetch('/customers', {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
             }
         });
         
@@ -74,7 +82,7 @@ function displayCustomers(customers) {
     if (!customers || customers.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="8" class="px-6 py-8 text-center text-gray-500">
+                <td colspan="9" class="px-6 py-8 text-center text-gray-500">
                     <i class="fas fa-users text-4xl mb-2"></i>
                     <p>Belum ada data customer</p>
                 </td>
@@ -84,7 +92,7 @@ function displayCustomers(customers) {
     }
     
     tbody.innerHTML = customers.map((customer, index) => `
-        <tr class="hover:bg-gray-50 transition-colors">
+        <tr class="hover:bg-gray-50 transition-colors border-b">
             <td class="px-6 py-4 whitespace-nowrap">
                 <input type="checkbox" 
                     class="customer-checkbox rounded border-gray-300" 
@@ -126,15 +134,15 @@ function displayCustomers(customers) {
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <button onclick="viewCustomer(${customer.id})" 
-                    class="text-blue-600 hover:text-blue-900 mr-3" title="View">
+                    class="text-blue-600 hover:text-blue-900 mr-3 transition" title="View">
                     <i class="fas fa-eye"></i>
                 </button>
                 <button onclick="editCustomer(${customer.id})" 
-                    class="text-green-600 hover:text-green-900 mr-3" title="Edit">
+                    class="text-green-600 hover:text-green-900 mr-3 transition" title="Edit">
                     <i class="fas fa-edit"></i>
                 </button>
                 <button onclick="deleteCustomer(${customer.id})" 
-                    class="text-red-600 hover:text-red-900" title="Delete">
+                    class="text-red-600 hover:text-red-900 transition" title="Delete">
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
@@ -157,10 +165,10 @@ function getStatusBadge(status) {
 // FILTER FUNCTIONS
 // ===================================
 function filterCustomers() {
-    const search = document.getElementById('searchInput').value.toLowerCase();
-    const type = document.getElementById('filterType').value;
-    const status = document.getElementById('filterStatus').value;
-    const source = document.getElementById('filterSource').value;
+    const search = document.getElementById('searchInput')?.value.toLowerCase() || '';
+    const type = document.getElementById('filterType')?.value || '';
+    const status = document.getElementById('filterStatus')?.value || '';
+    const source = document.getElementById('filterSource')?.value || '';
     
     const filtered = customersData.filter(customer => {
         const matchSearch = !search || 
@@ -179,10 +187,18 @@ function filterCustomers() {
     displayCustomers(filtered);
 }
 
+function resetFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('filterType').value = '';
+    document.getElementById('filterStatus').value = '';
+    document.getElementById('filterSource').value = '';
+    displayCustomers(customersData);
+}
+
 // ===================================
 // MODAL FUNCTIONS
 // ===================================
-function openModal(mode, customerId = null) {
+function openModal(mode = 'add', customerId = null) {
     const modal = document.getElementById('customerModal');
     const form = document.getElementById('customerForm');
     const title = document.getElementById('modalTitle');
@@ -257,7 +273,7 @@ async function handleFormSubmit(e) {
             method: method === 'PUT' ? 'PUT' : 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': window.csrfToken,
+                'X-CSRF-TOKEN': csrfToken,
                 'Accept': 'application/json'
             },
             body: JSON.stringify(data)
@@ -283,7 +299,7 @@ async function loadCustomerData(id) {
         const response = await fetch(`/customers/${id}`, {
             headers: {
                 'Accept': 'application/json',
-                'X-CSRF-TOKEN': window.csrfToken
+                'X-CSRF-TOKEN': csrfToken
             }
         });
         
@@ -296,9 +312,9 @@ async function loadCustomerData(id) {
         document.getElementById('customerName').value = customer.name;
         document.getElementById('customerEmail').value = customer.email;
         document.getElementById('customerPhone').value = customer.phone;
-        document.getElementById('customerAddress').value = customer.address;
+        document.getElementById('customerAddress').value = customer.address || '';
         document.getElementById('customerStatus').value = customer.status;
-        document.getElementById('customerSource').value = customer.source;
+        document.getElementById('customerSource').value = customer.source || '';
         document.getElementById('customerPIC').value = customer.pic;
         document.getElementById('customerNotes').value = customer.notes || '';
         
@@ -329,7 +345,7 @@ async function deleteCustomer(id) {
         const response = await fetch(`/customers/${id}`, {
             method: 'DELETE',
             headers: {
-                'X-CSRF-TOKEN': window.csrfToken,
+                'X-CSRF-TOKEN': csrfToken,
                 'Accept': 'application/json'
             }
         });
@@ -363,7 +379,11 @@ function handleCheckboxChange() {
     
     const bulkActions = document.getElementById('bulkActions');
     if (bulkActions) {
-        bulkActions.classList.toggle('hidden', selectedCustomers.length === 0);
+        if (selectedCustomers.length === 0) {
+            bulkActions.classList.add('hidden');
+        } else {
+            bulkActions.classList.remove('hidden');
+        }
     }
 }
 
@@ -380,7 +400,7 @@ async function bulkDeleteCustomers() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': window.csrfToken,
+                'X-CSRF-TOKEN': csrfToken,
                 'Accept': 'application/json'
             },
             body: JSON.stringify({ ids: selectedCustomers })
@@ -427,7 +447,7 @@ async function handleImportSubmit(e) {
         const response = await fetch('/customers/import', {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': window.csrfToken,
+                'X-CSRF-TOKEN': csrfToken,
                 'Accept': 'application/json'
             },
             body: formData
@@ -439,6 +459,7 @@ async function handleImportSubmit(e) {
             showNotification(result.message, 'success');
             closeImportModal();
             loadCustomers();
+            document.getElementById('importForm').reset();
         } else {
             showNotification(result.message || 'Gagal import data', 'error');
         }
@@ -446,6 +467,10 @@ async function handleImportSubmit(e) {
         console.error('Error:', error);
         showNotification('Gagal import data', 'error');
     }
+}
+
+function exportCustomers() {
+    window.location.href = '/customers/export/csv';
 }
 
 // ===================================
@@ -456,7 +481,7 @@ async function viewCustomer(id) {
         const response = await fetch(`/customers/${id}`, {
             headers: {
                 'Accept': 'application/json',
-                'X-CSRF-TOKEN': window.csrfToken
+                'X-CSRF-TOKEN': csrfToken
             }
         });
         
@@ -471,13 +496,13 @@ async function viewCustomer(id) {
 }
 
 function showCustomerDetail(customer) {
-    const contactPersonHtml = customer.contact_person ? `
+    const contactPersonHtml = customer.contact_person_name ? `
         <div class="border-t pt-4 mt-4">
             <h4 class="font-semibold text-gray-900 mb-3">Contact Person</h4>
             <div class="space-y-2">
-                <p><span class="text-gray-600">Nama:</span> ${customer.contact_person.name}</p>
-                <p><span class="text-gray-600">Email:</span> ${customer.contact_person.email || '-'}</p>
-                <p><span class="text-gray-600">Telepon:</span> ${customer.contact_person.phone || '-'}</p>
+                <p><span class="text-gray-600">Nama:</span> ${customer.contact_person_name}</p>
+                <p><span class="text-gray-600">Email:</span> ${customer.contact_person_email || '-'}</p>
+                <p><span class="text-gray-600">Telepon:</span> ${customer.contact_person_phone || '-'}</p>
             </div>
         </div>
     ` : '';
@@ -508,7 +533,7 @@ function showCustomerDetail(customer) {
                         </div>
                         <div>
                             <p class="text-sm text-gray-600">Source</p>
-                            <p class="font-medium">${customer.source}</p>
+                            <p class="font-medium">${customer.source || '-'}</p>
                         </div>
                     </div>
                     
@@ -525,7 +550,7 @@ function showCustomerDetail(customer) {
                     
                     <div>
                         <p class="text-sm text-gray-600">Alamat</p>
-                        <p class="font-medium">${customer.address}</p>
+                        <p class="font-medium">${customer.address || '-'}</p>
                     </div>
                     
                     <div>

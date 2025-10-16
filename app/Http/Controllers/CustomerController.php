@@ -2,307 +2,259 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Customer;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class CustomerController extends Controller
 {
-    // Tampilkan halaman utama Customers
-    public function customers(Request $request)
+    // GET page customers
+    public function index()
     {
-        // Jika ada filter via AJAX
-        if ($request->ajax()) {
-            $customers = Customer::query()
-                ->search($request->search)
-                ->byType($request->type)
-                ->byStatus($request->status)
-                ->bySource($request->source)
-                ->orderBy('created_at', 'desc')
-                ->get();
-
-            return response()->json($customers);
-        }
-
-        // Load halaman dengan data awal
-        $customers = Customer::orderBy('created_at', 'desc')->get();
-        return view('pages.customers', compact('customers'));
+        return view('pages.customers'); // Sesuaikan dengan nama view mu
     }
 
-    // Get all customers (untuk AJAX)
-    public function getCustomers(Request $request)
+    // GET all customers (AJAX)
+    public function customers()
     {
-        $customers = Customer::query()
-            ->search($request->search)
-            ->byType($request->type)
-            ->byStatus($request->status)
-            ->bySource($request->source)
-            ->orderBy('created_at', 'desc')
-            ->get();
-
+        $customers = Customer::all();
         return response()->json($customers);
     }
 
-    // Show single customer
+    // GET single customer (AJAX)
     public function show($id)
     {
-        try {
-            $customer = Customer::findOrFail($id);
-            
-            // Add contact_person attribute for Company type
-            $customerData = $customer->toArray();
-            if ($customer->type === 'Company') {
-                $customerData['contact_person'] = $customer->contact_person;
-            }
-            
-            return response()->json($customerData);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Customer tidak ditemukan'
-            ], 404);
-        }
+        $customer = Customer::findOrFail($id);
+        return response()->json($customer);
     }
 
-    // Simpan data baru
+    // POST create customer (AJAX)
     public function store(Request $request)
     {
-        try {
-            $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'type' => 'required|in:Personal,Company',
-                'email' => 'required|email|unique:customers,email',
-                'phone' => 'required|string|max:20',
-                'address' => 'required|string',
-                'status' => 'required|in:Lead,Prospect,Active,Inactive',
-                'source' => 'required|in:Website,Referral,Ads,Walk-in,Social Media',
-                'pic' => 'required|string|max:255',
-                'notes' => 'nullable|string',
-                // Contact Person (opsional untuk Company)
-                'contact_person_name' => 'nullable|string|max:255',
-                'contact_person_email' => 'nullable|email',
-                'contact_person_phone' => 'nullable|string|max:20',
-            ]);
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'type' => 'required|in:Personal,Company',
+            'email' => 'required|email|unique:customers,email',
+            'phone' => 'required|string|max:20',
+            'address' => 'nullable|string',
+            'status' => 'required|in:Lead,Prospect,Active,Inactive',
+            'source' => 'nullable|string|max:100',
+            'pic' => 'required|string|max:100',
+            'notes' => 'nullable|string',
+            'contact_person_name' => 'nullable|string|max:255',
+            'contact_person_email' => 'nullable|email',
+            'contact_person_phone' => 'nullable|string|max:20',
+        ]);
 
-            $customer = Customer::create($validated);
+        $customer = Customer::create($validated);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Customer berhasil ditambahkan!',
-                'data' => $customer
-            ], 201);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Customer berhasil ditambahkan',
+            'data' => $customer
+        ], 201);
     }
 
-    // Update data
+    // PUT update customer (AJAX)
     public function update(Request $request, $id)
     {
-        try {
-            $customer = Customer::findOrFail($id);
+        $customer = Customer::findOrFail($id);
 
-            $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'type' => 'required|in:Personal,Company',
-                'email' => "required|email|unique:customers,email,{$id}",
-                'phone' => 'required|string|max:20',
-                'address' => 'required|string',
-                'status' => 'required|in:Lead,Prospect,Active,Inactive',
-                'source' => 'required|in:Website,Referral,Ads,Walk-in,Social Media',
-                'pic' => 'required|string|max:255',
-                'notes' => 'nullable|string',
-                // Contact Person
-                'contact_person_name' => 'nullable|string|max:255',
-                'contact_person_email' => 'nullable|email',
-                'contact_person_phone' => 'nullable|string|max:20',
-            ]);
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'type' => 'required|in:Personal,Company',
+            'email' => 'required|email|unique:customers,email,' . $id,
+            'phone' => 'required|string|max:20',
+            'address' => 'nullable|string',
+            'status' => 'required|in:Lead,Prospect,Active,Inactive',
+            'source' => 'nullable|string|max:100',
+            'pic' => 'required|string|max:100',
+            'notes' => 'nullable|string',
+            'contact_person_name' => 'nullable|string|max:255',
+            'contact_person_email' => 'nullable|email',
+            'contact_person_phone' => 'nullable|string|max:20',
+        ]);
 
-            $customer->update($validated);
+        $customer->update($validated);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Customer berhasil diupdate!',
-                'data' => $customer
-            ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Customer berhasil diperbarui',
+            'data' => $customer
+        ]);
     }
 
-    // Hapus data
+    // DELETE customer (AJAX)
     public function destroy($id)
     {
-        try {
-            $customer = Customer::findOrFail($id);
-            $customer->delete();
+        $customer = Customer::findOrFail($id);
+        $customer->delete();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Customer berhasil dihapus!'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menghapus customer: ' . $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Customer berhasil dihapus'
+        ]);
     }
 
-    // Bulk delete
+    // BULK DELETE (AJAX)
     public function bulkDelete(Request $request)
     {
-        try {
-            $ids = $request->input('ids', []);
-            
-            if (empty($ids)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Tidak ada customer yang dipilih'
-                ], 400);
-            }
-            
-            $deleted = Customer::whereIn('id', $ids)->delete();
+        $validated = $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'exists:customers,id'
+        ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => $deleted . ' customer berhasil dihapus!'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menghapus customer: ' . $e->getMessage()
-            ], 500);
-        }
+        $count = count($validated['ids']);
+        Customer::whereIn('id', $validated['ids'])->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => $count . ' customer berhasil dihapus'
+        ]);
     }
 
-    // Export to CSV
-    public function export()
-    {
-        $customers = Customer::orderBy('created_at', 'desc')->get();
-
-        $filename = 'customers_' . date('Y-m-d') . '.csv';
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=\"$filename\"",
-        ];
-
-        $callback = function() use ($customers) {
-            $file = fopen('php://output', 'w');
-            
-            // Header
-            fputcsv($file, [
-                'Customer ID', 'Nama', 'Tipe', 'Email', 'Telepon', 
-                'Alamat', 'Status', 'Source', 'PIC', 'Notes', 
-                'Contact Person Name', 'Contact Person Email', 'Contact Person Phone',
-                'Tanggal Dibuat'
-            ]);
-
-            // Data
-            foreach ($customers as $customer) {
-                fputcsv($file, [
-                    $customer->customer_id,
-                    $customer->name,
-                    $customer->type,
-                    $customer->email,
-                    $customer->phone,
-                    $customer->address,
-                    $customer->status,
-                    $customer->source,
-                    $customer->pic,
-                    $customer->notes,
-                    $customer->contact_person_name ?? '',
-                    $customer->contact_person_email ?? '',
-                    $customer->contact_person_phone ?? '',
-                    $customer->created_at->format('Y-m-d H:i:s'),
-                ]);
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
-    }
-
-    // Import from CSV
+    // IMPORT dari CSV/Excel
     public function import(Request $request)
     {
-        try {
-            $request->validate([
-                'file' => 'required|mimes:csv,txt|max:2048'
-            ]);
+        $request->validate([
+            'file' => 'required|file|mimes:csv,xlsx,xls|max:5120'
+        ]);
 
+        try {
             $file = $request->file('file');
-            $path = $file->getRealPath();
-            $data = array_map('str_getcsv', file($path));
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('imports', $fileName, 'local');
+
+            $filePath = storage_path('app/' . $path);
             
-            // Skip header
-            $header = array_shift($data);
+            // Detect file type
+            $ext = $file->getClientOriginalExtension();
             
+            if ($ext === 'csv') {
+                $rows = array_map('str_getcsv', file($filePath));
+            } else {
+                // Untuk xlsx/xls, gunakan SimpleXLSX atau baca manual
+                $rows = $this->readExcelFile($filePath);
+            }
+
+            if (empty($rows)) {
+                Storage::delete($path);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'File kosong atau format tidak valid'
+                ], 400);
+            }
+
+            $header = array_shift($rows);
             $imported = 0;
             $errors = [];
-            
-            foreach ($data as $index => $row) {
+
+            foreach ($rows as $key => $row) {
+                if (empty(array_filter($row))) continue;
+
                 try {
-                    // Skip empty rows
-                    if (empty(array_filter($row))) {
+                    $data = array_combine($header, $row);
+                    
+                    if (!$data || empty($data['email'] ?? null)) {
+                        $errors[] = "Baris " . ($key + 2) . ": Email tidak boleh kosong";
                         continue;
                     }
-                    
+
+                    // Skip jika email sudah ada
+                    if (Customer::where('email', $data['email'])->exists()) {
+                        $errors[] = "Baris " . ($key + 2) . ": Email sudah terdaftar";
+                        continue;
+                    }
+
                     Customer::create([
-                        'name' => $row[0] ?? '',
-                        'type' => $row[1] ?? 'Personal',
-                        'email' => $row[2] ?? '',
-                        'phone' => $row[3] ?? '',
-                        'address' => $row[4] ?? '',
-                        'status' => $row[5] ?? 'Lead',
-                        'source' => $row[6] ?? 'Website',
-                        'pic' => $row[7] ?? '',
-                        'notes' => $row[8] ?? null,
-                        'contact_person_name' => $row[9] ?? null,
-                        'contact_person_email' => $row[10] ?? null,
-                        'contact_person_phone' => $row[11] ?? null,
+                        'customer_id' => $data['customer_id'] ?? null,
+                        'name' => $data['name'] ?? 'N/A',
+                        'type' => $data['type'] ?? 'Personal',
+                        'email' => $data['email'],
+                        'phone' => $data['phone'] ?? '',
+                        'address' => $data['address'] ?? null,
+                        'status' => $data['status'] ?? 'Lead',
+                        'source' => $data['source'] ?? null,
+                        'pic' => $data['pic'] ?? 'Admin',
+                        'notes' => $data['notes'] ?? null,
+                        'contact_person_name' => $data['contact_person_name'] ?? null,
+                        'contact_person_email' => $data['contact_person_email'] ?? null,
+                        'contact_person_phone' => $data['contact_person_phone'] ?? null,
                     ]);
+
                     $imported++;
                 } catch (\Exception $e) {
-                    $errors[] = "Baris " . ($index + 2) . ": " . $e->getMessage();
-                    continue;
+                    $errors[] = "Baris " . ($key + 2) . ": " . $e->getMessage();
                 }
             }
 
-            $message = "$imported customer berhasil diimport!";
-            if (!empty($errors)) {
-                $message .= " (" . count($errors) . " baris gagal)";
-            }
+            // Hapus file
+            Storage::delete($path);
 
             return response()->json([
                 'success' => true,
-                'message' => $message,
+                'message' => "$imported data customer berhasil diimpor",
                 'imported' => $imported,
                 'errors' => $errors
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal import: ' . $e->getMessage()
+                'message' => 'Error: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    // Helper untuk baca Excel
+    private function readExcelFile($filePath)
+    {
+        $rows = [];
+        // Jika menggunakan library, sesuaikan di sini
+        // Contoh dengan PhpOffice/PhpSpreadsheet
+        return $rows;
+    }
+
+    // EXPORT ke CSV
+    public function export()
+    {
+        $customers = Customer::all();
+
+        $filename = 'customers-' . date('Y-m-d-His') . '.csv';
+        $handle = fopen('php://memory', 'w');
+
+        // Header
+        fputcsv($handle, [
+            'ID', 'Customer ID', 'Nama', 'Tipe', 'Email', 'Telepon',
+            'Alamat', 'Status', 'Source', 'PIC', 'Notes',
+            'Contact Person Nama', 'Contact Person Email', 'Contact Person Telepon'
+        ]);
+
+        // Data
+        foreach ($customers as $customer) {
+            fputcsv($handle, [
+                $customer->id,
+                $customer->customer_id,
+                $customer->name,
+                $customer->type,
+                $customer->email,
+                $customer->phone,
+                $customer->address,
+                $customer->status,
+                $customer->source,
+                $customer->pic,
+                $customer->notes,
+                $customer->contact_person_name,
+                $customer->contact_person_email,
+                $customer->contact_person_phone,
+            ]);
+        }
+
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        return response($csv, 200)
+            ->header('Content-Type', 'text/csv; charset=utf-8')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 }
