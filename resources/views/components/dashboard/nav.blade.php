@@ -121,15 +121,6 @@ document.addEventListener('click', function(event) {
     <div class="flex-1 overflow-y-auto p-6 pb-0">
         <!-- Sidebar Header -->
         <div class="flex items-center justify-between mb-8">
-            <div class="flex items-center space-x-3">
-                <img class="h-8 w-8 rounded-full" 
-                    src="{{ asset('img/logo.png') }}" 
-                    alt="Profile">
-                <div>
-                    <h3 class="font-semibold text-gray-900">superadmin User</h3>
-                    <p class="text-sm text-gray-500">superadministrator</p>
-                </div>
-            </div>
             <button id="sidebarClose" class="text-gray-400 hover:text-gray-600 transition-colors">
                 <i class="fas fa-times text-xl"></i>
             </button>

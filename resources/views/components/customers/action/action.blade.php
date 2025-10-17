@@ -7,14 +7,14 @@
                 <!-- Import -->
                 <button onclick="openImportModal()"
                     class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                    <i class="fas fa-upload text-gray-600"></i>
+                    <i class="fas fa-download text-gray-600"></i>
                     Import
                 </button>
 
                 <!-- Export -->
                 <a href="{{ route('customers.export') }}"
                     class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                    <i class="fas fa-download text-gray-600"></i>
+                    <i class="fas fa-upload text-gray-600"></i>
                     Export
                 </a>
 
