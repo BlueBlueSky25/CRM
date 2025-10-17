@@ -84,11 +84,11 @@
 
 <!-- JavaScript untuk Modal -->
 <script>
+    // ========== EDIT ROLE FUNCTIONS ==========
     function openEditRoleModal(roleId, roleName, description) {
         document.getElementById('editRoleId').value = roleId;
         document.getElementById('editRoleName').value = roleName;
         document.getElementById('editRoleDescription').value = description || '';
-        
         document.getElementById('editRoleModal').classList.remove('hidden');
     }
 
@@ -97,6 +97,7 @@
         document.getElementById('editRoleForm').reset();
     }
 
+    // ========== ADD ROLE FUNCTIONS ==========
     function openRoleModal() {
         document.getElementById('addRoleModal').classList.remove('hidden');
     }
@@ -106,38 +107,108 @@
         document.getElementById('addRoleForm').reset();
     }
 
-    document.getElementById('editRoleForm').addEventListener('submit', function(e) {
-        e.preventDefault();
+    // ========== ASSIGN MENU FUNCTIONS ==========
+    function openAssignMenuModal(roleId, roleName) {
+        const modal = document.getElementById('assignMenuModal');
+        if (!modal) {
+            console.error('assignMenuModal not found!');
+            alert('Modal tidak ditemukan. Pastikan assign-menu.blade.php sudah di-include.');
+            return;
+        }
+
+        // Set role info
+        document.getElementById('roleId').value = roleId;
+        document.getElementById('roleName').textContent = roleName;
         
-        const roleId = document.getElementById('editRoleId').value;
-        const form = document.getElementById('editRoleForm');
-        form.action = `/roles/${roleId}`;
-        form.submit();
-    });
+        // Load existing permissions
+        loadRolePermissions(roleId);
+        
+        // Update form action
+        const form = document.getElementById('assignMenuForm');
+        if (form) {
+            form.action = `/roles/${roleId}/assign-menu`;
+        }
+        
+        // Show modal
+        modal.classList.remove('hidden');
+    }
 
-    document.getElementById('editRoleModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeEditRoleModal();
+    function closeAssignMenuModal() {
+        const modal = document.getElementById('assignMenuModal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    }
+
+    function loadRolePermissions(roleId) {
+        // Reset all checkboxes
+        document.querySelectorAll('#assignMenuForm input[type="checkbox"]').forEach(cb => {
+            cb.checked = false;
+        });
+        
+        // Load from global data
+        if (window.rolePermissions && window.rolePermissions[roleId]) {
+            const permissions = window.rolePermissions[roleId];
+            
+            permissions.forEach(perm => {
+                const checkbox = document.querySelector(
+                    `input[name="menus[${perm.menu_id}][]"][value="${perm.permission_type}"]`
+                );
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+            });
+        }
+    }
+
+    // ========== EVENT LISTENERS ==========
+    document.addEventListener('DOMContentLoaded', function() {
+        // Edit form submit
+        const editForm = document.getElementById('editRoleForm');
+        if (editForm) {
+            editForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const roleId = document.getElementById('editRoleId').value;
+                this.action = `/roles/${roleId}`;
+                this.submit();
+            });
+        }
+
+        // Edit modal outside click
+        const editModal = document.getElementById('editRoleModal');
+        if (editModal) {
+            editModal.addEventListener('click', function(e) {
+                if (e.target === this) closeEditRoleModal();
+            });
+        }
+
+        // Add modal outside click
+        const addModal = document.getElementById('addRoleModal');
+        if (addModal) {
+            addModal.addEventListener('click', function(e) {
+                if (e.target === this) closeAddRoleModal();
+            });
+        }
+
+        // Assign modal outside click
+        const assignModal = document.getElementById('assignMenuModal');
+        if (assignModal) {
+            assignModal.addEventListener('click', function(e) {
+                if (e.target === this) closeAssignMenuModal();
+            });
         }
     });
 
-    document.getElementById('addRoleModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeAddRoleModal();
-        }
-    });
-
+    // ESC key to close all modals
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             closeEditRoleModal();
             closeAddRoleModal();
+            closeAssignMenuModal();
         }
     });
-
-    function openAssignMenuModal(roleId, roleName) {
-        alert(`Assign permissions for role: ${roleName} (ID: ${roleId})`);
-    }
 </script>
+
 
 <style>
     @keyframes modalSlideIn {
