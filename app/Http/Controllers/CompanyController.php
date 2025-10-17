@@ -29,65 +29,76 @@ class CompanyController extends Controller
         ));
     }
 
-    public function search(Request $request)
+public function search(Request $request)
 {
     $query = Company::with('companyType');
 
-    // Gunakan parameter 'search' atau 'query'
+    // Search
     $search = $request->input('search') ?? $request->input('query');
 
     if ($search) {
-        $query->where(function($q) use ($search) {
-            $q->where('company_name', 'like', "%{$search}%")
-              ->orWhere('description', 'like', "%{$search}%")
-              ->orWhereHas('companyType', function($qt) use ($search) {
-                  $qt->where('type_name', 'like', "%{$search}%");
+        $searchLower = strtolower($search);
+        
+        $query->where(function($q) use ($searchLower) {
+            $q->whereRaw('LOWER(company_name) LIKE ?', ["%{$searchLower}%"])
+              ->orWhereRaw('LOWER(description) LIKE ?', ["%{$searchLower}%"])
+              ->orWhereHas('companyType', function($qt) use ($searchLower) {
+                  $qt->whereRaw('LOWER(type_name) LIKE ?', ["%{$searchLower}%"]);
               });
         });
     }
 
-
-        // Filter by type
-        if ($request->filled('type')) {
-            $query->where('company_type_id', $request->type);
+    // Filter by type - HANDLE BOTH ID DAN NAME
+    if ($request->filled('type')) {
+        $type = $request->type;
+        
+        // Cek apakah numeric (ID) atau string (name)
+        if (is_numeric($type)) {
+            $query->where('company_type_id', $type);
+        } else {
+            // Search by type_name (case-insensitive)
+            $query->whereHas('companyType', function($q) use ($type) {
+                $q->whereRaw('LOWER(type_name) LIKE ?', ['%' . strtolower($type) . '%']);
+            });
         }
-
-        // Filter by tier
-        if ($request->filled('tier')) {
-            $query->where('tier', $request->tier);
-        }
-
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Pagination
-        $companies = $query->orderBy('company_name', 'asc')->paginate(10);
-
-        // Format response untuk AJAX
-        return response()->json([
-            'items' => $companies->map(function($company, $index) use ($companies) {
-                return [
-                    'number' => $companies->firstItem() + $index,
-                    'company_id' => $company->company_id,
-                    'company_name' => $company->company_name ?? '-',
-                    'company_type' => $company->companyType->type_name ?? '-',
-                    'tier' => $company->tier ?? '-',
-                    'description' => $company->description ?? '-',
-                    'status' => ucfirst($company->status ?? 'inactive'),
-                    'actions' => $this->getCompanyActions($company)
-                ];
-            })->toArray(),
-            'pagination' => [
-                'current_page' => $companies->currentPage(),
-                'last_page' => $companies->lastPage(),
-                'from' => $companies->firstItem(),
-                'to' => $companies->lastItem(),
-                'total' => $companies->total()
-            ]
-        ]);
     }
+
+    // Filter by tier - CASE INSENSITIVE
+    if ($request->filled('tier')) {
+        $query->whereRaw('LOWER(tier) = ?', [strtolower($request->tier)]);
+    }
+
+    // Filter by status
+    if ($request->filled('status')) {
+        $query->whereRaw('LOWER(status) = ?', [strtolower($request->status)]);
+    }
+
+    // Pagination
+    $companies = $query->orderBy('company_name', 'asc')->paginate(10);
+
+    // Format response untuk AJAX
+    return response()->json([
+        'items' => $companies->map(function($company, $index) use ($companies) {
+            return [
+                'number' => $companies->firstItem() + $index,
+                'company_id' => $company->company_id,
+                'company_name' => $company->company_name ?? '-',
+                'company_type' => $company->companyType->type_name ?? '-',
+                'tier' => $company->tier ?? '-',
+                'description' => $company->description ?? '-',
+                'status' => ucfirst($company->status ?? 'inactive'),
+                'actions' => $this->getCompanyActions($company)
+            ];
+        })->toArray(),
+        'pagination' => [
+            'current_page' => $companies->currentPage(),
+            'last_page' => $companies->lastPage(),
+            'from' => $companies->firstItem(),
+            'to' => $companies->lastItem(),
+            'total' => $companies->total()
+        ]
+    ]);
+}
 
     public function store(Request $request)
     {
