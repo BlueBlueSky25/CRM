@@ -5,6 +5,7 @@
 // Global Variables
 let customersData = [];
 let selectedCustomers = [];
+let addressCascadeInstance = null;
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
 // ===================================
@@ -35,7 +36,44 @@ function setupEventListeners() {
         selectAllCheckbox.addEventListener('change', handleSelectAll);
     }
     
-    // Close modal on outside click (untuk modal tanpa Bootstrap)
+    // Modal button listeners
+    const openAddModalBtn = document.getElementById('openAddModalBtn');
+    if (openAddModalBtn) {
+        openAddModalBtn.addEventListener('click', () => openModal('add'));
+    }
+    
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', closeModal);
+    }
+    
+    const cancelModalBtn = document.getElementById('cancelModalBtn');
+    if (cancelModalBtn) {
+        cancelModalBtn.addEventListener('click', closeModal);
+    }
+    
+    const openImportBtn = document.getElementById('openImportBtn');
+    if (openImportBtn) {
+        openImportBtn.addEventListener('click', openImportModal);
+    }
+    
+    const closeImportModalBtn = document.getElementById('closeImportModalBtn');
+    if (closeImportModalBtn) {
+        closeImportModalBtn.addEventListener('click', closeImportModal);
+    }
+    
+    const cancelImportBtn = document.getElementById('cancelImportBtn');
+    if (cancelImportBtn) {
+        cancelImportBtn.addEventListener('click', closeImportModal);
+    }
+    
+    // Customer type radio buttons
+    const customerTypeRadios = document.querySelectorAll('input[name="customerType"]');
+    customerTypeRadios.forEach(radio => {
+        radio.addEventListener('change', toggleCompanyFields);
+    });
+    
+    // Close modal on outside click
     const customerModal = document.getElementById('customerModal');
     const importModal = document.getElementById('importModal');
     
@@ -199,6 +237,7 @@ function openModal(mode = 'add', customerId = null) {
     const modal = document.getElementById('customerModal');
     const form = document.getElementById('customerForm');
     const title = document.getElementById('modalTitle');
+    const titleIcon = title.previousElementSibling?.querySelector('i');
     
     // Reset form
     form.reset();
@@ -207,11 +246,23 @@ function openModal(mode = 'add', customerId = null) {
     
     if (mode === 'add') {
         title.textContent = 'Tambah Customer';
+        if (titleIcon) {
+            titleIcon.className = 'fas fa-user-plus text-white text-lg';
+        }
         document.querySelector('input[name="customerType"][value="Personal"]').checked = true;
         toggleCompanyFields();
+        
+        // Initialize address cascade for add mode
+        initializeAddressCascade();
     } else if (mode === 'edit' && customerId) {
         title.textContent = 'Edit Customer';
+        if (titleIcon) {
+            titleIcon.className = 'fas fa-user-edit text-white text-lg';
+        }
         document.getElementById('formMethod').value = 'PUT';
+        
+        // Initialize address cascade first, then load data
+        initializeAddressCascade();
         loadCustomerData(customerId);
     }
     
@@ -225,6 +276,12 @@ function closeModal() {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
     document.body.classList.remove('overflow-hidden');
+    
+    // Destroy address cascade instance
+    if (addressCascadeInstance) {
+        addressCascadeInstance.destroy();
+        addressCascadeInstance = null;
+    }
 }
 
 function toggleCompanyFields() {
@@ -239,6 +296,23 @@ function toggleCompanyFields() {
         companyFields.classList.add('hidden');
         nameLabel.textContent = 'Nama Lengkap';
     }
+}
+
+function initializeAddressCascade() {
+    // Destroy existing instance if any
+    if (addressCascadeInstance) {
+        addressCascadeInstance.destroy();
+    }
+    
+    // Create new instance using the helper function from address-cascade.js
+    addressCascadeInstance = initAddressCascade(
+        'create-province',
+        'create-regency',
+        'create-district',
+        'create-village'
+    );
+    
+    console.log('Address cascade initialized for modal');
 }
 
 // ===================================
@@ -311,12 +385,51 @@ async function loadCustomerData(id) {
         document.getElementById('customerPhone').value = customer.phone;
         document.getElementById('customerAddress').value = customer.address || '';
         document.getElementById('customerStatus').value = customer.status;
+        document.getElementById('customerSource').value = customer.source || 'Website';
         document.getElementById('customerPIC').value = customer.pic;
         document.getElementById('customerNotes').value = customer.notes || '';
         
         // Set customer type
         document.querySelector(`input[name="customerType"][value="${customer.type}"]`).checked = true;
         toggleCompanyFields();
+        
+        // Fill company fields if company type
+        if (customer.type === 'Company') {
+            document.getElementById('contactPersonName').value = customer.contact_person_name || '';
+            document.getElementById('contactPersonEmail').value = customer.contact_person_email || '';
+            document.getElementById('contactPersonPhone').value = customer.contact_person_phone || '';
+        }
+        
+        // Load address cascade data
+        if (customer.province_id) {
+            document.getElementById('create-province').value = customer.province_id;
+            
+            // Trigger cascade loading
+            if (addressCascadeInstance) {
+                await addressCascadeInstance.loadRegencies(customer.province_id);
+                
+                if (customer.regency_id) {
+                    // Wait a bit for regencies to load
+                    setTimeout(async () => {
+                        document.getElementById('create-regency').value = customer.regency_id;
+                        await addressCascadeInstance.loadDistricts(customer.regency_id);
+                        
+                        if (customer.district_id) {
+                            setTimeout(async () => {
+                                document.getElementById('create-district').value = customer.district_id;
+                                await addressCascadeInstance.loadVillages(customer.district_id);
+                                
+                                if (customer.village_id) {
+                                    setTimeout(() => {
+                                        document.getElementById('create-village').value = customer.village_id;
+                                    }, 300);
+                                }
+                            }, 300);
+                        }
+                    }, 300);
+                }
+            }
+        }
         
     } catch (error) {
         console.error('Error loading customer:', error);
@@ -638,11 +751,18 @@ function showNotification(message, type = 'info') {
         'info': 'bg-blue-500'
     };
     
+    const icons = {
+        'success': 'fa-check-circle',
+        'error': 'fa-exclamation-circle',
+        'warning': 'fa-exclamation-triangle',
+        'info': 'fa-info-circle'
+    };
+    
     const notification = document.createElement('div');
     notification.className = `fixed top-4 right-4 ${bgColors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-[100] animate-fadeIn`;
     notification.innerHTML = `
         <div class="flex items-center gap-3">
-            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+            <i class="fas ${icons[type]}"></i>
             <span>${message}</span>
         </div>
     `;
