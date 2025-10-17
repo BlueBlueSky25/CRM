@@ -108,12 +108,8 @@ class CustomerController extends Controller
             'district_id' => 'nullable|exists:districts,id',
             'village_id' => 'nullable|exists:villages,id',
             'status' => 'required|in:Lead,Prospect,Active,Inactive',
-            'source' => 'nullable|string|max:100',
             'pic' => 'required|string|max:100',
             'notes' => 'nullable|string',
-            'contact_person_name' => 'nullable|string|max:255',
-            'contact_person_email' => 'nullable|email',
-            'contact_person_phone' => 'nullable|string|max:20',
         ]);
 
         $customer = Customer::create($validated);
@@ -141,12 +137,8 @@ class CustomerController extends Controller
             'district_id' => 'nullable|exists:districts,id',
             'village_id' => 'nullable|exists:villages,id',
             'status' => 'required|in:Lead,Prospect,Active,Inactive',
-            'source' => 'nullable|string|max:100',
             'pic' => 'required|string|max:100',
             'notes' => 'nullable|string',
-            'contact_person_name' => 'nullable|string|max:255',
-            'contact_person_email' => 'nullable|email',
-            'contact_person_phone' => 'nullable|string|max:20',
         ]);
 
         $customer->update($validated);
@@ -252,12 +244,8 @@ class CustomerController extends Controller
                         'district_id' => $data['district_id'] ?? null,
                         'village_id' => $data['village_id'] ?? null,
                         'status' => $data['status'] ?? 'Lead',
-                        'source' => $data['source'] ?? null,
                         'pic' => $data['pic'] ?? 'Admin',
                         'notes' => $data['notes'] ?? null,
-                        'contact_person_name' => $data['contact_person_name'] ?? null,
-                        'contact_person_email' => $data['contact_person_email'] ?? null,
-                        'contact_person_phone' => $data['contact_person_phone'] ?? null,
                     ]);
 
                     $imported++;
@@ -304,8 +292,7 @@ class CustomerController extends Controller
         fputcsv($handle, [
             'ID', 'Customer ID', 'Nama', 'Tipe', 'Email', 'Telepon',
             'Alamat', 'Provinsi', 'Kabupaten', 'Kecamatan', 'Kelurahan',
-            'Status', 'Source', 'PIC', 'Notes',
-            'Contact Person Nama', 'Contact Person Email', 'Contact Person Telepon'
+            'Status', 'PIC', 'Notes',
         ]);
 
         // Data
@@ -323,12 +310,8 @@ class CustomerController extends Controller
                 $customer->district->name ?? '',
                 $customer->village->name ?? '',
                 $customer->status,
-                $customer->source,
                 $customer->pic,
                 $customer->notes,
-                $customer->contact_person_name,
-                $customer->contact_person_email,
-                $customer->contact_person_phone,
             ]);
         }
 

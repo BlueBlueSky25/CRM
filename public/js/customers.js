@@ -168,7 +168,6 @@ function filterCustomers() {
     const search = document.getElementById('searchInput')?.value.toLowerCase() || '';
     const type = document.getElementById('filterType')?.value || '';
     const status = document.getElementById('filterStatus')?.value || '';
-    const source = document.getElementById('filterSource')?.value || '';
     
     const filtered = customersData.filter(customer => {
         const matchSearch = !search || 
@@ -179,9 +178,8 @@ function filterCustomers() {
         
         const matchType = !type || customer.type === type;
         const matchStatus = !status || customer.status === status;
-        const matchSource = !source || customer.source === source;
         
-        return matchSearch && matchType && matchStatus && matchSource;
+        return matchSearch && matchType && matchStatus;
     });
     
     displayCustomers(filtered);
@@ -191,7 +189,6 @@ function resetFilters() {
     document.getElementById('searchInput').value = '';
     document.getElementById('filterType').value = '';
     document.getElementById('filterStatus').value = '';
-    document.getElementById('filterSource').value = '';
     displayCustomers(customersData);
 }
 
@@ -314,7 +311,6 @@ async function loadCustomerData(id) {
         document.getElementById('customerPhone').value = customer.phone;
         document.getElementById('customerAddress').value = customer.address || '';
         document.getElementById('customerStatus').value = customer.status;
-        document.getElementById('customerSource').value = customer.source || '';
         document.getElementById('customerPIC').value = customer.pic;
         document.getElementById('customerNotes').value = customer.notes || '';
         
@@ -322,12 +318,6 @@ async function loadCustomerData(id) {
         document.querySelector(`input[name="customerType"][value="${customer.type}"]`).checked = true;
         toggleCompanyFields();
         
-        // Fill contact person if company
-        if (customer.type === 'Company') {
-            document.getElementById('contactPersonName').value = customer.contact_person_name || '';
-            document.getElementById('contactPersonEmail').value = customer.contact_person_email || '';
-            document.getElementById('contactPersonPhone').value = customer.contact_person_phone || '';
-        }
     } catch (error) {
         console.error('Error loading customer:', error);
         showNotification('Gagal memuat data customer', 'error');
@@ -496,84 +486,115 @@ async function viewCustomer(id) {
 }
 
 function showCustomerDetail(customer) {
-    const contactPersonHtml = customer.contact_person_name ? `
-        <div class="border-t pt-4 mt-4">
-            <h4 class="font-semibold text-gray-900 mb-3">Contact Person</h4>
-            <div class="space-y-2">
-                <p><span class="text-gray-600">Nama:</span> ${customer.contact_person_name}</p>
-                <p><span class="text-gray-600">Email:</span> ${customer.contact_person_email || '-'}</p>
-                <p><span class="text-gray-600">Telepon:</span> ${customer.contact_person_phone || '-'}</p>
-            </div>
-        </div>
-    ` : '';
+    const typeIcon = customer.type === 'Company' ? 'fa-building' : 'fa-user';
     
     const html = `
-        <div class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                    <h3 class="text-xl font-semibold text-gray-900">Detail Customer</h3>
-                    <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times"></i>
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+                <!-- Header -->
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas ${typeIcon} text-blue-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">${customer.name}</h3>
+                            <p class="text-xs text-gray-500">${customer.customer_id || 'No ID'}</p>
+                        </div>
+                    </div>
+                    <button onclick="this.closest('.fixed').remove()" 
+                        class="text-gray-400 hover:text-gray-600 p-2">
+                        <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
                 
-                <div class="px-6 py-4 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h4 class="text-2xl font-bold text-gray-900">${customer.name}</h4>
-                            <p class="text-sm text-gray-500">${customer.customer_id}</p>
-                        </div>
+                <!-- Content -->
+                <div class="px-6 py-5 overflow-y-auto max-h-[calc(90vh-140px)] space-y-5">
+                    <!-- Status & Type Row -->
+                    <div class="flex gap-3">
                         ${getStatusBadge(customer.status)}
+                        <span class="px-3 py-1 text-xs font-medium rounded-full ${
+                            customer.type === 'Company' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                        }">
+                            <i class="fas ${typeIcon} mr-1"></i>${customer.type}
+                        </span>
                     </div>
                     
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-sm text-gray-600">Tipe</p>
-                            <p class="font-medium">${customer.type}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-600">Source</p>
-                            <p class="font-medium">${customer.source || '-'}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-sm text-gray-600">Email</p>
-                            <p class="font-medium">${customer.email}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-600">Telepon</p>
-                            <p class="font-medium">${customer.phone}</p>
-                        </div>
-                    </div>
-                    
+                    <!-- Contact Info -->
                     <div>
-                        <p class="text-sm text-gray-600">Alamat</p>
-                        <p class="font-medium">${customer.address || '-'}</p>
+                        <h4 class="text-xs font-semibold text-gray-500 uppercase mb-3 flex items-center">
+                            <i class="fas fa-id-card mr-2"></i>Informasi Kontak
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                                <div class="w-9 h-9 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-envelope text-white text-sm"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs text-gray-600">Email</p>
+                                    <p class="font-medium text-gray-900 truncate">${customer.email}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                                <div class="w-9 h-9 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-phone text-white text-sm"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs text-gray-600">Telepon</p>
+                                    <p class="font-medium text-gray-900">${customer.phone}</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
+                    <!-- Address -->
+                    ${customer.address ? `
                     <div>
-                        <p class="text-sm text-gray-600">PIC</p>
-                        <p class="font-medium">${customer.pic}</p>
-                    </div>
-                    
-                    ${customer.notes ? `
-                    <div>
-                        <p class="text-sm text-gray-600">Notes</p>
-                        <p class="font-medium">${customer.notes}</p>
+                        <h4 class="text-xs font-semibold text-gray-500 uppercase mb-2 flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2"></i>Alamat
+                        </h4>
+                        <div class="p-3 bg-gray-50 rounded-lg">
+                            <p class="text-sm text-gray-700">${customer.address}</p>
+                        </div>
                     </div>
                     ` : ''}
                     
-                    ${contactPersonHtml}
+                    <!-- PIC -->
+                    <div>
+                        <h4 class="text-xs font-semibold text-gray-500 uppercase mb-2 flex items-center">
+                            <i class="fas fa-user-tie mr-2"></i>Person In Charge
+                        </h4>
+                        <div class="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+                            <div class="w-9 h-9 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-user text-white text-sm"></i>
+                            </div>
+                            <p class="font-medium text-gray-900">${customer.pic}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Notes -->
+                    ${customer.notes ? `
+                    <div>
+                        <h4 class="text-xs font-semibold text-gray-500 uppercase mb-2 flex items-center">
+                            <i class="fas fa-sticky-note mr-2"></i>Catatan
+                        </h4>
+                        <div class="p-3 bg-yellow-50 rounded-lg border-l-4 border-yellow-400">
+                            <p class="text-sm text-gray-700">${customer.notes}</p>
+                        </div>
+                    </div>
+                    ` : ''}
                 </div>
                 
-                <div class="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
-                    <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
-                        Tutup
+                <!-- Footer -->
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-2">
+                    <button onclick="this.closest('.fixed').remove()" 
+                        class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
+                        <i class="fas fa-times mr-1"></i>Tutup
                     </button>
-                    <button onclick="this.closest('.fixed').remove(); editCustomer(${customer.id})" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                        Edit
+                    <button onclick="this.closest('.fixed').remove(); editCustomer(${customer.id})" 
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition">
+                        <i class="fas fa-edit mr-1"></i>Edit
                     </button>
                 </div>
             </div>

@@ -26,15 +26,5 @@
                 <option value="Inactive">Inactive</option>
             </select>
         </div>
-        <div>
-            <select id="filterSource" onchange="filterCustomers()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="">Semua Source</option>
-                <option value="Website">Website</option>
-                <option value="Referral">Referral</option>
-                <option value="Ads">Ads</option>
-                <option value="Walk-in">Walk-in</option>
-                <option value="Social Media">Social Media</option>
-            </select>
-        </div>
     </div>
 </div>

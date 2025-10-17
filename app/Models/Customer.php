@@ -19,12 +19,8 @@ class Customer extends Model
         'district_id',
         'village_id',
         'status',
-        'source',
         'pic',
         'notes',
-        'contact_person_name',
-        'contact_person_email',
-        'contact_person_phone',
     ];
 
     protected $casts = [
@@ -65,16 +61,6 @@ class Customer extends Model
         return $this->belongsTo(Village::class, 'village_id', 'id');
     }
 
-    // Accessor untuk contact_person
-    public function getContactPersonAttribute()
-    {
-        return [
-            'name' => $this->contact_person_name,
-            'email' => $this->contact_person_email,
-            'phone' => $this->contact_person_phone,
-        ];
-    }
-
     // Accessor untuk full address
     public function getFullAddressAttribute()
     {
@@ -98,11 +84,6 @@ class Customer extends Model
     public function scopeByType($query, $type)
     {
         return $query->where('type', $type);
-    }
-
-    public function scopeBySource($query, $source)
-    {
-        return $query->where('source', $source);
     }
 
     public function scopeSearch($query, $search)
