@@ -33,8 +33,8 @@
 <div id="customerModal"
     class="modal hidden fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 p-4">
     <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-hidden animate-fadeIn">
-        <!-- Modal Header -->
-        <div class="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-blue-500 to-blue-600">
+        <!-- Modal Header - WARNA BARU PURPLE BLUE -->
+        <div class="px-6 py-5 border-b border-gray-200" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #3b82f6 100%);">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
@@ -393,11 +393,11 @@
     </div>
 </div>
 
-<!-- Modal Import -->
+<!-- Modal Import - WARNA BARU PURPLE BLUE -->
 <div id="importModal"
     class="modal hidden fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 p-4">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-md animate-fadeIn">
-        <div class="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-green-500 to-green-600">
+        <div class="px-6 py-5 border-b border-gray-200" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #3b82f6 100%);">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
