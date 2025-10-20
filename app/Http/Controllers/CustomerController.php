@@ -9,27 +9,86 @@ use App\Models\District;
 use App\Models\Village;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class CustomerController extends Controller
 {
     // GET page customers
     public function index()
     {
+        $user = Auth::user();
         $provinces = Province::orderBy('name')->get();
-        return view('pages.customers', compact('provinces'));
+        
+        // Base query dengan relasi
+        $customersQuery = Customer::with(['province', 'regency', 'district', 'village', 'user']);
+
+        // 🔹 SUPERADMIN (role_id = 1) → lihat semua data
+        if ($user->role_id == 1) {
+            // tanpa filter apa pun
+        }
+
+        // 🔹 ADMIN (role_id = 7) & MARKETING (role_id = 11)
+        //     → lihat semua data milik SALES (role_id = 12)
+        elseif (in_array($user->role_id, [7, 11])) {
+            $customersQuery->whereHas('user', function ($q) {
+                $q->where('role_id', 12); // hanya user sales
+            });
+        }
+
+        // 🔹 SALES (role_id = 12) → hanya data milik sendiri
+        elseif ($user->role_id == 12) {
+            $customersQuery->where('user_id', $user->user_id);
+        }
+
+        // kalau role lain (misalnya belum dikategorikan)
+        else {
+            $customersQuery->whereNull('id'); // tampil kosong aja
+        }
+
+        $customers = $customersQuery->paginate(10);
+
+        return view('pages.customers', compact('provinces', 'customers'));
     }
 
-    // GET all customers (AJAX)
+    // GET all customers (AJAX) - WITH FILTERING
     public function customers()
     {
-        $customers = Customer::with(['province', 'regency', 'district', 'village'])->get();
+        $user = Auth::user();
+        
+        // Base query dengan relasi
+        $query = Customer::with(['province', 'regency', 'district', 'village', 'user']);
+
+        // 🔹 SUPERADMIN (role_id = 1) → lihat semua data
+        if ($user->role_id == 1) {
+            // tanpa filter apa pun
+        }
+
+        // 🔹 ADMIN (role_id = 7) & MARKETING (role_id = 11)
+        //     → lihat semua data milik SALES (role_id = 12)
+        elseif (in_array($user->role_id, [7, 11])) {
+            $query->whereHas('user', function ($q) {
+                $q->where('role_id', 12); // hanya user sales
+            });
+        }
+
+        // 🔹 SALES (role_id = 12) → hanya data milik sendiri
+        elseif ($user->role_id == 12) {
+            $query->where('user_id', $user->user_id);
+        }
+
+        // kalau role lain
+        else {
+            $query->whereNull('id'); // tampil kosong
+        }
+
+        $customers = $query->get();
         return response()->json($customers);
     }
 
     // GET single customer (AJAX)
     public function show($id)
     {
-        $customer = Customer::with(['province', 'regency', 'district', 'village'])->findOrFail($id);
+        $customer = Customer::with(['province', 'regency', 'district', 'village', 'user'])->findOrFail($id);
         return response()->json($customer);
     }
 
@@ -111,26 +170,39 @@ class CustomerController extends Controller
             'source' => 'nullable|string|max:100',
             'pic' => 'required|string|max:100',
             'notes' => 'nullable|string',
-            // Contact Person fields (for Company type)
             'contact_person_name' => 'nullable|string|max:255',
             'contact_person_email' => 'nullable|email|max:255',
             'contact_person_phone' => 'nullable|string|max:20',
         ]);
+
+        $user = Auth::user();
+
+        // Hanya role tertentu yang boleh tambah
+        $allowedRoles = ['superadmin', 'admin', 'marketing', 'sales'];
+        $userRoleName = strtolower($user->role->role_name ?? '');
+        
+        if (!in_array($userRoleName, $allowedRoles)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki izin untuk menambah customer.'
+            ], 403);
+        }
+
+        // 🔹 Simpan user_id pembuat
+        $validated['user_id'] = $user->user_id;
 
         $customer = Customer::create($validated);
 
         return response()->json([
             'success' => true,
             'message' => 'Customer berhasil ditambahkan',
-            'data' => $customer->load(['province', 'regency', 'district', 'village'])
+            'data' => $customer->load(['province', 'regency', 'district', 'village', 'user'])
         ], 201);
     }
 
     // PUT update customer (AJAX)
     public function update(Request $request, $id)
     {
-        $customer = Customer::findOrFail($id);
-
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|in:Personal,Company',
@@ -145,25 +217,49 @@ class CustomerController extends Controller
             'source' => 'nullable|string|max:100',
             'pic' => 'required|string|max:100',
             'notes' => 'nullable|string',
-            // Contact Person fields (for Company type)
             'contact_person_name' => 'nullable|string|max:255',
             'contact_person_email' => 'nullable|email|max:255',
             'contact_person_phone' => 'nullable|string|max:20',
         ]);
+
+        $user = Auth::user();
+        $customer = Customer::findOrFail($id);
+
+        // 🔹 Sales hanya boleh edit data miliknya sendiri
+        $userRoleName = strtolower($user->role->role_name ?? '');
+        
+        if ($userRoleName === 'sales' && $customer->user_id !== $user->user_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak boleh mengedit data milik sales lain.'
+            ], 403);
+        }
 
         $customer->update($validated);
 
         return response()->json([
             'success' => true,
             'message' => 'Customer berhasil diperbarui',
-            'data' => $customer->load(['province', 'regency', 'district', 'village'])
+            'data' => $customer->load(['province', 'regency', 'district', 'village', 'user'])
         ]);
     }
 
     // DELETE customer (AJAX)
     public function destroy($id)
     {
+        $user = Auth::user();
         $customer = Customer::findOrFail($id);
+
+        // 🔹 Sales hanya bisa hapus data miliknya sendiri
+        $userRoleName = strtolower($user->role->role_name ?? '');
+        
+        if ($userRoleName === 'sales' && $customer->user_id !== $user->user_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak boleh menghapus data milik sales lain.'
+            ], 403);
+        }
+
         $customer->delete();
 
         return response()->json([
@@ -180,8 +276,30 @@ class CustomerController extends Controller
             'ids.*' => 'exists:customers,id'
         ]);
 
-        $count = count($validated['ids']);
-        Customer::whereIn('id', $validated['ids'])->delete();
+        $user = Auth::user();
+        $userRoleName = strtolower($user->role->role_name ?? '');
+
+        // 🔹 Sales hanya bisa hapus data miliknya sendiri
+        if ($userRoleName === 'sales') {
+            $customersToDelete = Customer::whereIn('id', $validated['ids'])
+                                        ->where('user_id', $user->user_id)
+                                        ->pluck('id')
+                                        ->toArray();
+            
+            if (count($customersToDelete) !== count($validated['ids'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak boleh menghapus data milik sales lain.'
+                ], 403);
+            }
+            
+            Customer::whereIn('id', $customersToDelete)->delete();
+            $count = count($customersToDelete);
+        } else {
+            // Superadmin, Admin, Marketing bisa hapus semua (sesuai filter view mereka)
+            $count = count($validated['ids']);
+            Customer::whereIn('id', $validated['ids'])->delete();
+        }
 
         return response()->json([
             'success' => true,
@@ -192,6 +310,19 @@ class CustomerController extends Controller
     // IMPORT dari CSV/Excel
     public function import(Request $request)
     {
+        $user = Auth::user();
+
+        // Hanya role tertentu yang boleh import
+        $allowedRoles = ['superadmin', 'admin', 'marketing', 'sales'];
+        $userRoleName = strtolower($user->role->role_name ?? '');
+        
+        if (!in_array($userRoleName, $allowedRoles)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki izin untuk import data.'
+            ], 403);
+        }
+
         $request->validate([
             'file' => 'required|file|mimes:csv,xlsx,xls|max:5120'
         ]);
@@ -209,7 +340,6 @@ class CustomerController extends Controller
             if ($ext === 'csv') {
                 $rows = array_map('str_getcsv', file($filePath));
             } else {
-                // Untuk xlsx/xls, gunakan SimpleXLSX atau baca manual
                 $rows = $this->readExcelFile($filePath);
             }
 
@@ -236,7 +366,6 @@ class CustomerController extends Controller
                         continue;
                     }
 
-                    // Skip jika email sudah ada
                     if (Customer::where('email', $data['email'])->exists()) {
                         $errors[] = "Baris " . ($key + 2) . ": Email sudah terdaftar";
                         continue;
@@ -260,6 +389,7 @@ class CustomerController extends Controller
                         'contact_person_name' => $data['contact_person_name'] ?? null,
                         'contact_person_email' => $data['contact_person_email'] ?? null,
                         'contact_person_phone' => $data['contact_person_phone'] ?? null,
+                        'user_id' => $user->user_id, // 🔹 simpan user_id
                     ]);
 
                     $imported++;
@@ -268,7 +398,6 @@ class CustomerController extends Controller
                 }
             }
 
-            // Hapus file
             Storage::delete($path);
 
             return response()->json([
@@ -285,19 +414,45 @@ class CustomerController extends Controller
         }
     }
 
-    // Helper untuk baca Excel
     private function readExcelFile($filePath)
     {
         $rows = [];
-        // Jika menggunakan library, sesuaikan di sini
-        // Contoh dengan PhpOffice/PhpSpreadsheet
+        // Implementasi baca Excel
         return $rows;
     }
 
     // EXPORT ke CSV
     public function export()
     {
-        $customers = Customer::with(['province', 'regency', 'district', 'village'])->get();
+        $user = Auth::user();
+        
+        // Base query dengan filter session (SAMA SEPERTI index/customers)
+        $query = Customer::with(['province', 'regency', 'district', 'village', 'user']);
+
+        // 🔹 SUPERADMIN (role_id = 1) → export semua data
+        if ($user->role_id == 1) {
+            // tanpa filter
+        }
+
+        // 🔹 ADMIN (role_id = 7) & MARKETING (role_id = 11)
+        //     → export semua data milik SALES (role_id = 12)
+        elseif (in_array($user->role_id, [7, 11])) {
+            $query->whereHas('user', function ($q) {
+                $q->where('role_id', 12);
+            });
+        }
+
+        // 🔹 SALES (role_id = 12) → export hanya data milik sendiri
+        elseif ($user->role_id == 12) {
+            $query->where('user_id', $user->user_id);
+        }
+
+        // kalau role lain
+        else {
+            $query->whereNull('id');
+        }
+
+        $customers = $query->get();
 
         $filename = 'customers-' . date('Y-m-d-His') . '.csv';
         $handle = fopen('php://memory', 'w');

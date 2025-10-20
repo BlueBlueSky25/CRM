@@ -11,11 +11,21 @@ class Company extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'company_name', 'company_type_id', 'tier', 'description', 'status'
+        'company_name', 
+        'company_type_id', 
+        'tier', 
+        'description', 
+        'status',
+        'user_id'
     ];
 
     public function companyType()
     {
         return $this->belongsTo(CompanyType::class, 'company_type_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 }

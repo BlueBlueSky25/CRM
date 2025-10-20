@@ -25,6 +25,7 @@ class Customer extends Model
         'contact_person_name',
         'contact_person_email',
         'contact_person_phone',
+        'user_id'
     ];
 
     protected $casts = [
@@ -96,5 +97,10 @@ class Customer extends Model
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhere('phone', 'like', "%{$search}%")
                     ->orWhere('customer_id', 'like', "%{$search}%");
+    }
+
+     public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 }
