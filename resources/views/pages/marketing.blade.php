@@ -34,6 +34,7 @@
             <x-marketing.table.table :salesUsers="$salesUsers" :currentMenuId="$currentMenuId" />
 
             <!-- Pagination -->
+            <x-globals.pagination />
         </div>
     </div>
 </div>

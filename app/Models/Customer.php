@@ -19,8 +19,12 @@ class Customer extends Model
         'district_id',
         'village_id',
         'status',
+        'source',
         'pic',
         'notes',
+        'contact_person_name',
+        'contact_person_email',
+        'contact_person_phone',
     ];
 
     protected $casts = [
@@ -89,8 +93,8 @@ class Customer extends Model
     public function scopeSearch($query, $search)
     {
         return $query->where('name', 'like', "%{$search}%")
-                     ->orWhere('email', 'like', "%{$search}%")
-                     ->orWhere('phone', 'like', "%{$search}%")
-                     ->orWhere('customer_id', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('customer_id', 'like', "%{$search}%");
     }
 }

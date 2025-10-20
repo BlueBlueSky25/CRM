@@ -102,14 +102,8 @@
             </tbody>
         </table>
     </div>
-
-    <div id="salesTable-pagination" class="bg-white border-t border-gray-200">
-        
-                <x-globals.pagination :paginator="$salesUsers" />
-            </div>
+        <x-globals.pagination :paginator="$salesUsers" />
 </div>
-
-
 
 <style>
 @keyframes modalSlideIn {

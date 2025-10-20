@@ -636,7 +636,7 @@ function showCustomerDetail(customer) {
                     <!-- Contact Info -->
                     <div>
                         <h4 class="text-xs font-semibold text-gray-500 uppercase mb-3 flex items-center">
-                            <i class="fas fa-id-card mr-2"></i>Informasi Kontak
+                            <i class="fas fa-id-card mr-2"></i>Informasi Kontak ${customer.type === 'Company' ? 'Perusahaan' : ''}
                         </h4>
                         <div class="space-y-3">
                             <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
@@ -660,6 +660,52 @@ function showCustomerDetail(customer) {
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Contact Person Info (Only for Company) -->
+                    ${customer.type === 'Company' && (customer.contact_person_name || customer.contact_person_email || customer.contact_person_phone) ? `
+                    <div>
+                        <h4 class="text-xs font-semibold text-gray-500 uppercase mb-3 flex items-center">
+                            <i class="fas fa-user-circle mr-2"></i>Informasi Contact Person
+                        </h4>
+                        <div class="space-y-3">
+                            ${customer.contact_person_name ? `
+                            <div class="flex items-center gap-3 p-3 bg-indigo-50 rounded-lg">
+                                <div class="w-9 h-9 bg-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-user text-white text-sm"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs text-gray-600">Nama</p>
+                                    <p class="font-medium text-gray-900">${customer.contact_person_name}</p>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            ${customer.contact_person_email ? `
+                            <div class="flex items-center gap-3 p-3 bg-cyan-50 rounded-lg">
+                                <div class="w-9 h-9 bg-cyan-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-envelope text-white text-sm"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs text-gray-600">Email</p>
+                                    <p class="font-medium text-gray-900 truncate">${customer.contact_person_email}</p>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            ${customer.contact_person_phone ? `
+                            <div class="flex items-center gap-3 p-3 bg-teal-50 rounded-lg">
+                                <div class="w-9 h-9 bg-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-phone text-white text-sm"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs text-gray-600">Telepon</p>
+                                    <p class="font-medium text-gray-900">${customer.contact_person_phone}</p>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    ` : ''}
                     
                     <!-- Address -->
                     ${customer.address ? `
