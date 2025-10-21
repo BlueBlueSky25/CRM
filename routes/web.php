@@ -10,6 +10,7 @@ use App\Http\Controllers\CompanyChartController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\SalesVisitController;
 
 // ==========================
 // Public Routes (Login / Logout)
@@ -50,27 +51,36 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // ==========================
     // ✅ Customer Management (FIXED)
     // ==========================
-    // Halaman utama customers
+    
     Route::get('/customers', [CustomerController::class, 'index'])->name('customers');
-    
-    // ✅ GET all customers (AJAX) - HARUS DI ATAS route {id}
     Route::get('/customers/list', [CustomerController::class, 'customers'])->name('customers.list');
-    
-    // Export & Import - HARUS DI ATAS route {id}
     Route::get('/customers/export/csv', [CustomerController::class, 'export'])->name('customers.export');
     Route::post('/customers/import', [CustomerController::class, 'import'])->name('customers.import');
     Route::post('/customers/bulk-delete', [CustomerController::class, 'bulkDelete'])->name('customers.bulkDelete');
-    
-    // Cascade Dropdown - HARUS DI ATAS route {id}
     Route::get('/customers/get-regencies/{provinceId}', [CustomerController::class, 'getRegencies']);
     Route::get('/customers/get-districts/{regencyId}', [CustomerController::class, 'getDistricts']);
     Route::get('/customers/get-villages/{districtId}', [CustomerController::class, 'getVillages']);
-    
-    // CRUD individual - HARUS PALING BAWAH
     Route::get('/customers/{id}', [CustomerController::class, 'show'])->name('customers.show');
     Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
     Route::put('/customers/{id}', [CustomerController::class, 'update'])->name('customers.update');
     Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+
+
+
+    // ==========================
+    // Sales Visit Management
+    // ==========================
+    Route::get('/salesvisit', [SalesVisitController::class, 'index'])->name('salesvisit');
+    Route::post('/salesvisit', [SalesVisitController::class, 'store'])->name('salesvisit.store');
+    Route::put('/salesvisit/{id}', [SalesVisitController::class, 'update'])->name('salesvisit.update');
+    Route::delete('/salesvisit/{id}', [SalesVisitController::class, 'destroy'])->name('salesvisit.destroy');
+    Route::get('/salesvisit/search', [SalesVisitController::class, 'search'])->name('salesvisit.search');
+    Route::post('/salesvisit/import', [SalesVisitController::class, 'import'])->name('salesvisit.import');
+    Route::get('/salesvisit/export', [SalesVisitController::class, 'export'])->name('salesvisit.export');
+    Route::get('/salesvisit/get-regencies/{provinceId}', [SalesVisitController::class, 'getRegencies']);
+    Route::get('/salesvisit/get-districts/{regencyId}', [SalesVisitController::class, 'getDistricts']);
+    Route::get('/salesvisit/get-villages/{districtId}', [SalesVisitController::class, 'getVillages']);
+
 
     
     // ==========================
@@ -102,7 +112,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/role', [RoleController::class, 'index'])->name('role'); 
     Route::get('/menu', [MenuController::class, 'index'])->name('menu');
     Route::get('/pic', fn() => view('pages.pic'))->name('pic');
-    Route::get('/salesvisit', fn() => view('pages.salesvisit'))->name('salesvisit');
+   
 
     // ==========================
     // CRUD - Users
