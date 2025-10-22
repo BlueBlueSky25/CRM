@@ -3,23 +3,41 @@ function openVisitModal() {
     const modal = document.getElementById('visitModal');
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
+    
+    // Focus on first input after animation
+    setTimeout(() => {
+        const firstInput = modal.querySelector('select[name="sales_id"]');
+        if (firstInput) firstInput.focus();
+    }, 300);
 }
 
 function closeVisitModal() {
     const modal = document.getElementById('visitModal');
     modal.classList.add('hidden');
     document.body.style.overflow = 'auto';
-    modal.querySelector('form').reset();
+    
+    // Reset form
+    const form = modal.querySelector('form');
+    if (form) form.reset();
+    
+    // Reset cascade dropdowns
+    document.getElementById('create-regency').innerHTML = '<option value="">-- Pilih Kabupaten/Kota --</option>';
+    document.getElementById('create-district').innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+    document.getElementById('create-village').innerHTML = '<option value="">-- Pilih Kelurahan/Desa --</option>';
 }
 
 // ==================== EDIT MODAL ====================
 let editVisitCascade = null;
 let currentEditData = null;
 
-function openEditVisitModal(id, salesId, customerName, company, provinceId, visitDate, purpose, followUp) {
-    console.log('Opening Edit Visit Modal:', { id, salesId, customerName, company, provinceId, visitDate, purpose, followUp });
+function openEditVisitModal(id, salesId, customerName, company, provinceId, regencyId, districtId, villageId, address, visitDate, purpose, followUp) {
+    console.log('Opening Edit Visit Modal:', { 
+        id, salesId, customerName, company, 
+        provinceId, regencyId, districtId, villageId, 
+        address, visitDate, purpose, followUp 
+    });
 
-    // Show loading state
+    // Show modal
     const modal = document.getElementById('editVisitModal');
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
@@ -32,14 +50,18 @@ function openEditVisitModal(id, salesId, customerName, company, provinceId, visi
     document.getElementById('editVisitId').value = id ?? '';
     document.getElementById('editCustomerName').value = customerName ?? '';
     document.getElementById('editCompany').value = company ?? '';
+    document.getElementById('editAddress').value = address ?? '';
     document.getElementById('editVisitDate').value = visitDate ?? '';
     document.getElementById('editPurpose').value = purpose ?? '';
     document.getElementById('editFollowUp').checked = followUp == 1;
 
-    // Store current data untuk nanti
+    // Store current data
     currentEditData = {
         salesId: salesId,
-        provinceId: provinceId
+        provinceId: provinceId,
+        regencyId: regencyId,
+        districtId: districtId,
+        villageId: villageId
     };
 
     // Load data via AJAX
@@ -62,7 +84,7 @@ function loadEditVisitData(visitId) {
             return response.json();
         })
         .then(data => {
-            console.log('Edit data loaded:', data); // Debug log
+            console.log('Edit data loaded:', data);
             if (data.success) {
                 populateEditForm(data);
             } else {
@@ -74,7 +96,7 @@ function loadEditVisitData(visitId) {
             // Reset to empty options
             salesSelect.innerHTML = '<option value="">-- Pilih Sales --</option>';
             provinceSelect.innerHTML = '<option value="">-- Pilih Provinsi --</option>';
-            alert('Error memuat data untuk edit: ' + error.message);
+            showNotification('Error memuat data untuk edit: ' + error.message, 'error');
         });
 }
 
@@ -84,7 +106,7 @@ function populateEditForm(data) {
     salesSelect.innerHTML = '<option value="">-- Pilih Sales --</option>';
     
     if (data.salesUsers && Array.isArray(data.salesUsers)) {
-        console.log('Sales users data:', data.salesUsers); // Debug log
+        console.log('Sales users data:', data.salesUsers);
         
         data.salesUsers.forEach(sales => {
             const option = document.createElement('option');
@@ -93,10 +115,10 @@ function populateEditForm(data) {
             salesSelect.appendChild(option);
         });
         
-        // Set selected sales setelah semua options ditambahkan
+        // Set selected sales
         if (currentEditData.salesId) {
             salesSelect.value = currentEditData.salesId;
-            console.log('Set sales selection to:', currentEditData.salesId); // Debug log
+            console.log('Set sales selection to:', currentEditData.salesId);
         }
     } else {
         console.warn('No sales users data found');
@@ -108,7 +130,7 @@ function populateEditForm(data) {
     provinceSelect.innerHTML = '<option value="">-- Pilih Provinsi --</option>';
     
     if (data.provinces && Array.isArray(data.provinces)) {
-        console.log('Provinces data:', data.provinces); // Debug log
+        console.log('Provinces data:', data.provinces);
         
         data.provinces.forEach(province => {
             const option = document.createElement('option');
@@ -117,14 +139,14 @@ function populateEditForm(data) {
             provinceSelect.appendChild(option);
         });
         
-        // Set selected province setelah semua options ditambahkan
+        // Set selected province and trigger cascade
         if (currentEditData.provinceId) {
             provinceSelect.value = currentEditData.provinceId;
-            console.log('Set province selection to:', currentEditData.provinceId); // Debug log
+            console.log('Set province selection to:', currentEditData.provinceId);
             
-            // Trigger cascade untuk wilayah
+            // Initialize cascade dengan delay
             setTimeout(() => {
-                initEditVisitCascade(currentEditData.provinceId);
+                initEditVisitCascade();
             }, 100);
         }
     } else {
@@ -133,9 +155,13 @@ function populateEditForm(data) {
     }
 }
 
-function initEditVisitCascade(provinceId) {
-    if (editVisitCascade) editVisitCascade.destroy();
+function initEditVisitCascade() {
+    // Destroy previous instance
+    if (editVisitCascade) {
+        editVisitCascade.destroy();
+    }
 
+    // Create new instance
     editVisitCascade = new AddressCascade({
         provinceId: 'edit-province',
         regencyId: 'edit-regency',
@@ -143,11 +169,40 @@ function initEditVisitCascade(provinceId) {
         villageId: 'edit-village'
     });
 
-    if (provinceId) {
-        // Trigger change event untuk load data cascade
+    // Set values dari currentEditData
+    if (currentEditData.provinceId) {
         const provinceSelect = document.getElementById('edit-province');
-        provinceSelect.value = provinceId;
-        provinceSelect.dispatchEvent(new Event('change'));
+        provinceSelect.value = currentEditData.provinceId;
+        
+        // Trigger change untuk load regency
+        const changeEvent = new Event('change');
+        provinceSelect.dispatchEvent(changeEvent);
+        
+        // Wait for regency to load, then set value
+        setTimeout(() => {
+            if (currentEditData.regencyId) {
+                const regencySelect = document.getElementById('edit-regency');
+                regencySelect.value = currentEditData.regencyId;
+                regencySelect.dispatchEvent(new Event('change'));
+                
+                // Wait for district to load
+                setTimeout(() => {
+                    if (currentEditData.districtId) {
+                        const districtSelect = document.getElementById('edit-district');
+                        districtSelect.value = currentEditData.districtId;
+                        districtSelect.dispatchEvent(new Event('change'));
+                        
+                        // Wait for village to load
+                        setTimeout(() => {
+                            if (currentEditData.villageId) {
+                                const villageSelect = document.getElementById('edit-village');
+                                villageSelect.value = currentEditData.villageId;
+                            }
+                        }, 500);
+                    }
+                }, 500);
+            }
+        }, 500);
     }
 }
 
@@ -156,6 +211,7 @@ function closeEditVisitModal() {
     modal.classList.add('hidden');
     document.body.style.overflow = 'auto';
 
+    // Destroy cascade instance
     if (editVisitCascade) {
         editVisitCascade.destroy();
         editVisitCascade = null;
@@ -167,7 +223,7 @@ function closeEditVisitModal() {
     const form = document.getElementById('editVisitForm');
     if (form) form.reset();
 
-    // Reset dropdowns ke state awal
+    // Reset dropdowns
     document.getElementById('editSalesId').innerHTML = '<option value="">-- Pilih Sales --</option>';
     document.getElementById('edit-province').innerHTML = '<option value="">-- Pilih Provinsi --</option>';
     document.getElementById('edit-regency').innerHTML = '<option value="">-- Pilih Kabupaten/Kota --</option>';
@@ -199,15 +255,62 @@ function deleteVisit(id, deleteUrl, csrfToken) {
     }
 }
 
-// ==================== CLOSE MODAL (ESC + OUTSIDE) ====================
+// ==================== NOTIFICATION SYSTEM ====================
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 z-[60] p-4 rounded-lg shadow-lg text-white transform transition-all duration-300 translate-x-full`;
+    
+    const bgColor = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        info: 'bg-blue-500'
+    };
+    
+    notification.classList.add(bgColor[type]);
+    notification.innerHTML = `
+        <div class="flex items-center gap-2">
+            <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : 'info'}-circle"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Animate in
+    setTimeout(() => {
+        notification.classList.remove('translate-x-full');
+    }, 100);
+    
+    // Auto remove
+    setTimeout(() => {
+        notification.classList.add('translate-x-full');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// ==================== EVENT LISTENERS ====================
+// Close modal on ESC key
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-        if (!document.getElementById('visitModal').classList.contains('hidden')) closeVisitModal();
-        if (!document.getElementById('editVisitModal').classList.contains('hidden')) closeEditVisitModal();
+        if (!document.getElementById('visitModal').classList.contains('hidden')) {
+            closeVisitModal();
+        }
+        if (!document.getElementById('editVisitModal').classList.contains('hidden')) {
+            closeEditVisitModal();
+        }
     }
 });
 
+// Close modal on backdrop click
 document.addEventListener('click', (e) => {
-    if (e.target.id === 'visitModal') closeVisitModal();
-    if (e.target.id === 'editVisitModal') closeEditVisitModal();
+    if (e.target.id === 'visitModal') {
+        closeVisitModal();
+    }
+    if (e.target.id === 'editVisitModal') {
+        closeEditVisitModal();
+    }
 });
