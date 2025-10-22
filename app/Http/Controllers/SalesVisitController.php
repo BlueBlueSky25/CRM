@@ -171,44 +171,60 @@ class SalesVisitController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'sales_id' => 'required|exists:users,user_id',
-            'customer_name' => 'required|string|max:255',
-            'company' => 'nullable|string|max:255',
-            'province_id' => 'required|exists:provinces,id',
-            'visit_date' => 'required|date',
-            'purpose' => 'required|string',
-            'is_follow_up' => 'nullable|boolean',
+{
+    // Debug request data
+    \Log::info('Store Request Data:', $request->all());
+
+    $validated = $request->validate([
+        'sales_id' => 'required|exists:users,user_id',
+        'customer_name' => 'required|string|max:255',
+        'company' => 'nullable|string|max:255',
+        'province_id' => 'required|exists:provinces,id',
+        'regency_id' => 'nullable|exists:regencies,id',
+        'district_id' => 'nullable|exists:districts,id',
+        'village_id' => 'nullable|exists:villages,id',
+        'address' => 'nullable|string',
+        'visit_date' => 'required|date',
+        'purpose' => 'required|string',
+        'is_follow_up' => 'nullable|boolean',
+    ]);
+
+    $user = Auth::user();
+    $allowedRoles = ['superadmin', 'admin', 'marketing', 'sales'];
+    $userRoleName = strtolower($user->role->role_name ?? '');
+
+    if (!in_array($userRoleName, $allowedRoles)) {
+        return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk menambah kunjungan.');
+    }
+
+    try {
+        $visit = SalesVisit::create([
+            'sales_id' => $request->sales_id,
+            'customer_name' => $request->customer_name,
+            'company' => $request->company,
+            'province_id' => $request->province_id,
+            'regency_id' => $request->regency_id,
+            'district_id' => $request->district_id,
+            'village_id' => $request->village_id,
+            'address' => $request->address,
+            'visit_date' => $request->visit_date,
+            'purpose' => $request->purpose,
+            'is_follow_up' => $request->has('is_follow_up') ? 1 : 0,
         ]);
 
-        $user = Auth::user();
-        $allowedRoles = ['superadmin', 'admin', 'marketing', 'sales'];
-        $userRoleName = strtolower($user->role->role_name ?? '');
+        \Log::info('Visit Created:', $visit->toArray());
 
-        if (!in_array($userRoleName, $allowedRoles)) {
-            return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk menambah kunjungan.');
-        }
-
-        try {
-            SalesVisit::create([
-                'sales_id' => $request->sales_id,
-                'customer_name' => $request->customer_name,
-                'company' => $request->company ?? null,
-                'province_id' => $request->province_id,
-                'visit_date' => $request->visit_date,
-                'purpose' => $request->purpose,
-                'is_follow_up' => $request->is_follow_up ?? 0,
-            ]);
-
-            return redirect()->route('pages.salesvisit')
-                ->with('success', 'Data kunjungan sales berhasil ditambahkan!');
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Gagal menambahkan data: ' . $e->getMessage())
-                ->withInput();
-        }
+        return redirect()->route('salesvisit')
+            ->with('success', 'Data kunjungan sales berhasil ditambahkan!');
+    } catch (\Exception $e) {
+        \Log::error('Error creating visit: ' . $e->getMessage());
+        \Log::error('Stack trace: ' . $e->getTraceAsString());
+        
+        return redirect()->back()
+            ->with('error', 'Gagal menambahkan data: ' . $e->getMessage())
+            ->withInput();
     }
+}
 
    public function edit($id)
 {
@@ -234,44 +250,59 @@ class SalesVisitController extends Controller
 
 
     public function update(Request $request, $id)
-    {
-        $request->validate([
-            'sales_id' => 'required|exists:users,user_id',
-            'customer_name' => 'required|string|max:255',
-            'company' => 'nullable|string|max:255',
-            'province_id' => 'required|exists:provinces,id',
-            'visit_date' => 'required|date',
-            'purpose' => 'required|string',
-            'is_follow_up' => 'nullable|boolean',
+{
+    
+    \Log::info('Update Request Data:', $request->all());
+
+    $validated = $request->validate([
+        'sales_id' => 'required|exists:users,user_id',
+        'customer_name' => 'required|string|max:255',
+        'company' => 'nullable|string|max:255',
+        'province_id' => 'required|exists:provinces,id',
+        'regency_id' => 'nullable|exists:regencies,id',
+        'district_id' => 'nullable|exists:districts,id',
+        'village_id' => 'nullable|exists:villages,id',
+        'address' => 'nullable|string',
+        'visit_date' => 'required|date',
+        'purpose' => 'required|string',
+        'is_follow_up' => 'nullable|boolean',
+    ]);
+
+    $user = Auth::user();
+    $visit = SalesVisit::findOrFail($id);
+    $userRoleName = strtolower($user->role->role_name ?? '');
+
+    if ($userRoleName === 'sales' && $visit->sales_id !== $user->user_id) {
+        return redirect()->back()->with('error', 'Anda tidak boleh mengedit data kunjungan milik sales lain.');
+    }
+
+    try {
+        $visit->update([
+            'sales_id' => $request->sales_id,
+            'customer_name' => $request->customer_name,
+            'company' => $request->company,
+            'province_id' => $request->province_id,
+            'regency_id' => $request->regency_id,
+            'district_id' => $request->district_id,
+            'village_id' => $request->village_id,
+            'address' => $request->address,
+            'visit_date' => $request->visit_date,
+            'purpose' => $request->purpose,
+            'is_follow_up' => $request->has('is_follow_up') ? 1 : 0,
         ]);
 
-        $user = Auth::user();
-        $visit = SalesVisit::findOrFail($id);
-        $userRoleName = strtolower($user->role->role_name ?? '');
+        \Log::info('Visit Updated:', $visit->toArray());
 
-        if ($userRoleName === 'sales' && $visit->sales_id !== $user->user_id) {
-            return redirect()->back()->with('error', 'Anda tidak boleh mengedit data kunjungan milik sales lain.');
-        }
-
-        try {
-            $visit->update([
-                'sales_id' => $request->sales_id,
-                'customer_name' => $request->customer_name,
-                'company' => $request->company ?? null,
-                'province_id' => $request->province_id,
-                'visit_date' => $request->visit_date,
-                'purpose' => $request->purpose,
-                'is_follow_up' => $request->is_follow_up ?? 0,
-            ]);
-
-            return redirect()->route('pages.salesvisit')
-                ->with('success', 'Data kunjungan sales berhasil diupdate!');
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Gagal mengupdate data: ' . $e->getMessage())
-                ->withInput();
-        }
+        return redirect()->route('salesvisit')
+            ->with('success', 'Data kunjungan sales berhasil diupdate!');
+    } catch (\Exception $e) {
+        \Log::error('Error updating visit: ' . $e->getMessage());
+        
+        return redirect()->back()
+            ->with('error', 'Gagal mengupdate data: ' . $e->getMessage())
+            ->withInput();
     }
+}
 
     public function destroy($id)
     {

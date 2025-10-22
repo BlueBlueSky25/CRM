@@ -4,7 +4,6 @@ function openVisitModal() {
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     
-    // Focus on first input after animation
     setTimeout(() => {
         const firstInput = modal.querySelector('select[name="sales_id"]');
         if (firstInput) firstInput.focus();
@@ -16,11 +15,9 @@ function closeVisitModal() {
     modal.classList.add('hidden');
     document.body.style.overflow = 'auto';
     
-    // Reset form
     const form = modal.querySelector('form');
     if (form) form.reset();
     
-    // Reset cascade dropdowns
     document.getElementById('create-regency').innerHTML = '<option value="">-- Pilih Kabupaten/Kota --</option>';
     document.getElementById('create-district').innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
     document.getElementById('create-village').innerHTML = '<option value="">-- Pilih Kelurahan/Desa --</option>';
@@ -30,12 +27,8 @@ function closeVisitModal() {
 let editVisitCascade = null;
 let currentEditData = null;
 
-function openEditVisitModal(id, salesId, customerName, company, provinceId, regencyId, districtId, villageId, address, visitDate, purpose, followUp) {
-    console.log('Opening Edit Visit Modal:', { 
-        id, salesId, customerName, company, 
-        provinceId, regencyId, districtId, villageId, 
-        address, visitDate, purpose, followUp 
-    });
+function openEditVisitModal(visitData) {
+    console.log('Opening Edit Visit Modal:', visitData);
 
     // Show modal
     const modal = document.getElementById('editVisitModal');
@@ -44,32 +37,31 @@ function openEditVisitModal(id, salesId, customerName, company, provinceId, rege
 
     // Set form action
     const form = document.getElementById('editVisitForm');
-    form.action = `/salesvisit/${id}`;
+    form.action = `/salesvisit/${visitData.id}`;
 
     // Set basic fields
-    document.getElementById('editVisitId').value = id ?? '';
-    document.getElementById('editCustomerName').value = customerName ?? '';
-    document.getElementById('editCompany').value = company ?? '';
-    document.getElementById('editAddress').value = address ?? '';
-    document.getElementById('editVisitDate').value = visitDate ?? '';
-    document.getElementById('editPurpose').value = purpose ?? '';
-    document.getElementById('editFollowUp').checked = followUp == 1;
+    document.getElementById('editVisitId').value = visitData.id || '';
+    document.getElementById('editCustomerName').value = visitData.customerName || '';
+    document.getElementById('editCompany').value = visitData.company || '';
+    document.getElementById('editAddress').value = visitData.address || '';
+    document.getElementById('editVisitDate').value = visitData.visitDate || '';
+    document.getElementById('editPurpose').value = visitData.purpose || '';
+    document.getElementById('editFollowUp').checked = visitData.followUp == 1;
 
     // Store current data
     currentEditData = {
-        salesId: salesId,
-        provinceId: provinceId,
-        regencyId: regencyId,
-        districtId: districtId,
-        villageId: villageId
+        salesId: visitData.salesId,
+        provinceId: visitData.provinceId,
+        regencyId: visitData.regencyId,
+        districtId: visitData.districtId,
+        villageId: visitData.villageId
     };
 
     // Load data via AJAX
-    loadEditVisitData(id);
+    loadEditVisitData(visitData.id);
 }
 
 function loadEditVisitData(visitId) {
-    // Show loading state
     const salesSelect = document.getElementById('editSalesId');
     const provinceSelect = document.getElementById('edit-province');
     
@@ -93,7 +85,6 @@ function loadEditVisitData(visitId) {
         })
         .catch(error => {
             console.error('Error loading edit data:', error);
-            // Reset to empty options
             salesSelect.innerHTML = '<option value="">-- Pilih Sales --</option>';
             provinceSelect.innerHTML = '<option value="">-- Pilih Provinsi --</option>';
             showNotification('Error memuat data untuk edit: ' + error.message, 'error');
@@ -115,7 +106,6 @@ function populateEditForm(data) {
             salesSelect.appendChild(option);
         });
         
-        // Set selected sales
         if (currentEditData.salesId) {
             salesSelect.value = currentEditData.salesId;
             console.log('Set sales selection to:', currentEditData.salesId);
@@ -139,12 +129,10 @@ function populateEditForm(data) {
             provinceSelect.appendChild(option);
         });
         
-        // Set selected province and trigger cascade
         if (currentEditData.provinceId) {
             provinceSelect.value = currentEditData.provinceId;
             console.log('Set province selection to:', currentEditData.provinceId);
             
-            // Initialize cascade dengan delay
             setTimeout(() => {
                 initEditVisitCascade();
             }, 100);
@@ -156,12 +144,10 @@ function populateEditForm(data) {
 }
 
 function initEditVisitCascade() {
-    // Destroy previous instance
     if (editVisitCascade) {
         editVisitCascade.destroy();
     }
 
-    // Create new instance
     editVisitCascade = new AddressCascade({
         provinceId: 'edit-province',
         regencyId: 'edit-regency',
@@ -169,30 +155,25 @@ function initEditVisitCascade() {
         villageId: 'edit-village'
     });
 
-    // Set values dari currentEditData
     if (currentEditData.provinceId) {
         const provinceSelect = document.getElementById('edit-province');
         provinceSelect.value = currentEditData.provinceId;
         
-        // Trigger change untuk load regency
         const changeEvent = new Event('change');
         provinceSelect.dispatchEvent(changeEvent);
         
-        // Wait for regency to load, then set value
         setTimeout(() => {
             if (currentEditData.regencyId) {
                 const regencySelect = document.getElementById('edit-regency');
                 regencySelect.value = currentEditData.regencyId;
                 regencySelect.dispatchEvent(new Event('change'));
                 
-                // Wait for district to load
                 setTimeout(() => {
                     if (currentEditData.districtId) {
                         const districtSelect = document.getElementById('edit-district');
                         districtSelect.value = currentEditData.districtId;
                         districtSelect.dispatchEvent(new Event('change'));
                         
-                        // Wait for village to load
                         setTimeout(() => {
                             if (currentEditData.villageId) {
                                 const villageSelect = document.getElementById('edit-village');
@@ -211,7 +192,6 @@ function closeEditVisitModal() {
     modal.classList.add('hidden');
     document.body.style.overflow = 'auto';
 
-    // Destroy cascade instance
     if (editVisitCascade) {
         editVisitCascade.destroy();
         editVisitCascade = null;
@@ -219,11 +199,9 @@ function closeEditVisitModal() {
 
     currentEditData = null;
 
-    // Reset form
     const form = document.getElementById('editVisitForm');
     if (form) form.reset();
 
-    // Reset dropdowns
     document.getElementById('editSalesId').innerHTML = '<option value="">-- Pilih Sales --</option>';
     document.getElementById('edit-province').innerHTML = '<option value="">-- Pilih Provinsi --</option>';
     document.getElementById('edit-regency').innerHTML = '<option value="">-- Pilih Kabupaten/Kota --</option>';
@@ -276,12 +254,10 @@ function showNotification(message, type = 'info') {
     
     document.body.appendChild(notification);
     
-    // Animate in
     setTimeout(() => {
         notification.classList.remove('translate-x-full');
     }, 100);
     
-    // Auto remove
     setTimeout(() => {
         notification.classList.add('translate-x-full');
         setTimeout(() => {
@@ -293,7 +269,6 @@ function showNotification(message, type = 'info') {
 }
 
 // ==================== EVENT LISTENERS ====================
-// Close modal on ESC key
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         if (!document.getElementById('visitModal').classList.contains('hidden')) {
@@ -305,7 +280,6 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Close modal on backdrop click
 document.addEventListener('click', (e) => {
     if (e.target.id === 'visitModal') {
         closeVisitModal();

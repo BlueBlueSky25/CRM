@@ -12,16 +12,19 @@ class SalesVisit extends Model
     protected $table = 'sales_visits';
 
     protected $fillable = [
-        'sales_id',
-        'customer_name',
-        'company',
-        'province_id',
-        'visit_date',
-        'purpose',
-        'is_follow_up',
-        'user_id'
-    ];
-
+    'sales_id',
+    'customer_name',
+    'company',
+    'province_id',
+    'regency_id',  // ← PENTING
+    'district_id',  // ← PENTING
+    'village_id',   // ← PENTING
+    'address',      // ← PENTING
+    'visit_date',
+    'purpose',
+    'is_follow_up',
+    'user_id'
+];
     protected $casts = [
         'visit_date' => 'date',
         'is_follow_up' => 'boolean',

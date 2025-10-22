@@ -100,22 +100,24 @@
                     <div class="flex items-center space-x-2">
                         @if(auth()->user()->canAccess($currentMenuId, 'edit'))
                         <button 
-                            onclick="openEditVisitModal(
-                                '{{ $visit->id }}',
-                                '{{ $visit->sales_id }}',
-                                '{{ addslashes($visit->customer_name) }}',
-                                '{{ addslashes($visit->company ?? '') }}',
-                                '{{ $visit->province_id }}',
-                                '{{ $visit->regency_id }}',
-                                '{{ $visit->district_id }}',
-                                '{{ $visit->village_id }}',
-                                '{{ addslashes($visit->address ?? '') }}',
-                                '{{ $visit->visit_date->format('Y-m-d') }}',
-                                '{{ addslashes($visit->purpose) }}',
-                                '{{ $visit->is_follow_up }}'
-                            )"
-                            class="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 flex items-center" 
-                            title="Edit Visit">
+                            type="button"
+                            class="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 flex items-center edit-visit-btn" 
+                            title="Edit Visit"
+                            data-visit="{{ json_encode([
+                            'id' => $visit->id,
+                            'salesId' => $visit->sales_id,
+                            'customerName' => $visit->customer_name,
+                            'company' => $visit->company ?? '',
+                            'provinceId' => $visit->province_id,
+                            'regencyId' => $visit->regency_id,
+                            'districtId' => $visit->district_id,
+                            'villageId' => $visit->village_id,
+                            'address' => $visit->address ?? '',
+                            'visitDate' => optional($visit->visit_date)->format('Y-m-d'),
+                            'purpose' => $visit->purpose,
+                            'followUp' => $visit->is_follow_up,
+                        ]) }}">
+
                             <i class="fas fa-edit"></i>
                         </button>
                         @endif

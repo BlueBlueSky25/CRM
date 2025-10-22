@@ -73,6 +73,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/salesvisit', [SalesVisitController::class, 'index'])->name('salesvisit');
     Route::post('/salesvisit', [SalesVisitController::class, 'store'])->name('salesvisit.store');
     Route::put('/salesvisit/{id}', [SalesVisitController::class, 'update'])->name('salesvisit.update');
+    Route::get('/salesvisit/{id}/edit', [SalesVisitController::class, 'edit'])->name('salesvisit.edit');
     Route::delete('/salesvisit/{id}', [SalesVisitController::class, 'destroy'])->name('salesvisit.destroy');
     Route::get('/salesvisit/search', [SalesVisitController::class, 'search'])->name('salesvisit.search');
     Route::post('/salesvisit/import', [SalesVisitController::class, 'import'])->name('salesvisit.import');

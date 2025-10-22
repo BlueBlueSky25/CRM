@@ -80,22 +80,48 @@
 </div>
 
 @push('scripts')
-<script src="{{ asset('js/salesvisit-modal.js') }}"></script>
 <script src="{{ asset('js/address-cascade.js') }}"></script>
-<script src="{{ asset('js/salesvisit-filter.js') }}"></script>
-@endpush
+<script src="{{ asset('js/salesvisit-modal.js') }}"></script>
 
 <script>
-// Initialize cascade untuk CREATE form
 document.addEventListener('DOMContentLoaded', function() {
-    const createCascade = new AddressCascade({
-        provinceId: 'create-province',
-        regencyId: 'create-regency',
-        districtId: 'create-district',
-        villageId: 'create-village'
+    console.log('Initializing Sales Visit page...');
+    
+    // Check if AddressCascade is defined
+    if (typeof AddressCascade === 'undefined') {
+        console.error('AddressCascade class not found!');
+        return;
+    }
+    
+    // Initialize cascade untuk CREATE form
+    try {
+        const createCascade = new AddressCascade({
+            provinceId: 'create-province',
+            regencyId: 'create-regency',
+            districtId: 'create-district',
+            villageId: 'create-village'
+        });
+        console.log('Create cascade initialized');
+    } catch (error) {
+        console.error('Error initializing cascade:', error);
+    }
+    
+    // Add event listener untuk edit buttons
+    document.addEventListener('click', function(e) {
+        const editBtn = e.target.closest('.edit-visit-btn');
+        if (editBtn) {
+            try {
+                const visitData = JSON.parse(editBtn.dataset.visit);
+                console.log('Edit button clicked:', visitData);
+                openEditVisitModal(visitData);
+            } catch (error) {
+                console.error('Error parsing visit data:', error);
+            }
+        }
     });
 });
 </script>
+@endpush
 
 <style>
 @keyframes fadeIn {
