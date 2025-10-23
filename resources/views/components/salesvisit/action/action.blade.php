@@ -1,212 +1,191 @@
-@props(['salesUsers', 'provinces'])
+@props(['currentMenuId', 'salesUsers', 'provinces'])
 
-<!-- Modal Add Sales Visit -->
+<!-- Quick Actions Section -->
+<div class="fade-in mb-8">
+    <div class="flex justify-between items-center">
+        <div>
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">Quick Actions</h3>
+            <div class="flex gap-3">
+                @if(auth()->user()->canAccess($currentMenuId, 'create'))
+                <button onclick="openVisitModal()"
+                    class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
+                    <i class="fas fa-plus"></i>
+                    Tambah Kunjungan
+                </button>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tambah Kunjungan Modal -->
 <div id="visitModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden animate-modal-in">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-modal-in">
         
         <!-- Modal Header -->
-        <div style="background: linear-gradient(to right, #4f46e5, #7c3aed); padding: 1.25rem 1.5rem;">
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
             <div class="flex justify-between items-center">
                 <div>
-                    <h3 class="text-xl font-semibold text-white">Tambah Kunjungan Sales</h3>
-                    <p class="text-sm text-indigo-100 mt-1">Lengkapi formulir berikut untuk menambahkan kunjungan sales</p>
+                    <h2 class="text-xl font-semibold text-white">Tambah Kunjungan Sales</h2>
+                    <p class="text-indigo-100 text-sm mt-1">Isi data untuk menambahkan kunjungan sales</p>
                 </div>
-                <button onclick="closeVisitModal()" 
-                    class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
+                <button onclick="closeVisitModal()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
                     <i class="fas fa-times text-lg"></i>
                 </button>
             </div>
         </div>
 
         <!-- Modal Body -->
-        <div class="overflow-y-auto max-h-[calc(90vh-140px)]" style="background-color: #f3f4f6; padding: 1.5rem;">
-            <form id="addVisitForm" action="{{ route('salesvisit.store') }}" method="POST" style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <div class="overflow-y-auto max-h-[calc(90vh-140px)] p-6">
+            <form action="{{ route('salesvisit.store') }}" method="POST" class="space-y-4">
                 @csrf
 
-                <!-- Sales Information Section -->
+                @php
+                    $userRole = strtolower(auth()->user()->role->role_name ?? '');
+                    $isSales = $userRole === 'sales';
+                @endphp
+
                 <div>
-                    <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center border-b pb-2">
-                        <i class="fas fa-user-tie text-indigo-500 mr-2"></i>
-                        Informasi Sales
-                    </h4>
-                    
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
-                        <!-- Sales -->
-                        <div style="grid-column: span 2;">
-                            <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
-                                Sales <span style="color: #ef4444;">*</span>
-                            </label>
-                            <div style="position: relative;">
-                                <i class="fas fa-user" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
-                                <select name="sales_id" required
-                                    style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem 1rem 0.75rem 2.5rem; font-size: 0.875rem;">
-                                    <option value="">-- Pilih Sales --</option>
-                                    @foreach($salesUsers as $sales)
-                                        <option value="{{ $sales->user_id }}">{{ $sales->username }} ({{ $sales->email }})</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Customer Name -->
-                        <div>
-                            <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
-                                Nama Customer <span style="color: #ef4444;">*</span>
-                            </label>
-                            <div style="position: relative;">
-                                <i class="fas fa-user-circle" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
-                                <input type="text" name="customer_name" required
-                                    style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem 1rem 0.75rem 2.5rem; font-size: 0.875rem;"
-                                    placeholder="Masukkan nama customer">
-                            </div>
-                        </div>
-
-                        <!-- Company -->
-                        <div>
-                            <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
-                                Perusahaan
-                            </label>
-                            <div style="position: relative;">
-                                <i class="fas fa-building" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
-                                <input type="text" name="company"
-                                    style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem 1rem 0.75rem 2.5rem; font-size: 0.875rem;"
-                                    placeholder="Nama perusahaan (opsional)">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Address Section -->
-                <div>
-                    <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center border-b pb-2">
-                        <i class="fas fa-map-marker-alt text-indigo-500 mr-2"></i>
-                        Informasi Alamat
-                    </h4>
-                    
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
-                        <!-- Provinsi -->
-                        <div>
-                            <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
-                                Provinsi <span style="color: #ef4444;">*</span>
-                            </label>
-                            <select id="create-province" name="province_id" class="cascade-province" required
-                                style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem; font-size: 0.875rem;">
-                                <option value="">-- Pilih Provinsi --</option>
-                                @foreach($provinces as $province)
-                                    <option value="{{ $province->id }}">{{ $province->name }}</option>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Sales <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <i class="fas fa-user-tie absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        @if($isSales)
+                            <!-- Sales role: read-only, auto-filled -->
+                            <input type="text" 
+                                value="{{ auth()->user()->username }} - {{ auth()->user()->email }}"
+                                class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 bg-gray-100 cursor-not-allowed transition-all"
+                                readonly>
+                            <input type="hidden" name="sales_id" value="{{ auth()->user()->user_id }}">
+                        @else
+                            <!-- Admin/Superadmin/Marketing: bisa pilih sales -->
+                            <select name="sales_id" id="visit-sales"
+                                class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                required>
+                                <option value="">Pilih Sales</option>
+                                @foreach($salesUsers as $sales)
+                                    <option value="{{ $sales->user_id }}">{{ $sales->username }} - {{ $sales->email }}</option>
                                 @endforeach
                             </select>
-                        </div>
-
-                        <!-- Kabupaten/Kota -->
-                        <div>
-                            <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
-                                Kabupaten/Kota <span style="color: #ef4444;">*</span>
-                            </label>
-                            <select id="create-regency" name="regency_id" class="cascade-regency" required
-                                style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem; font-size: 0.875rem;">
-                                <option value="">-- Pilih Kabupaten/Kota --</option>
-                            </select>
-                        </div>
-
-                        <!-- Kecamatan -->
-                        <div>
-                            <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
-                                Kecamatan <span style="color: #ef4444;">*</span>
-                            </label>
-                            <select id="create-district" name="district_id" class="cascade-district" required
-                                style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem; font-size: 0.875rem;">
-                                <option value="">-- Pilih Kecamatan --</option>
-                            </select>
-                        </div>
-
-                        <!-- Kelurahan/Desa -->
-                        <div>
-                            <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
-                                Kelurahan/Desa <span style="color: #ef4444;">*</span>
-                            </label>
-                            <select id="create-village" name="village_id" class="cascade-village" required
-                                style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem; font-size: 0.875rem;">
-                                <option value="">-- Pilih Kelurahan/Desa --</option>
-                            </select>
-                        </div>
-
-                        <!-- Detail Alamat (full width) -->
-                        <div style="grid-column: span 2;">
-                            <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
-                                Detail Alamat
-                            </label>
-                            <div style="position: relative;">
-                                <i class="fas fa-home" style="position: absolute; left: 0.75rem; top: 0.75rem; color: #9ca3af;"></i>
-                                <textarea name="address" rows="3" 
-                                    placeholder="Contoh: Jl. Merdeka No. 123, RT 01/RW 02"
-                                    style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem 1rem 0.75rem 2.5rem; font-size: 0.875rem; resize: none;"></textarea>
-                            </div>
-                            <small style="color: #6b7280; font-size: 0.75rem;">Isi dengan detail alamat seperti nama jalan, nomor rumah, RT/RW</small>
-                        </div>
+                        @endif
                     </div>
                 </div>
 
-                <!-- Visit Details Section -->
                 <div>
-                    <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center border-b pb-2">
-                        <i class="fas fa-calendar-check text-indigo-500 mr-2"></i>
-                        Detail Kunjungan
-                    </h4>
-                    
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
-                        <!-- Visit Date -->
-                        <div>
-                            <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
-                                Tanggal Kunjungan <span style="color: #ef4444;">*</span>
-                            </label>
-                            <div style="position: relative;">
-                                <i class="fas fa-calendar" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
-                                <input type="date" name="visit_date" required
-                                    style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem 1rem 0.75rem 2.5rem; font-size: 0.875rem;"
-                                    max="{{ date('Y-m-d') }}">
-                            </div>
-                        </div>
-
-                        <!-- Purpose (full width) -->
-                        <div style="grid-column: span 2;">
-                            <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
-                                Tujuan Kunjungan <span style="color: #ef4444;">*</span>
-                            </label>
-                            <div style="position: relative;">
-                                <i class="fas fa-clipboard-list" style="position: absolute; left: 0.75rem; top: 0.75rem; color: #9ca3af;"></i>
-                                <textarea name="purpose" rows="4" required
-                                    placeholder="Jelaskan tujuan kunjungan sales..."
-                                    style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem 1rem 0.75rem 2.5rem; font-size: 0.875rem; resize: none;"></textarea>
-                            </div>
-                        </div>
-
-                        <!-- Follow Up (full width) -->
-                        <div style="grid-column: span 2;">
-                            <div style="display: flex; align-items: center;">
-                                <input type="checkbox" name="is_follow_up" value="1" id="followUpCreate"
-                                    style="width: 1rem; height: 1rem; color: #4f46e5; border-color: #d1d5db; border-radius: 0.25rem;">
-                                <label for="followUpCreate" style="margin-left: 0.5rem; font-size: 0.875rem; font-weight: 500; color: #374151;">
-                                    Perlu Follow Up
-                                </label>
-                            </div>
-                            <p style="margin-left: 1.5rem; margin-top: 0.25rem; font-size: 0.75rem; color: #6b7280;">
-                                Centang jika kunjungan ini memerlukan tindak lanjut
-                            </p>
-                        </div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Customer Name <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" name="customer_name"
+                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                            placeholder="Masukkan nama customer" required>
                     </div>
                 </div>
 
-                <!-- Form Actions -->
-                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; margin-top: 0.5rem;">
-                    <button type="button" 
-                            onclick="closeVisitModal()" 
-                            style="background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.625rem 1.5rem; font-weight: 500; font-size: 0.875rem; cursor: pointer; transition: all 0.2s;">
-                        Batal
-                    </button>
-                    <button type="submit" 
-                            style="background-color: #4f46e5; color: white; border: none; border-radius: 0.5rem; padding: 0.625rem 1.5rem; font-weight: 500; font-size: 0.875rem; cursor: pointer; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); transition: all 0.2s;">
-                        <i class="fas fa-save" style="margin-right: 0.5rem;"></i>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Company</label>
+                    <div class="relative">
+                        <i class="fas fa-building absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" name="company_name"
+                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                            placeholder="Masukkan nama perusahaan">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Province <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <i class="fas fa-map-marked-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <select name="create-province" id="create-province"
+                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                            required>
+                            <option value="">Pilih Provinsi</option>
+                            @foreach($provinces as $province)
+                                <option value="{{ $province->id }}">{{ $province->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Regency</label>
+                    <div class="relative">
+                        <i class="fas fa-map-marker-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <select name="create-regency" id="create-regency"
+                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                            <option value="">Pilih Kabupaten/Kota</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">District</label>
+                    <div class="relative">
+                        <i class="fas fa-map-pin absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <select name="create-district" id="create-district"
+                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                            <option value="">Pilih Kecamatan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Village</label>
+                    <div class="relative">
+                        <i class="fas fa-location-dot absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <select name="create-village" id="create-village"
+                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                            <option value="">Pilih Kelurahan/Desa</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                    <div class="relative">
+                        <i class="fas fa-map-location-dot absolute left-3 top-4 text-gray-400"></i>
+                        <textarea name="address" rows="2"
+                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none transition-all"
+                            placeholder="Masukkan alamat lengkap..."></textarea>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Visit Date <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <i class="fas fa-calendar absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="date" name="visit_date"
+                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                            required>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Purpose <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <i class="fas fa-bullseye absolute left-3 top-4 text-gray-400"></i>
+                        <textarea name="visit_purpose" rows="3"
+                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none transition-all"
+                            placeholder="Masukkan tujuan kunjungan..." required></textarea>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Follow Up</label>
+                    <div class="flex items-center gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="is_follow_up" value="1" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+                            <span class="text-sm text-gray-700">Ya</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="is_follow_up" value="0" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500" checked>
+                            <span class="text-sm text-gray-700">Tidak</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 mt-6">
+                    <button type="button" onclick="closeVisitModal()" class="px-6 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">Batal</button>
+                    <button type="submit" class="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 font-medium shadow-md hover:shadow-lg">
+                        <i class="fas fa-save mr-2"></i>
                         Simpan Data
                     </button>
                 </div>
@@ -214,47 +193,3 @@
         </div>
     </div>
 </div>
-
-<style>
-/* Modal Animation */
-@keyframes modal-in {
-    from {
-        opacity: 0;
-        transform: scale(0.9) translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
-}
-
-.animate-modal-in {
-    animation: modal-in 0.3s ease-out;
-}
-
-/* Custom Scrollbar for Modal */
-.overflow-y-auto::-webkit-scrollbar {
-    width: 6px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 3px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 3px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-}
-
-/* Enhanced focus states */
-input:focus, textarea:focus, select:focus {
-    outline: none;
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-}
-</style>

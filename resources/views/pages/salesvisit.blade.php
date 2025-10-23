@@ -1,151 +1,81 @@
 @extends('layout.main')
-@section('title','Marketing - Sales Visit')
+@section('title','Sales Visit')
 
 @section('content')
-<div class="container-expanded mx-auto px-6 lg:px-8 py-8">
+<div class="container-expanded mx-auto px-6 lg:px-8 py-8 pt-[60px]">
+    
+    <!-- Tombol Add Component -->
+    <x-salesvisit.action.action :currentMenuId="$currentMenuId" :salesUsers="$salesUsers" :provinces="$provinces" />
+    <x-salesvisit.action.edit :currentMenuId="$currentMenuId" :salesUsers="$salesUsers" :provinces="$provinces" />
 
-    <!-- Filters and Search Section -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6 mt-12 fade-in">
+    <!-- Sales Visit Table -->
+    <div class="bg-white rounded-xl shadow-sm border mt-4">
         <div class="p-6">
-            <div class="flex flex-wrap gap-4 items-center">
-                <!-- Search Input -->
-                <div class="flex-1 min-w-[250px]">
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-search text-gray-400"></i>
-                        </div>
-                        <input type="text" 
-                            id="searchInput"
-                            placeholder="Cari nama customer, perusahaan, atau sales..." 
-                            class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
-                    </div>
-                </div>
 
-                <!-- Filter by Sales -->
-                <div class="w-full sm:w-auto min-w-[200px]">
-                    <select id="filterSales" 
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
-                        <option value="">Semua Sales</option>
-                        @foreach($salesUsers as $sales)
-                            <option value="{{ $sales->user_id }}">{{ $sales->username }}</option>
-                        @endforeach
-                    </select>
-                </div>
+            <x-globals.filtersearch
+                tableId="salesVisitTable"
+                :columns="[
+                    'number',
+                    'sales',
+                    'customer_name',
+                    'company',
+                    'province',
+                    'visit_date',
+                    'purpose',
+                    'follow_up',
+                    'actions'
+                ]"
+                :filters="['Follow Up' => ['Ya', 'Tidak']]"
+                ajaxUrl="{{ route('salesvisit.search') }}"
+                placeholder="Cari nama customer, company, atau sales..."
+            />
+            
+            <!-- Table Component -->
+            <x-salesvisit.table.table :salesVisits="$salesVisits" :currentMenuId="$currentMenuId" />
 
-                <!-- Filter by Province -->
-                <div class="w-full sm:w-auto min-w-[200px]">
-                    <select id="filterProvince" 
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
-                        <option value="">Semua Provinsi</option>
-                        @foreach($provinces as $province)
-                            <option value="{{ $province->id }}">{{ $province->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Filter by Follow Up Status -->
-                <div class="w-full sm:w-auto min-w-[200px]">
-                    <select id="filterFollowUp" 
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
-                        <option value="">Semua Status</option>
-                        <option value="1">Perlu Follow Up</option>
-                        <option value="0">Tidak Perlu Follow Up</option>
-                    </select>
-                </div>
-            </div>
+            <!-- Pagination -->
+            <x-globals.pagination :paginator="$salesVisits" />
         </div>
     </div>
-        <!-- Header Section with Add Button -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden fade-in mb-6">
-            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">Sales Visit Management</h3>
-                    <p class="text-sm text-gray-600 mt-1">Kelola data kunjungan sales dan informasinya</p>
-                </div>
-                @if(auth()->user()->canAccess($currentMenuId ?? 1, 'create'))
-                <button onclick="openVisitModal()" 
-                    class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
-                    <i class="fas fa-plus"></i>
-                    Tambah Visit
-                </button>
-                @endif
-            </div>
-            <x-salesvisit.table.table :salesVisits="$salesVisits" :currentMenuId="$currentMenuId ?? 1"/>
-        </div>
-
-
-    <!-- Modals -->
-    <x-salesvisit.action.action :provinces="$provinces" :salesUsers="$salesUsers"/> 
-    <x-salesvisit.action.edit :provinces="$provinces" :salesUsers="$salesUsers"/> 
 </div>
 
+<!-- Edit Modal -->
+<x-salesvisit.action.edit :salesUsers="$salesUsers" :provinces="$provinces" />
+
 @push('scripts')
+<script src="{{ asset('js/search.js') }}"></script>
 <script src="{{ asset('js/address-cascade.js') }}"></script>
 <script src="{{ asset('js/salesvisit-modal.js') }}"></script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Initializing Sales Visit page...');
-    
-    // Check if AddressCascade is defined
-    if (typeof AddressCascade === 'undefined') {
-        console.error('AddressCascade class not found!');
-        return;
-    }
-    
-    // Initialize cascade untuk CREATE form
-    try {
-        const createCascade = new AddressCascade({
-            provinceId: 'create-province',
-            regencyId: 'create-regency',
-            districtId: 'create-district',
-            villageId: 'create-village'
-        });
-        console.log('Create cascade initialized');
-    } catch (error) {
-        console.error('Error initializing cascade:', error);
-    }
-    
-    // Add event listener untuk edit buttons
-    document.addEventListener('click', function(e) {
-        const editBtn = e.target.closest('.edit-visit-btn');
-        if (editBtn) {
-            try {
-                const visitData = JSON.parse(editBtn.dataset.visit);
-                console.log('Edit button clicked:', visitData);
-                openEditVisitModal(visitData);
-            } catch (error) {
-                console.error('Error parsing visit data:', error);
-            }
-        }
-    });
-});
-</script>
 @endpush
 
-<style>
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+<script>
+    window.Laravel = {!! json_encode(['csrfToken' => csrf_token()]) !!};
 
-.fade-in {
-    animation: fadeIn 0.3s ease-in;
-}
+    function deleteVisit(visitId, deleteRoute, csrfToken) {
+        console.log('deleteVisit called:', { visitId, deleteRoute, csrfToken });
 
-@keyframes modalSlideIn {
-    from { 
-        opacity: 0; 
-        transform: translateY(-20px) scale(0.95); 
+        deleteRecord(visitId, deleteRoute, csrfToken, (data) => {
+            console.log('Delete success:', data);
+            if (window.salesVisitTableHandler) {
+                window.salesVisitTableHandler.refresh();
+            } else {
+                location.reload();
+            }
+        });
     }
-    to { 
-        opacity: 1; 
-        transform: translateY(0) scale(1); 
-    }
-}
 
-.animate-modal-in { 
-    animation: modalSlideIn 0.25s ease-out; 
-}
-</style>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof TableHandler === 'undefined') {
+            console.error('TableHandler not loaded.');
+            return;
+        }
+
+        window.salesVisitTableHandler = new TableHandler({
+            tableId: 'salesVisitTable',
+            ajaxUrl: '{{ route("salesvisit.search") }}',
+            filters: ['Follow Up'],
+            columns: ['number', 'sales', 'customer_name', 'company', 'province', 'visit_date', 'purpose', 'follow_up', 'actions']
+        });
+    });
+</script>
 @endsection

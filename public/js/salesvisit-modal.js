@@ -1,13 +1,33 @@
 // ==================== ADD MODAL ====================
+let createVisitCascade = null;
+
 function openVisitModal() {
     const modal = document.getElementById('visitModal');
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     
+    // Initialize address cascade untuk CREATE modal
+    initCreateVisitCascade();
+    
     setTimeout(() => {
         const firstInput = modal.querySelector('select[name="sales_id"]');
-        if (firstInput) firstInput.focus();
+        if (firstInput && !firstInput.disabled) firstInput.focus();
     }, 300);
+}
+
+function initCreateVisitCascade() {
+    // Destroy existing instance if any
+    if (createVisitCascade) {
+        createVisitCascade.destroy();
+    }
+
+    // Initialize new cascade instance untuk CREATE modal
+    createVisitCascade = new AddressCascade({
+        provinceId: 'create-province',
+        regencyId: 'create-regency',
+        districtId: 'create-district',
+        villageId: 'create-village'
+    });
 }
 
 function closeVisitModal() {
@@ -15,12 +35,19 @@ function closeVisitModal() {
     modal.classList.add('hidden');
     document.body.style.overflow = 'auto';
     
+    // Destroy cascade instance
+    if (createVisitCascade) {
+        createVisitCascade.destroy();
+        createVisitCascade = null;
+    }
+    
     const form = modal.querySelector('form');
     if (form) form.reset();
     
-    document.getElementById('create-regency').innerHTML = '<option value="">-- Pilih Kabupaten/Kota --</option>';
-    document.getElementById('create-district').innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
-    document.getElementById('create-village').innerHTML = '<option value="">-- Pilih Kelurahan/Desa --</option>';
+    // Reset dropdowns
+    document.getElementById('create-regency').innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
+    document.getElementById('create-district').innerHTML = '<option value="">Pilih Kecamatan</option>';
+    document.getElementById('create-village').innerHTML = '<option value="">Pilih Kelurahan/Desa</option>';
 }
 
 // ==================== EDIT MODAL ====================
@@ -46,7 +73,13 @@ function openEditVisitModal(visitData) {
     document.getElementById('editAddress').value = visitData.address || '';
     document.getElementById('editVisitDate').value = visitData.visitDate || '';
     document.getElementById('editPurpose').value = visitData.purpose || '';
-    document.getElementById('editFollowUp').checked = visitData.followUp == 1;
+    
+    // Set follow up radio buttons
+    if (visitData.followUp == 1) {
+        document.getElementById('editFollowUpYes').checked = true;
+    } else {
+        document.getElementById('editFollowUpNo').checked = true;
+    }
 
     // Store current data
     currentEditData = {
@@ -92,6 +125,8 @@ function loadEditVisitData(visitId) {
 }
 
 function populateEditForm(data) {
+    const isSalesRole = document.getElementById('editIsSalesRole').value === '1';
+    
     // Populate sales dropdown
     const salesSelect = document.getElementById('editSalesId');
     salesSelect.innerHTML = '<option value="">-- Pilih Sales --</option>';
@@ -102,13 +137,19 @@ function populateEditForm(data) {
         data.salesUsers.forEach(sales => {
             const option = document.createElement('option');
             option.value = sales.user_id;
-            option.textContent = `${sales.username} (${sales.email})`;
+            option.textContent = `${sales.username} - ${sales.email}`;
             salesSelect.appendChild(option);
         });
         
         if (currentEditData.salesId) {
             salesSelect.value = currentEditData.salesId;
             console.log('Set sales selection to:', currentEditData.salesId);
+        }
+        
+        // 🔒 Jika user adalah sales, disable dropdown
+        if (isSalesRole) {
+            salesSelect.disabled = true;
+            salesSelect.classList.add('bg-gray-100', 'cursor-not-allowed');
         }
     } else {
         console.warn('No sales users data found');
@@ -133,6 +174,7 @@ function populateEditForm(data) {
             provinceSelect.value = currentEditData.provinceId;
             console.log('Set province selection to:', currentEditData.provinceId);
             
+            // Initialize cascade setelah province terisi
             setTimeout(() => {
                 initEditVisitCascade();
             }, 100);
@@ -162,6 +204,7 @@ function initEditVisitCascade() {
         const changeEvent = new Event('change');
         provinceSelect.dispatchEvent(changeEvent);
         
+        // Chain the cascade selections dengan delay
         setTimeout(() => {
             if (currentEditData.regencyId) {
                 const regencySelect = document.getElementById('edit-regency');
@@ -286,5 +329,15 @@ document.addEventListener('click', (e) => {
     }
     if (e.target.id === 'editVisitModal') {
         closeEditVisitModal();
+    }
+});
+
+// ==================== INIT ON PAGE LOAD ====================
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('SalesVisit Modal JS Loaded');
+    
+    // Check if AddressCascade is available
+    if (typeof AddressCascade === 'undefined') {
+        console.error('AddressCascade class not found! Make sure address-cascade.js is loaded.');
     }
 });
