@@ -68,20 +68,23 @@ Route::middleware(['auth', 'permission'])->group(function () {
 
 
     // ==========================
-    // Sales Visit Management
-    // ==========================
-    Route::get('/salesvisit', [SalesVisitController::class, 'index'])->name('salesvisit');
-    Route::post('/salesvisit', [SalesVisitController::class, 'store'])->name('salesvisit.store');
-    Route::put('/salesvisit/{id}', [SalesVisitController::class, 'update'])->name('salesvisit.update');
-    Route::get('/salesvisit/{id}/edit', [SalesVisitController::class, 'edit'])->name('salesvisit.edit');
-    Route::delete('/salesvisit/{id}', [SalesVisitController::class, 'destroy'])->name('salesvisit.destroy');
-    Route::get('/salesvisit/search', [SalesVisitController::class, 'search'])->name('salesvisit.search');
-    Route::post('/salesvisit/import', [SalesVisitController::class, 'import'])->name('salesvisit.import');
-    Route::get('/salesvisit/export', [SalesVisitController::class, 'export'])->name('salesvisit.export');
-    Route::get('/salesvisit/get-regencies/{provinceId}', [SalesVisitController::class, 'getRegencies']);
-    Route::get('/salesvisit/get-districts/{regencyId}', [SalesVisitController::class, 'getDistricts']);
-    Route::get('/salesvisit/get-villages/{districtId}', [SalesVisitController::class, 'getVillages']);
+// Sales Visit Management
+// ==========================
+Route::get('/salesvisit', [SalesVisitController::class, 'index'])->name('salesvisit');
+Route::post('/salesvisit', [SalesVisitController::class, 'store'])->name('salesvisit.store');
+Route::put('/salesvisit/{id}', [SalesVisitController::class, 'update'])->name('salesvisit.update');
+Route::get('/salesvisit/{id}/edit', [SalesVisitController::class, 'edit'])->name('salesvisit.edit');
+Route::delete('/salesvisit/{id}', [SalesVisitController::class, 'destroy'])->name('salesvisit.destroy');
+Route::get('/salesvisit/search', [SalesVisitController::class, 'search'])->name('salesvisit.search');
 
+// 🔥 CASCADE DROPDOWN ROUTES (HARUS DI ATAS ROUTE DENGAN {id})
+Route::get('/salesvisit/get-regencies/{provinceId}', [SalesVisitController::class, 'getRegencies'])->name('salesvisit.getRegencies');
+Route::get('/salesvisit/get-districts/{regencyId}', [SalesVisitController::class, 'getDistricts'])->name('salesvisit.getDistricts');
+Route::get('/salesvisit/get-villages/{districtId}', [SalesVisitController::class, 'getVillages'])->name('salesvisit.getVillages');
+
+// IMPORT/EXPORT
+Route::post('/salesvisit/import', [SalesVisitController::class, 'import'])->name('salesvisit.import');
+Route::get('/salesvisit/export', [SalesVisitController::class, 'export'])->name('salesvisit.export');
 
     
     // ==========================

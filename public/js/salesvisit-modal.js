@@ -26,7 +26,8 @@ function initCreateVisitCascade() {
         provinceId: 'create-province',
         regencyId: 'create-regency',
         districtId: 'create-district',
-        villageId: 'create-village'
+        villageId: 'create-village',
+        baseUrl: '/salesvisit'
     });
 }
 
@@ -194,7 +195,8 @@ function initEditVisitCascade() {
         provinceId: 'edit-province',
         regencyId: 'edit-regency',
         districtId: 'edit-district',
-        villageId: 'edit-village'
+        villageId: 'edit-village',
+        baseUrl: '/salesvisit'
     });
 
     if (currentEditData.provinceId) {
@@ -245,7 +247,12 @@ function closeEditVisitModal() {
     const form = document.getElementById('editVisitForm');
     if (form) form.reset();
 
-    document.getElementById('editSalesId').innerHTML = '<option value="">-- Pilih Sales --</option>';
+    // Reset sales dropdown & re-enable if needed
+    const salesSelect = document.getElementById('editSalesId');
+    salesSelect.disabled = false;
+    salesSelect.classList.remove('bg-gray-100', 'cursor-not-allowed');
+    salesSelect.innerHTML = '<option value="">-- Pilih Sales --</option>';
+
     document.getElementById('edit-province').innerHTML = '<option value="">-- Pilih Provinsi --</option>';
     document.getElementById('edit-regency').innerHTML = '<option value="">-- Pilih Kabupaten/Kota --</option>';
     document.getElementById('edit-district').innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
