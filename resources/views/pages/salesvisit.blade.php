@@ -39,8 +39,7 @@
     </div>
 </div>
 
-<!-- Edit Modal -->
-<x-salesvisit.action.edit :salesUsers="$salesUsers" :provinces="$provinces" />
+
 
 @push('scripts')
 <script src="{{ asset('js/search.js') }}"></script>

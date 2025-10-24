@@ -94,7 +94,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Province <span class="text-red-500">*</span></label>
                     <div class="relative">
                         <i class="fas fa-map-marked-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <select name="create-province" id="create-province"
+                        <select name="province_id" id="create-province"
                             class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                             required>
                             <option value="">Pilih Provinsi</option>
@@ -109,7 +109,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Regency</label>
                     <div class="relative">
                         <i class="fas fa-map-marker-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <select name="create-regency" id="create-regency"
+                        <select name="regency_id" id="create-regency"
                             class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
                             <option value="">Pilih Kabupaten/Kota</option>
                         </select>
@@ -120,7 +120,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">District</label>
                     <div class="relative">
                         <i class="fas fa-map-pin absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <select name="create-district" id="create-district"
+                        <select name="district_id" id="create-district"
                             class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
                             <option value="">Pilih Kecamatan</option>
                         </select>
@@ -131,7 +131,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Village</label>
                     <div class="relative">
                         <i class="fas fa-location-dot absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <select name="create-village" id="create-village"
+                        <select name="village_id" id="create-village"
                             class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
                             <option value="">Pilih Kelurahan/Desa</option>
                         </select>

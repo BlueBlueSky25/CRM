@@ -54,12 +54,11 @@ class SalesVisitController extends Controller
 
         // Get sales users (users dengan role sales) - PERBAIKAN DI SINI
         $salesUsers = User::whereHas('role', function($query) {
-            $query->where('role_name', 'sales')
-                  ->orWhere('role_name', 'like', '%sales%');
-        })
-        ->select('user_id', 'username', 'email')
-        ->orderBy('username')
-        ->get();
+        $query->where('role_id', 12); // Langsung filter by role_id = 12 (sales)
+    })
+    ->select('user_id', 'username', 'email')
+    ->orderBy('username')
+    ->get();
 
         // Get all provinces
         $provinces = Province::orderBy('name')->get();
@@ -179,56 +178,73 @@ class SalesVisitController extends Controller
      * Store a newly created sales visit
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'sales_id' => 'required|exists:users,user_id',
-            'customer_name' => 'required|string|max:255',
-            'company_name' => 'nullable|string|max:255',
-            'province_id' => 'required|exists:provinces,id',
-            'regency_id' => 'nullable|exists:regencies,id',
-            'district_id' => 'nullable|exists:districts,id',
-            'village_id' => 'nullable|exists:villages,id',
-            'address' => 'nullable|string',
-            'visit_date' => 'required|date',
-            'visit_purpose' => 'required|string',
-            'is_follow_up' => 'nullable|boolean',
-        ]);
+{
+    // Debug: lihat data yang masuk
+    \Log::info('Store Request Data:', $request->all());
+    
+    $request->validate([
+        'sales_id' => 'required|exists:users,user_id',
+        'customer_name' => 'required|string|max:255',
+        'company_name' => 'nullable|string|max:255',
+        'province_id' => 'required|exists:provinces,id',
+        'regency_id' => 'nullable|exists:regencies,id',
+        'district_id' => 'nullable|exists:districts,id',
+        'village_id' => 'nullable|exists:villages,id',
+        'address' => 'nullable|string',
+        'visit_date' => 'required|date',
+        'visit_purpose' => 'required|string',
+        'is_follow_up' => 'nullable|boolean',
+    ]);
 
-        $user = Auth::user();
+    $user = Auth::user();
 
-        // 🔧 Check permission
-        $allowedRoles = ['superadmin', 'admin', 'marketing', 'sales'];
-        $userRoleName = strtolower($user->role->role_name ?? '');
-        
-        if (!in_array($userRoleName, $allowedRoles)) {
-            return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk menambah kunjungan.');
-        }
-
-        try {
-            SalesVisit::create([
-                'sales_id' => $request->sales_id,
-                'user_id' => auth()->id(),
-                'customer_name' => $request->customer_name,
-                'company_name' => $request->company_name ?? null,
-                'province_id' => $request->province_id,
-                'regency_id' => $request->regency_id ?? null,
-                'district_id' => $request->district_id ?? null,
-                'village_id' => $request->village_id ?? null,
-                'address' => $request->address ?? null,
-                'visit_date' => $request->visit_date,
-                'visit_purpose' => $request->visit_purpose,
-                'is_follow_up' => $request->is_follow_up ?? 0,
-            ]);
-
-            return redirect()->route('salesvisit.index')
-                ->with('success', 'Data kunjungan sales berhasil ditambahkan!');
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Gagal menambahkan data: ' . $e->getMessage())
-                ->withInput();
-        }
+    // Check permission
+    $allowedRoles = ['superadmin', 'admin', 'marketing', 'sales'];
+    $userRoleName = strtolower($user->role->role_name ?? '');
+    
+    if (!in_array($userRoleName, $allowedRoles)) {
+        return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk menambah kunjungan.');
     }
 
+    // Untuk sales, pastikan sales_id adalah user_id mereka sendiri
+    if ($userRoleName === 'sales') {
+        $request->merge(['sales_id' => $user->user_id]);
+    }
+
+    try {
+        DB::beginTransaction();
+
+        $salesVisit = SalesVisit::create([
+            'sales_id' => $request->sales_id,
+            'user_id' => $user->user_id, // Pastikan menggunakan user_id
+            'customer_name' => $request->customer_name,
+            'company_name' => $request->company_name ?? null,
+            'province_id' => $request->province_id,
+            'regency_id' => $request->regency_id ?? null,
+            'district_id' => $request->district_id ?? null,
+            'village_id' => $request->village_id ?? null,
+            'address' => $request->address ?? null,
+            'visit_date' => $request->visit_date,
+            'visit_purpose' => $request->visit_purpose,
+            'is_follow_up' => $request->boolean('is_follow_up') ?? false,
+        ]);
+
+        DB::commit();
+
+        \Log::info('Sales Visit Created Successfully:', $salesVisit->toArray());
+
+        return redirect()->route('salesvisit')
+            ->with('success', 'Data kunjungan sales berhasil ditambahkan!');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('Error storing sales visit: ' . $e->getMessage());
+        \Log::error('Error trace: ' . $e->getTraceAsString());
+        
+        return redirect()->back()
+            ->with('error', 'Gagal menambahkan data: ' . $e->getMessage())
+            ->withInput();
+    }
+}
     /**
      * Show the form for editing the specified sales visit
      */
@@ -237,10 +253,7 @@ class SalesVisitController extends Controller
         $visit = SalesVisit::with(['sales', 'province', 'regency', 'district', 'village'])->findOrFail($id);
         
         // Get sales users - PERBAIKAN DI SINI
-        $salesUsers = User::whereHas('role', function($query) {
-            $query->where('role_name', 'sales')
-                  ->orWhere('role_name', 'like', '%sales%');
-        })
+        $salesUsers = User::where('role_id', 12) // Langsung filter by role_id
         ->select('user_id', 'username', 'email')
         ->orderBy('username')
         ->get();
