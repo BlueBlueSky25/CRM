@@ -10,7 +10,7 @@ class SalesVisit extends Model
     use HasFactory;
 
     protected $table = 'sales_visits';
-    protected $primaryKey = 'visit_id';
+    protected $primaryKey = 'id';
     public $incrementing = true;
     protected $keyType = 'int';
 

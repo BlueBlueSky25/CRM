@@ -6,7 +6,9 @@
     
     <!-- Tombol Add Component -->
     <x-salesvisit.action.action :currentMenuId="$currentMenuId" :salesUsers="$salesUsers" :provinces="$provinces" />
-    <x-salesvisit.action.edit :currentMenuId="$currentMenuId" :salesUsers="$salesUsers" :provinces="$provinces" />
+
+    <!-- HAPUS BARIS INI: -->
+    <!-- <x-salesvisit.action.edit :currentMenuId="$currentMenuId" :salesUsers="$salesUsers" :provinces="$provinces" /> -->
 
     <!-- Sales Visit Table -->
     <div class="bg-white rounded-xl shadow-sm border mt-4">
@@ -40,7 +42,7 @@
 </div>
 
 <!-- Edit Modal -->
-<x-salesvisit.action.edit :salesUsers="$salesUsers" :provinces="$provinces" />
+<x-salesvisit.action.edit :currentMenuId="$currentMenuId" />
 
 @push('scripts')
 <script src="{{ asset('js/search.js') }}"></script>

@@ -52,157 +52,156 @@
         <!-- Modal Body -->
         <div class="overflow-y-auto max-h-[calc(90vh-140px)] p-6">
             <form action="{{ route('salesvisit.store') }}" method="POST" class="space-y-4">
-            @csrf
+    @csrf
 
-            @php
-                $userRole = strtolower(auth()->user()->role->role_name ?? '');
-                $isSales = $userRole === 'sales';
-            @endphp
+    @php
+        $userRole = strtolower(auth()->user()->role->role_name ?? '');
+        $isSales = $userRole === 'sales';
+    @endphp
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Sales <span class="text-red-500">*</span></label>
-                <div class="relative">
-                    <i class="fas fa-user-tie absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    @if($isSales)
-                        <input type="text" 
-                            value="{{ auth()->user()->username }} - {{ auth()->user()->email }}"
-                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 bg-gray-100 cursor-not-allowed transition-all"
-                            readonly>
-                        <input type="hidden" name="sales_id" value="{{ auth()->user()->user_id }}">
-                    @else
-                        <select name="sales_id" id="visit-sales"
-                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                            required>
-                            <option value="">Pilih Sales</option>
-                            @foreach($salesUsers as $sales)
-                                <option value="{{ $sales->user_id }}">{{ $sales->username }} - {{ $sales->email }}</option>
-                            @endforeach
-                        </select>
-                    @endif
-                </div>
-            </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Sales <span class="text-red-500">*</span></label>
+        <div class="relative">
+            <i class="fas fa-user-tie absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            @if($isSales)
+                <input type="text" 
+                    value="{{ auth()->user()->username }} - {{ auth()->user()->email }}"
+                    class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 bg-gray-100 cursor-not-allowed transition-all"
+                    readonly>
+                <input type="hidden" name="sales_id" value="{{ auth()->user()->user_id }}">
+            @else
+                <select name="sales_id" id="visit-sales"
+                    class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    required>
+                    <option value="">Pilih Sales</option>
+                    @foreach($salesUsers as $sales)
+                        <option value="{{ $sales->user_id }}">{{ $sales->username }} - {{ $sales->email }}</option>
+                    @endforeach
+                </select>
+            @endif
+        </div>
+    </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Customer Name <span class="text-red-500">*</span></label>
-                <div class="relative">
-                    <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <input type="text" name="customer_name"
-                        class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                        placeholder="Masukkan nama customer" required>
-                </div>
-            </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Customer Name <span class="text-red-500">*</span></label>
+        <div class="relative">
+            <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <input type="text" name="customer_name"
+                class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                placeholder="Masukkan nama customer" required>
+        </div>
+    </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Company</label>
-                <div class="relative">
-                    <i class="fas fa-building absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <input type="text" name="company"
-                        class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                        placeholder="Masukkan nama perusahaan">
-                </div>
-            </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Company</label>
+        <div class="relative">
+            <i class="fas fa-building absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <input type="text" name="company_name"
+                class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                placeholder="Masukkan nama perusahaan">
+        </div>
+    </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Province <span class="text-red-500">*</span></label>
-                <div class="relative">
-                    <i class="fas fa-map-marked-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <select name="province_id" id="create-province"
-                        class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                        required>
-                        <option value="">Pilih Provinsi</option>
-                        @foreach($provinces as $province)
-                            <option value="{{ $province->id }}">{{ $province->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Province <span class="text-red-500">*</span></label>
+        <div class="relative">
+            <i class="fas fa-map-marked-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <select name="province_id" id="create-province"
+                class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                required>
+                <option value="">Pilih Provinsi</option>
+                @foreach($provinces as $province)
+                    <option value="{{ $province->id }}">{{ $province->name }}</option>
+                @endforeach
+            </select>
+        </div>
+    </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Regency</label>
-                <div class="relative">
-                    <i class="fas fa-map-marker-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <select name="regency_id" id="create-regency"
-                        class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
-                        <option value="">Pilih Kabupaten/Kota</option>
-                    </select>
-                </div>
-            </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Regency</label>
+        <div class="relative">
+            <i class="fas fa-map-marker-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <select name="regency_id" id="create-regency"
+                class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                <option value="">Pilih Kabupaten/Kota</option>
+            </select>
+        </div>
+    </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">District</label>
-                <div class="relative">
-                    <i class="fas fa-map-pin absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <select name="district_id" id="create-district"
-                        class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
-                        <option value="">Pilih Kecamatan</option>
-                    </select>
-                </div>
-            </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">District</label>
+        <div class="relative">
+            <i class="fas fa-map-pin absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <select name="district_id" id="create-district"
+                class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                <option value="">Pilih Kecamatan</option>
+            </select>
+        </div>
+    </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Village</label>
-                <div class="relative">
-                    <i class="fas fa-location-dot absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <select name="village_id" id="create-village"
-                        class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
-                        <option value="">Pilih Kelurahan/Desa</option>
-                    </select>
-                </div>
-            </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Village</label>
+        <div class="relative">
+            <i class="fas fa-location-dot absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <select name="village_id" id="create-village"
+                class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                <option value="">Pilih Kelurahan/Desa</option>
+            </select>
+        </div>
+    </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
-                <div class="relative">
-                    <i class="fas fa-map-location-dot absolute left-3 top-4 text-gray-400"></i>
-                    <textarea name="address" rows="2"
-                        class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none transition-all"
-                        placeholder="Masukkan alamat lengkap..."></textarea>
-                </div>
-            </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+        <div class="relative">
+            <i class="fas fa-map-location-dot absolute left-3 top-4 text-gray-400"></i>
+            <textarea name="address" rows="2"
+                class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none transition-all"
+                placeholder="Masukkan alamat lengkap..."></textarea>
+        </div>
+    </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Visit Date <span class="text-red-500">*</span></label>
-                <div class="relative">
-                    <i class="fas fa-calendar absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <input type="date" name="visit_date"
-                        class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                        required>
-                </div>
-            </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Visit Date <span class="text-red-500">*</span></label>
+        <div class="relative">
+            <i class="fas fa-calendar absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <input type="date" name="visit_date"
+                class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                required>
+        </div>
+    </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Purpose <span class="text-red-500">*</span></label>
-                <div class="relative">
-                    <i class="fas fa-bullseye absolute left-3 top-4 text-gray-400"></i>
-                    <textarea name="purpose" rows="3"
-                        class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none transition-all"
-                        placeholder="Masukkan tujuan kunjungan..." required></textarea>
-                </div>
-            </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Purpose <span class="text-red-500">*</span></label>
+        <div class="relative">
+            <i class="fas fa-bullseye absolute left-3 top-4 text-gray-400"></i>
+            <textarea name="visit_purpose" rows="3"
+                class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none transition-all"
+                placeholder="Masukkan tujuan kunjungan..." required></textarea>
+        </div>
+    </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Follow Up</label>
-                <div class="flex items-center gap-4">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="follow_up" value="1" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
-                        <span class="text-sm text-gray-700">Ya</span>
-                    </label>
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="follow_up" value="0" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500" checked>
-                        <span class="text-sm text-gray-700">Tidak</span>
-                    </label>
-                </div>
-            </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Follow Up</label>
+        <div class="flex items-center gap-4">
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="is_follow_up" value="1" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+                <span class="text-sm text-gray-700">Ya</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="is_follow_up" value="0" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500" checked>
+                <span class="text-sm text-gray-700">Tidak</span>
+            </label>
+        </div>
+    </div>
 
-            <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 mt-6">
-                <button type="button" onclick="closeVisitModal()" class="px-6 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">Batal</button>
-                <button type="submit" class="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 font-medium shadow-md hover:shadow-lg">
-                    <i class="fas fa-save mr-2"></i>
-                    Simpan Data
-                </button>
-            </div>
-        </form>
-
+    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 mt-6">
+        <button type="button" onclick="closeVisitModal()" class="px-6 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">Batal</button>
+        <button type="submit" class="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 font-medium shadow-md hover:shadow-lg">
+            <i class="fas fa-save mr-2"></i>
+            Simpan Data
+        </button>
+    </div>
+</form>
         </div>
     </div>
 </div>

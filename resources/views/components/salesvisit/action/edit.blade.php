@@ -62,7 +62,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Province <span class="text-red-500">*</span></label>
                     <div class="relative">
                         <i class="fas fa-map-marked-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <select name="edit-province" id="edit-province"
+                        <select name="province_id" id="edit-province"
                             class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                             required>
                             <option value="">Pilih Provinsi</option>
@@ -74,7 +74,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Regency</label>
                     <div class="relative">
                         <i class="fas fa-map-marker-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <select name="edit-regency" id="edit-regency"
+                        <select name="regency_id" id="edit-regency"
                             class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all">
                             <option value="">Pilih Kabupaten/Kota</option>
                         </select>
@@ -85,7 +85,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">District</label>
                     <div class="relative">
                         <i class="fas fa-map-pin absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <select name="edit-district" id="edit-district"
+                        <select name="district_id" id="edit-district"
                             class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all">
                             <option value="">Pilih Kecamatan</option>
                         </select>
@@ -96,7 +96,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Village</label>
                     <div class="relative">
                         <i class="fas fa-location-dot absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <select name="edit-village" id="edit-village"
+                        <select name="village_id" id="edit-village"
                             class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all">
                             <option value="">Pilih Kelurahan/Desa</option>
                         </select>
