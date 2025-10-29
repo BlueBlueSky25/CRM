@@ -120,9 +120,9 @@ function displayCustomers(customers) {
     if (!customers || customers.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="9" class="px-6 py-8 text-center text-gray-500">
-                    <i class="fas fa-users text-4xl mb-2"></i>
-                    <p>Belum ada data customer</p>
+                <td colspan="9" class="px-3 py-6 text-center text-gray-500">
+                    <i class="fas fa-users text-3xl mb-2"></i>
+                    <p class="text-xs">Belum ada data customer</p>
                 </td>
             </tr>
         `;
@@ -131,57 +131,57 @@ function displayCustomers(customers) {
     
     tbody.innerHTML = customers.map((customer, index) => `
         <tr class="hover:bg-gray-50 transition-colors border-b">
-            <td class="px-6 py-4 whitespace-nowrap">
+            <td class="px-3 py-2 whitespace-nowrap">
                 <input type="checkbox" 
-                    class="customer-checkbox rounded border-gray-300" 
+                    class="customer-checkbox rounded border-gray-300 w-3.5 h-3.5" 
                     value="${customer.id}"
                     onchange="handleCheckboxChange()">
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-900">
                 ${index + 1}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
+            <td class="px-3 py-2 whitespace-nowrap">
                 <div class="flex items-center">
-                    <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-user text-blue-600"></i>
+                    <div class="flex-shrink-0 h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-blue-600 text-xs"></i>
                     </div>
-                    <div class="ml-4">
-                        <div class="text-sm font-medium text-gray-900">${customer.name}</div>
-                        <div class="text-sm text-gray-500">${customer.customer_id || ''}</div>
+                    <div class="ml-3">
+                        <div class="text-xs font-medium text-gray-900">${customer.name}</div>
+                        <div class="text-[10px] text-gray-500">${customer.customer_id || ''}</div>
                     </div>
                 </div>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-2 py-1 text-xs font-medium rounded-full ${
+            <td class="px-3 py-2 whitespace-nowrap">
+                <span class="px-2 py-0.5 text-[10px] font-medium rounded-full ${
                     customer.type === 'Company' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
                 }">
                     ${customer.type}
                 </span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <i class="fas fa-envelope mr-2"></i>${customer.email}
+            <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
+                <i class="fas fa-envelope mr-1 text-[10px]"></i>${customer.email}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <i class="fas fa-phone mr-2"></i>${customer.phone}
+            <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
+                <i class="fas fa-phone mr-1 text-[10px]"></i>${customer.phone}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
+            <td class="px-3 py-2 whitespace-nowrap">
                 ${getStatusBadge(customer.status)}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <i class="fas fa-user-tie mr-2"></i>${customer.pic}
+            <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
+                <i class="fas fa-user-tie mr-1 text-[10px]"></i>${customer.pic}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <td class="px-3 py-2 whitespace-nowrap text-right text-xs font-medium">
                 <button onclick="viewCustomer(${customer.id})" 
-                    class="text-blue-600 hover:text-blue-900 mr-3 transition" title="View">
-                    <i class="fas fa-eye"></i>
+                    class="text-blue-600 hover:text-blue-900 p-1.5 transition" title="View">
+                    <i class="fas fa-eye text-xs"></i>
                 </button>
                 <button onclick="editCustomer(${customer.id})" 
-                    class="text-green-600 hover:text-green-900 mr-3 transition" title="Edit">
-                    <i class="fas fa-edit"></i>
+                    class="text-green-600 hover:text-green-900 p-1.5 transition" title="Edit">
+                    <i class="fas fa-edit text-xs"></i>
                 </button>
                 <button onclick="deleteCustomer(${customer.id})" 
-                    class="text-red-600 hover:text-red-900 transition" title="Delete">
-                    <i class="fas fa-trash"></i>
+                    class="text-red-600 hover:text-red-900 p-1.5 transition" title="Delete">
+                    <i class="fas fa-trash text-xs"></i>
                 </button>
             </td>
         </tr>
@@ -196,7 +196,7 @@ function getStatusBadge(status) {
         'Inactive': 'bg-gray-100 text-gray-800'
     };
     
-    return `<span class="px-2 py-1 text-xs font-medium rounded-full ${badges[status] || ''}">${status}</span>`;
+    return `<span class="px-2 py-0.5 text-[10px] font-medium rounded-full ${badges[status] || ''}">${status}</span>`;
 }
 
 // ===================================

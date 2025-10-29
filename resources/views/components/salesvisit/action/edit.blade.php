@@ -5,7 +5,7 @@
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-modal-in">
         
         <!-- Modal Header -->
-        <div class="bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-4">
+        <div class="px-6 py-5 border-b border-gray-200" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #3b82f6 100%);">
             <div class="flex justify-between items-center">
                 <div>
                     <h2 class="text-xl font-semibold text-white">Edit Kunjungan Sales</h2>
