@@ -81,103 +81,50 @@ class SalesVisitController extends Controller
         ));
     }
 
-    /**
-     * Search and filter sales visits (AJAX)
-     */
+    
+
+public function getSalesUsers()
+{
+    $salesUsers = User::where('role_id', 12) // 12 = sales role
+        ->select('user_id', 'username', 'email')
+        ->orderBy('username')
+        ->get();
+    
+    return response()->json([
+        'users' => $salesUsers
+    ]);
+}
+
+
     public function search(Request $request)
-    {
-        $user = Auth::user();
-        $query = SalesVisit::with(['sales.role', 'province', 'regency', 'district', 'village']);
-
-        // 🔹 Role-based filtering
-        if ($user->role_id == 1) {
-            // Superadmin: lihat semua
-        } elseif (in_array($user->role_id, [7, 11])) {
-            // Admin & Marketing: lihat data sales
-            $query->whereHas('sales', function ($q) {
-                $q->where('role_id', 12);
-            });
-        } elseif ($user->role_id == 12) {
-            // Sales: hanya data sendiri
-            $query->where('sales_id', $user->user_id);
-        } else {
-            $query->whereNull('id');
-        }
-
-        // Search
-        $search = $request->input('search') ?? $request->input('query');
-
-        if ($search) {
-            $query->search($search);
-        }
-
-        // Filter by sales
-        if ($request->filled('sales_id')) {
-            $query->where('sales_id', $request->sales_id);
-        }
-
-        // Filter by province
-        if ($request->filled('province_id')) {
-            $query->where('province_id', $request->province_id);
-        }
-
-        // Filter by regency
-        if ($request->filled('regency_id')) {
-            $query->where('regency_id', $request->regency_id);
-        }
-
-        // Filter by follow up
-        if ($request->filled('follow_up')) {
-            $followUp = strtolower($request->follow_up);
-            if (in_array($followUp, ['ya', 'yes', '1'])) {
-                $query->where('is_follow_up', true);
-            } elseif (in_array($followUp, ['tidak', 'no', '0'])) {
-                $query->where('is_follow_up', false);
-            }
-        }
-
-        // Filter by date range
-        if ($request->filled('date_from')) {
-            $query->whereDate('visit_date', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->whereDate('visit_date', '<=', $request->date_to);
-        }
-
-        // Pagination
-        $salesVisits = $query->orderBy('visit_date', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-
-        // Format response untuk AJAX
-        return response()->json([
-            'items' => $salesVisits->map(function($visit, $index) use ($salesVisits) {
-                return [
-                    'number' => $salesVisits->firstItem() + $index,
-                    'id' => $visit->id,
-                    'sales_name' => $visit->sales->username ?? '-',
-                    'customer_name' => $visit->customer_name ?? '-',
-                    'company_name' => $visit->company_name ?? '-',
-                    'province' => $visit->province->name ?? '-',
-                    'regency' => $visit->regency->name ?? '-',
-                    'district' => $visit->district->name ?? '-',
-                    'village' => $visit->village->name ?? '-',
-                    'address' => $visit->address ?? '-',
-                    'visit_date' => $visit->visit_date ? $visit->visit_date->format('d-m-Y') : '-',
-                    'visit_purpose' => $visit->visit_purpose ?? '-',
-                    'is_follow_up' => $visit->is_follow_up ? 'Ya' : 'Tidak',
-                    'actions' => $this->getVisitActions($visit)
-                ];
-            })->toArray(),
-            'pagination' => [
-                'current_page' => $salesVisits->currentPage(),
-                'last_page' => $salesVisits->lastPage(),
-                'from' => $salesVisits->firstItem(),
-                'to' => $salesVisits->lastItem(),
-                'total' => $salesVisits->total()
-            ]
-        ]);
+{
+    $query = User::with('role');
+    
+    // Search by keyword
+    if ($request->filled('search') || $request->filled('query')) {
+        $keyword = $request->input('search') ?? $request->input('query');
+        $query->where(function($q) use ($keyword) {
+            $q->where('username', 'like', '%' . $keyword . '%')
+              ->orWhere('email', 'like', '%' . $keyword . '%');
+        });
     }
+    
+    // Filter by role NAME (bukan role_id)
+    if ($request->filled('role')) {
+        $roleName = strtolower($request->role);
+        $query->whereHas('role', function($q) use ($roleName) {
+            $q->whereRaw('LOWER(role_name) LIKE ?', ['%' . $roleName . '%']);
+        });
+    }
+    
+    $users = $query->select('user_id', 'username', 'email', 'role_id')
+        ->orderBy('username')
+        ->get();
+    
+    return response()->json([
+        'users' => $users
+    ]);
+}
 
     /**
      * Store a newly created sales visit

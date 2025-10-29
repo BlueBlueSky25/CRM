@@ -2,12 +2,10 @@
 @section('title','PIC Management')
 
 @section('content')
-<div class="container-expanded mx-auto px-6 lg:px-8 py-8 pt-[60px]">
+<div class="container-expanded mx-auto px-6 lg:px-8 py-8 pt-[60px] mt-8">
 
-    <!-- PIC Table Component -->
-    <div class="mb-8 mt-8">
+    <!-- PIC Table Component - NO WRAPPER PADDING -->
     <x-PICharge.table.table :currentMenuId="10" />
-    </div>
 
     <!-- Action Modal (Add PIC) -->
     <x-PICharge.action.action 

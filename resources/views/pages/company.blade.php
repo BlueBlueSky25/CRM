@@ -1,8 +1,9 @@
+<!-- company/index.blade.php -->
 @extends('layout.main')
 @section('title','Company')
 
 @section('content')
-<div class="container-expanded mx-auto px-6 lg:px-8 py-8 pt-[60px]">
+<div class="container-expanded mx-auto px-6 lg:px-8 py-8 pt-[60px] mt-8">
     <!-- KPI Section -->
     <x-company.attribut.kpi
         :totalCompanies="$totalCompanies"
@@ -11,7 +12,7 @@
         :activeCompanies="$activeCompanies"
     />
     
-    <!-- Company Table -->
+    <!-- Company Table - NO WRAPPER PADDING -->
     <div class="bg-white rounded-xl shadow-sm border mt-3">
         <x-globals.filtersearch
             tableId="companyTable"
@@ -34,8 +35,12 @@
         />
         <x-company.action.action :types="$types"/>
         <x-company.action.edit :types="$types"/>
-        <div class="p-6">
-            <x-company.table.table :companies="$companies" />
+        
+        <!-- Table without padding wrapper -->
+        <x-company.table.table :companies="$companies" />
+        
+        <!-- Pagination with padding -->
+        <div class="p-6 pt-0">
             <x-globals.pagination :paginator="$companies" />
         </div>
     </div>

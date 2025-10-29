@@ -70,10 +70,8 @@
             </div>
         </div>
 
-        <!-- Table Section -->
-        <div style="padding: 1.5rem;">
-            <x-salesvisit.table.table :salesVisits="$salesVisits" :currentMenuId="$currentMenuId" />
-        </div>
+        <!-- Table Section - NO PADDING! -->
+        <x-salesvisit.table.table :salesVisits="$salesVisits" :currentMenuId="$currentMenuId" />
 
         <!-- Pagination -->
         @if($salesVisits->hasPages())
@@ -118,53 +116,32 @@
 </style>
 
 <script>
-    window.Laravel = {!! json_encode(['csrfToken' => csrf_token()]) !!};
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('SalesVisit page loaded');
+    
 
-    function deleteVisit(visitId, deleteRoute, csrfToken) {
-        console.log('deleteVisit called:', { visitId, deleteRoute, csrfToken });
-
-        deleteRecord(visitId, deleteRoute, csrfToken, (data) => {
-            console.log('Delete success:', data);
-            if (window.salesVisitTableHandler) {
-                window.salesVisitTableHandler.refresh();
-            } else {
-                location.reload();
-            }
+    console.log('deleteVisit function available:', typeof deleteVisit !== 'undefined');
+    console.log('showNotification function available:', typeof showNotification !== 'undefined');
+    
+    
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchValue = this.value.toLowerCase();
+            console.log('Searching for:', searchValue);
+            
         });
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        if (typeof TableHandler === 'undefined') {
-            console.error('TableHandler not loaded.');
-            return;
-        }
-
-        window.salesVisitTableHandler = new TableHandler({
-            tableId: 'salesVisitTable',
-            ajaxUrl: '{{ route("salesvisit.search") }}',
-            filters: ['Follow Up'],
-            columns: ['number', 'sales', 'customer_name', 'company', 'province', 'visit_date', 'purpose', 'follow_up', 'actions']
+    
+    const filterFollowUp = document.getElementById('filterFollowUp');
+    if (filterFollowUp) {
+        filterFollowUp.addEventListener('change', function() {
+            const filterValue = this.value;
+            console.log('Filtering by:', filterValue);
+        
         });
-
-        // Manual search and filter integration
-        const searchInput = document.getElementById('searchInput');
-        const filterFollowUp = document.getElementById('filterFollowUp');
-
-        if (searchInput) {
-            searchInput.addEventListener('input', function() {
-                if (window.salesVisitTableHandler) {
-                    window.salesVisitTableHandler.search(this.value);
-                }
-            });
-        }
-
-        if (filterFollowUp) {
-            filterFollowUp.addEventListener('change', function() {
-                if (window.salesVisitTableHandler) {
-                    window.salesVisitTableHandler.filter('Follow Up', this.value);
-                }
-            });
-        }
-    });
+    }
+});
 </script>
 @endsection

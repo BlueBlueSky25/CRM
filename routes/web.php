@@ -72,7 +72,9 @@ Route::middleware(['auth', 'permission'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     
     Route::get('/salesvisit', [SalesVisitController::class, 'index'])->name('salesvisit');
-    
+    Route::get('/salesvisit/get-sales', [SalesVisitController::class, 'getSalesUsers'])->name('salesvisit.sales');
+
+
     Route::post('/salesvisit', [SalesVisitController::class, 'store'])->name('salesvisit.store');
     Route::get('/salesvisit/{id}/edit', [SalesVisitController::class, 'edit'])->name('salesvisit.edit');
     Route::put('/salesvisit/{id}', [SalesVisitController::class, 'update'])->name('salesvisit.update');
