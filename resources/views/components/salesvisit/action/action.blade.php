@@ -1,36 +1,6 @@
 @props(['currentMenuId', 'salesUsers', 'provinces'])
 
-<!-- Quick Actions Section -->
-<div class="fade-in mb-8">
-    <div class="flex justify-between items-center">
-        <div>
-            <h3 class="text-lg font-semibold text-gray-800 mb-2">Quick Actions</h3>
-            <div class="flex gap-3 flex-wrap">
-                @if(auth()->user()->canAccess($currentMenuId, 'create'))
-                <button onclick="openVisitModal()"
-                    class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
-                    <i class="fas fa-plus"></i>
-                    Tambah Kunjungan
-                </button>
-                @endif
 
-                <!-- Export Button -->
-                <a href="{{ route('salesvisit.export') }}" 
-                    class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
-                    <i class="fas fa-file-export"></i>
-                    Export CSV
-                </a>
-
-                <!-- Import Button -->
-                <button onclick="openImportModal()"
-                    class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
-                    <i class="fas fa-file-import"></i>
-                    Import CSV
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Tambah Kunjungan Modal -->
 <div id="visitModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -209,7 +179,7 @@
 <!-- Import Modal -->
 <div id="importModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-modal-in">
-        <div class="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4">
+        <div class="px-6 py-5 border-b border-gray-200" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #3b82f6 100%);">
             <div class="flex justify-between items-center">
                 <h2 class="text-xl font-semibold text-white">Import Data CSV</h2>
                 <button onclick="closeImportModal()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
