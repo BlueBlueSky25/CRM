@@ -6,7 +6,6 @@ function openVisitModal() {
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     
-    // Initialize address cascade untuk CREATE modal
     initCreateVisitCascade();
     
     setTimeout(() => {
@@ -16,12 +15,10 @@ function openVisitModal() {
 }
 
 function initCreateVisitCascade() {
-    // Destroy existing instance if any
     if (createVisitCascade) {
         createVisitCascade.destroy();
     }
 
-    // Initialize new cascade instance untuk CREATE modal
     createVisitCascade = new AddressCascade({
         provinceId: 'create-province',
         regencyId: 'create-regency',
@@ -36,7 +33,6 @@ function closeVisitModal() {
     modal.classList.add('hidden');
     document.body.style.overflow = 'auto';
     
-    // Destroy cascade instance
     if (createVisitCascade) {
         createVisitCascade.destroy();
         createVisitCascade = null;
@@ -45,7 +41,6 @@ function closeVisitModal() {
     const form = modal.querySelector('form');
     if (form) form.reset();
     
-    // Reset dropdowns
     document.getElementById('create-regency').innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
     document.getElementById('create-district').innerHTML = '<option value="">Pilih Kecamatan</option>';
     document.getElementById('create-village').innerHTML = '<option value="">Pilih Kelurahan/Desa</option>';
@@ -58,12 +53,11 @@ let currentEditData = null;
 function openEditVisitModal(visitData) {
     console.log('Opening Edit Visit Modal:', visitData);
 
-    // Show modal
     const modal = document.getElementById('editVisitModal');
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 
-    // Set form action
+    // ✅ Set form action dengan route yang benar
     const form = document.getElementById('editVisitForm');
     form.action = `/salesvisit/${visitData.id}`;
 
@@ -175,7 +169,6 @@ function populateEditForm(data) {
             provinceSelect.value = currentEditData.provinceId;
             console.log('Set province selection to:', currentEditData.provinceId);
             
-            // Initialize cascade setelah province terisi
             setTimeout(() => {
                 initEditVisitCascade();
             }, 100);
@@ -206,7 +199,6 @@ function initEditVisitCascade() {
         const changeEvent = new Event('change');
         provinceSelect.dispatchEvent(changeEvent);
         
-        // Chain the cascade selections dengan delay
         setTimeout(() => {
             if (currentEditData.regencyId) {
                 const regencySelect = document.getElementById('edit-regency');
@@ -247,7 +239,6 @@ function closeEditVisitModal() {
     const form = document.getElementById('editVisitForm');
     if (form) form.reset();
 
-    // Reset sales dropdown & re-enable if needed
     const salesSelect = document.getElementById('editSalesId');
     salesSelect.disabled = false;
     salesSelect.classList.remove('bg-gray-100', 'cursor-not-allowed');
@@ -259,28 +250,92 @@ function closeEditVisitModal() {
     document.getElementById('edit-village').innerHTML = '<option value="">-- Pilih Kelurahan/Desa --</option>';
 }
 
+// ==================== FORM SUBMIT HANDLER ====================
+document.addEventListener('DOMContentLoaded', () => {
+    const editForm = document.getElementById('editVisitForm');
+    if (editForm) {
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const visitId = document.getElementById('editVisitId').value;
+            
+            // Show loading
+            showNotification('Menyimpan perubahan...', 'info');
+            
+            fetch(`/salesvisit/${visitId}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message || 'Data berhasil diupdate!', 'success');
+                    closeEditVisitModal();
+                    
+                    // Refresh page atau table
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    throw new Error(data.message || 'Gagal mengupdate data');
+                }
+            })
+            .catch(error => {
+                console.error('Update error:', error);
+                showNotification(error.message || 'Terjadi kesalahan saat mengupdate data', 'error');
+            });
+        });
+    }
+});
+
 // ==================== DELETE ====================
 function deleteVisit(id, deleteUrl, csrfToken) {
-    if (confirm('Apakah Anda yakin ingin menghapus data kunjungan ini?')) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = deleteUrl;
-
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = '_token';
-        csrfInput.value = csrfToken;
-
-        const methodInput = document.createElement('input');
-        methodInput.type = 'hidden';
-        methodInput.name = '_method';
-        methodInput.value = 'DELETE';
-
-        form.appendChild(csrfInput);
-        form.appendChild(methodInput);
-        document.body.appendChild(form);
-        form.submit();
+    console.log('deleteVisit called with:', { id, deleteUrl, csrfToken });
+    
+    if (!confirm('Apakah Anda yakin ingin menghapus data kunjungan ini?')) {
+        return;
     }
+
+    showNotification('Menghapus data...', 'info');
+
+    fetch(deleteUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            _method: 'DELETE'
+        })
+    })
+    .then(response => {
+        console.log('Delete response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Delete response data:', data);
+        
+        if (data.success) {
+            showNotification(data.message || 'Data berhasil dihapus!', 'success');
+            
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            throw new Error(data.message || 'Gagal menghapus data');
+        }
+    })
+    .catch(error => {
+        console.error('Delete error:', error);
+        showNotification(error.message || 'Terjadi kesalahan saat menghapus data', 'error');
+    });
 }
 
 // ==================== NOTIFICATION SYSTEM ====================
@@ -316,15 +371,17 @@ function showNotification(message, type = 'info') {
             }
         }, 300);
     }, 3000);
+    
+    return notification;
 }
 
 // ==================== EVENT LISTENERS ====================
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-        if (!document.getElementById('visitModal').classList.contains('hidden')) {
+        if (!document.getElementById('visitModal')?.classList.contains('hidden')) {
             closeVisitModal();
         }
-        if (!document.getElementById('editVisitModal').classList.contains('hidden')) {
+        if (!document.getElementById('editVisitModal')?.classList.contains('hidden')) {
             closeEditVisitModal();
         }
     }
@@ -343,7 +400,6 @@ document.addEventListener('click', (e) => {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('SalesVisit Modal JS Loaded');
     
-    // Check if AddressCascade is available
     if (typeof AddressCascade === 'undefined') {
         console.error('AddressCascade class not found! Make sure address-cascade.js is loaded.');
     }

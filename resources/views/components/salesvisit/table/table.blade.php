@@ -1,222 +1,164 @@
 @props(['salesVisits', 'currentMenuId'])
 
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden fade-in">
-    <!-- Header -->
-    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-        <div>
-            <h3 class="text-lg font-semibold text-gray-900">Sales Visit Management</h3>
-            <p class="text-sm text-gray-600 mt-1">Kelola data kunjungan sales dan informasinya</p>
-        </div>
-        <div class="text-sm text-gray-600">
-            Total: <span class="font-semibold text-gray-900">{{ $salesVisits->total() }}</span> kunjungan
-        </div>
-    </div>
-
-    <!-- Table -->
-    <div class="overflow-x-auto">
-        <table id="salesVisitTable" class="w-full">
-            <thead class="bg-gray-50 border-b border-gray-200">
-                <tr>
-                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">No</th>
-                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Sales</th>
-                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Customer Name</th>
-                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Company</th>
-                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Location</th>
-                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Visit Date</th>
-                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Purpose</th>
-                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Follow Up</th>
-                    <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200 bg-white">
-                @forelse($salesVisits as $index => $visit)
-                <tr class="hover:bg-gray-50 transition-colors duration-150">
-                    <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
-                        <span class="font-medium">{{ $salesVisits->firstItem() + $index }}</span>
-                    </td>
-                    
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <div class="h-10 w-10 flex-shrink-0">
-                                <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                                    <i class="fas fa-user-tie text-indigo-600"></i>
-                                </div>
-                            </div>
-                            <div class="ml-3">
-                                <div class="text-sm font-medium text-gray-900">{{ $visit->sales->username ?? '-' }}</div>
-                                <div class="text-xs text-gray-500">{{ $visit->sales->email ?? 'No email' }}</div>
+<!-- Table Only (No Header, No Pagination) -->
+<div class="overflow-x-auto">
+    <table id="salesVisitTable" class="w-full">
+        <thead style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+            <tr>
+                <th style="padding: 1rem 1.5rem; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">No</th>
+                <th style="padding: 1rem 1.5rem; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Sales</th>
+                <th style="padding: 1rem 1.5rem; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Customer Name</th>
+                <th style="padding: 1rem 1.5rem; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Company</th>
+                <th style="padding: 1rem 1.5rem; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Location</th>
+                <th style="padding: 1rem 1.5rem; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Visit Date</th>
+                <th style="padding: 1rem 1.5rem; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Purpose</th>
+                <th style="padding: 1rem 1.5rem; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Follow Up</th>
+                <th style="padding: 1rem 1.5rem; text-align: right; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Aksi</th>
+            </tr>
+        </thead>
+        <tbody style="background-color: #ffffff; border-top: 1px solid #e5e7eb;">
+            @forelse($salesVisits as $index => $visit)
+            <tr style="border-bottom: 1px solid #e5e7eb; transition: background-color 0.15s;" onmouseover="this.style.backgroundColor='#f9fafb'" onmouseout="this.style.backgroundColor='#ffffff'">
+                <td style="padding: 1rem 1.5rem; font-size: 0.875rem; color: #111827; white-space: nowrap;">
+                    <span style="font-weight: 500;">{{ $salesVisits->firstItem() + $index }}</span>
+                </td>
+                
+                <td style="padding: 1rem 1.5rem; white-space: nowrap;">
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 2.5rem; height: 2.5rem; flex-shrink: 0;">
+                            <div style="width: 2.5rem; height: 2.5rem; border-radius: 9999px; background-color: #e0e7ff; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-user-tie" style="color: #6366f1;"></i>
                             </div>
                         </div>
-                    </td>
-                    
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm font-medium text-gray-900">{{ $visit->customer_name ?? '-' }}</div>
-                    </td>
-                    
-                    <td class="px-6 py-4">
-                        <div class="text-sm text-gray-900">{{ $visit->company_name ?? '-' }}</div>
-                    </td>
-                    
-                    <td class="px-6 py-4">
-                        <div class="text-sm text-gray-900">
-                            <div class="flex items-center space-x-1">
-                                <i class="fas fa-map-marker-alt text-gray-400 text-xs"></i>
-                                <span>{{ $visit->province->name ?? '-' }}</span>
+                        <div style="margin-left: 0.75rem;">
+                            <div style="font-size: 0.875rem; font-weight: 500; color: #111827;">{{ $visit->sales->username ?? '-' }}</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">{{ $visit->sales->email ?? 'No email' }}</div>
+                        </div>
+                    </div>
+                </td>
+                
+                <td style="padding: 1rem 1.5rem; white-space: nowrap;">
+                    <div style="font-size: 0.875rem; font-weight: 500; color: #111827;">{{ $visit->customer_name ?? '-' }}</div>
+                </td>
+                
+                <td style="padding: 1rem 1.5rem;">
+                    <div style="font-size: 0.875rem; color: #111827;">{{ $visit->company_name ?? '-' }}</div>
+                </td>
+                
+                <td style="padding: 1rem 1.5rem;">
+                    <div style="font-size: 0.875rem; color: #111827;">
+                        <div style="display: flex; align-items: center; gap: 0.25rem;">
+                            <i class="fas fa-map-marker-alt" style="color: #9ca3af; font-size: 0.75rem;"></i>
+                            <span>{{ $visit->province->name ?? '-' }}</span>
+                        </div>
+                        @if($visit->regency)
+                        <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">{{ $visit->regency->name }}</div>
+                        @endif
+                    </div>
+                </td>
+                
+                <td style="padding: 1rem 1.5rem; white-space: nowrap;">
+                    <div style="font-size: 0.875rem; color: #111827;">
+                        @if($visit->visit_date)
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fas fa-calendar" style="color: #9ca3af; font-size: 0.75rem;"></i>
+                                <span>{{ $visit->visit_date->format('d M Y') }}</span>
                             </div>
-                            @if($visit->regency)
-                            <div class="text-xs text-gray-500 mt-1">{{ $visit->regency->name }}</div>
-                            @endif
-                        </div>
-                    </td>
-                    
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900">
-                            @if($visit->visit_date)
-                                <div class="flex items-center space-x-2">
-                                    <i class="fas fa-calendar text-gray-400 text-xs"></i>
-                                    <span>{{ $visit->visit_date->format('d M Y') }}</span>
-                                </div>
-                            @else
-                                <span class="text-gray-400">-</span>
-                            @endif
-                        </div>
-                    </td>
-                    
-                    <td class="px-6 py-4">
-                        <div class="text-sm text-gray-700 max-w-xs">
-                            @if($visit->visit_purpose)
-                                <span class="line-clamp-2" title="{{ $visit->visit_purpose }}">
-                                    {{ Str::limit($visit->visit_purpose, 50) }}
-                                </span>
-                            @else
-                                <span class="text-gray-400">-</span>
-                            @endif
-                        </div>
-                    </td>
-                    
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        @if($visit->is_follow_up)
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                <i class="fas fa-check-circle mr-1"></i>
-                                Ya
+                        @else
+                            <span style="color: #9ca3af;">-</span>
+                        @endif
+                    </div>
+                </td>
+                
+                <td style="padding: 1rem 1.5rem;">
+                    <div style="font-size: 0.875rem; color: #374151; max-width: 20rem;">
+                        @if($visit->visit_purpose)
+                            <span style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" title="{{ $visit->visit_purpose }}">
+                                {{ Str::limit($visit->visit_purpose, 50) }}
                             </span>
                         @else
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                <i class="fas fa-times-circle mr-1"></i>
-                                Tidak
-                            </span>
+                            <span style="color: #9ca3af;">-</span>
                         @endif
-                    </td>
-                    
-                    <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                        <div class="flex items-center justify-end space-x-2">
-                            @if(auth()->user()->canAccess($currentMenuId, 'edit'))
-                            <button onclick='openEditVisitModal({
-                                id: {{ $visit->id }},
-                                salesId: {{ $visit->sales_id }},
-                                customerName: "{{ addslashes($visit->customer_name) }}",
-                                company: "{{ addslashes($visit->company_name ?? '') }}",
-                                provinceId: {{ $visit->province_id }},
-                                regencyId: {{ $visit->regency_id ?? 'null' }},
-                                districtId: {{ $visit->district_id ?? 'null' }},
-                                villageId: {{ $visit->village_id ?? 'null' }},
-                                address: "{{ addslashes($visit->address ?? '') }}",
-                                visitDate: "{{ $visit->visit_date->format('Y-m-d') }}",
-                                purpose: "{{ addslashes($visit->visit_purpose) }}",
-                                followUp: {{ $visit->is_follow_up ? 1 : 0 }}
-                            })'
-                                class="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-all duration-150 flex items-center" 
-                                title="Edit Visit">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            @endif
-                            
-                            @if(auth()->user()->canAccess($currentMenuId, 'delete'))
-                            <button type="button" 
-                                onclick="deleteVisit({{ $visit->id }}, '{{ route('salesvisit.destroy', $visit->id) }}', '{{ csrf_token() }}')"
-                                class="text-red-600 hover:text-red-900 p-2 rounded-lg hover:bg-red-50 transition-all duration-150 flex items-center" 
-                                title="Hapus Visit">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                            @endif
+                    </div>
+                </td>
+                
+                <td style="padding: 1rem 1.5rem; white-space: nowrap;">
+                    @if($visit->is_follow_up)
+                        <span style="display: inline-flex; align-items: center; padding: 0.25rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; background-color: #d1fae5; color: #065f46;">
+                            <i class="fas fa-check-circle" style="margin-right: 0.25rem;"></i>
+                            Ya
+                        </span>
+                    @else
+                        <span style="display: inline-flex; align-items: center; padding: 0.25rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; background-color: #f3f4f6; color: #374151;">
+                            <i class="fas fa-times-circle" style="margin-right: 0.25rem;"></i>
+                            Tidak
+                        </span>
+                    @endif
+                </td>
+                
+                <td style="padding: 1rem 1.5rem; font-size: 0.875rem; font-weight: 500; text-align: right; white-space: nowrap;">
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem;">
+                        @if(auth()->user()->canAccess($currentMenuId, 'edit'))
+                        <button 
+                            onclick="openEditVisitModal({{ json_encode([
+                                'id' => $visit->id,
+                                'salesId' => $visit->sales_id,
+                                'customerName' => $visit->customer_name,
+                                'company' => $visit->company_name ?? '',
+                                'provinceId' => $visit->province_id,
+                                'regencyId' => $visit->regency_id,
+                                'districtId' => $visit->district_id,
+                                'villageId' => $visit->village_id,
+                                'address' => $visit->address ?? '',
+                                'visitDate' => $visit->visit_date->format('Y-m-d'),
+                                'purpose' => $visit->visit_purpose,
+                                'followUp' => $visit->is_follow_up ? 1 : 0
+                            ]) }})"
+                            style="color: #2563eb; background: transparent; border: none; padding: 0.5rem; border-radius: 0.5rem; cursor: pointer; transition: all 0.15s;"
+                            onmouseover="this.style.backgroundColor='#dbeafe'; this.style.color='#1e40af';"
+                            onmouseout="this.style.backgroundColor='transparent'; this.style.color='#2563eb';"
+                            title="Edit Visit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        @endif
+                        
+                        @if(auth()->user()->canAccess($currentMenuId, 'delete'))
+                        <button type="button" 
+                            onclick="deleteVisit({{ $visit->id }}, '{{ route('salesvisit.destroy', $visit->id) }}', '{{ csrf_token() }}')"
+                            style="color: #dc2626; background: transparent; border: none; padding: 0.5rem; border-radius: 0.5rem; cursor: pointer; transition: all 0.15s;"
+                            onmouseover="this.style.backgroundColor='#fee2e2'; this.style.color='#991b1b';"
+                            onmouseout="this.style.backgroundColor='transparent'; this.style.color='#dc2626';"
+                            title="Hapus Visit">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        @endif
+                    </div>
+                </td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="9" style="padding: 3rem 1.5rem; text-align: center;">
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <div style="width: 6rem; height: 6rem; border-radius: 9999px; background-color: #f3f4f6; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                            <i class="fas fa-inbox" style="font-size: 3rem; color: #d1d5db;"></i>
                         </div>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="9" class="px-6 py-12 text-center">
-                        <div class="flex flex-col items-center justify-center">
-                            <div class="h-24 w-24 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                                <i class="fas fa-inbox text-5xl text-gray-300"></i>
-                            </div>
-                            <h3 class="text-lg font-medium text-gray-900 mb-1">Belum Ada Data</h3>
-                            <p class="text-sm text-gray-500">Belum ada data kunjungan sales yang tersedia</p>
-                            @if(auth()->user()->canAccess($currentMenuId, 'create'))
-                            <button onclick="openVisitModal()" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-                                <i class="fas fa-plus mr-2"></i>
-                                Tambah Kunjungan
-                            </button>
-                            @endif
-                        </div>
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Pagination Info & Links -->
-    @if($salesVisits->hasPages())
-    <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
-        <div class="text-sm text-gray-700">
-            Menampilkan 
-            <span class="font-medium">{{ $salesVisits->firstItem() ?? 0 }}</span>
-            sampai 
-            <span class="font-medium">{{ $salesVisits->lastItem() ?? 0 }}</span>
-            dari 
-            <span class="font-medium">{{ $salesVisits->total() }}</span>
-            hasil
-        </div>
-        <div>
-            {{ $salesVisits->links() }}
-        </div>
-    </div>
-    @endif
+                        <h3 style="font-size: 1.125rem; font-weight: 500; color: #111827; margin: 0 0 0.25rem 0;">Belum Ada Data</h3>
+                        <p style="font-size: 0.875rem; color: #6b7280; margin: 0;">Belum ada data kunjungan sales yang tersedia</p>
+                        @if(auth()->user()->canAccess($currentMenuId, 'create'))
+                        <button onclick="openVisitModal()" style="margin-top: 1rem; padding: 0.5rem 1rem; background-color: #6366f1; color: white; border: none; border-radius: 0.5rem; cursor: pointer; transition: background-color 0.2s;">
+                            <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
+                            Tambah Kunjungan
+                        </button>
+                        @endif
+                    </div>
+                </td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
 </div>
 
 <style>
-@keyframes modalSlideIn {
-    from { 
-        opacity: 0; 
-        transform: translateY(-20px) scale(0.95); 
-    }
-    to { 
-        opacity: 1; 
-        transform: translateY(0) scale(1); 
-    }
-}
-
-.animate-modal-in { 
-    animation: modalSlideIn 0.25s ease-out; 
-}
-
-.fade-in { 
-    animation: fadeIn 0.3s ease-in; 
-}
-
-@keyframes fadeIn { 
-    from { opacity: 0; } 
-    to { opacity: 1; } 
-}
-
-/* Line clamp for purpose text */
-.line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
 /* Responsive improvements */
 @media (max-width: 1024px) {
     #salesVisitTable {
