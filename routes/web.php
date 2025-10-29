@@ -71,24 +71,20 @@ Route::middleware(['auth', 'permission'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     
-    // Main route
     Route::get('/salesvisit', [SalesVisitController::class, 'index'])->name('salesvisit');
     
-    // CRUD operations
     Route::post('/salesvisit', [SalesVisitController::class, 'store'])->name('salesvisit.store');
     Route::get('/salesvisit/{id}/edit', [SalesVisitController::class, 'edit'])->name('salesvisit.edit');
     Route::put('/salesvisit/{id}', [SalesVisitController::class, 'update'])->name('salesvisit.update');
     Route::delete('/salesvisit/{id}', [SalesVisitController::class, 'destroy'])->name('salesvisit.destroy');
     
-    // Search & Filter
     Route::get('/salesvisit/search', [SalesVisitController::class, 'search'])->name('salesvisit.search');
     
-    // Cascade Dropdowns
+    Route::get('/salesvisit/get-provinces', [SalesVisitController::class, 'getProvinces'])->name('salesvisit.provinces.list');
     Route::get('/salesvisit/regencies/{provinceId}', [SalesVisitController::class, 'getRegencies'])->name('salesvisit.regencies');
     Route::get('/salesvisit/districts/{regencyId}', [SalesVisitController::class, 'getDistricts'])->name('salesvisit.districts');
     Route::get('/salesvisit/villages/{districtId}', [SalesVisitController::class, 'getVillages'])->name('salesvisit.villages');
-    
-    // Import & Export
+
     Route::get('/salesvisit/export', [SalesVisitController::class, 'export'])->name('salesvisit.export');
     Route::post('/salesvisit/import', [SalesVisitController::class, 'import'])->name('salesvisit.import');
 });
