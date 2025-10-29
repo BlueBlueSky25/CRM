@@ -3,7 +3,7 @@
 @section('title','Company')
 
 @section('content')
-<div class="container-expanded mx-auto px-6 lg:px-8 py-8 pt-[60px] mt-8">
+<div class="container-expanded mx-auto px-6 lg:px-8 py-8 pt-[60px] mt-2">
     <!-- KPI Section -->
     <x-company.attribut.kpi
         :totalCompanies="$totalCompanies"
