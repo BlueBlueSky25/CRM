@@ -1,5 +1,5 @@
 <!-- User Management Table -->
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden" style="margin: 0;">
     <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
         <div>
             <h3 class="text-lg font-semibold text-gray-900">User Management</h3>
@@ -20,43 +20,43 @@
         </div>
     @endif
 
-    <div class="overflow-x-auto">
-        <table id="userTable" class="min-w-full divide-y divide-gray-200">
+    <div class="overflow-x-auto" style="margin: 0; padding: 0;">
+        <table id="userTable" class="min-w-full divide-y divide-gray-200" style="margin: 0; border-collapse: collapse;">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No.</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date Birth</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Alamat</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">No.</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date Birth</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Alamat</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 @foreach($users as $index => $user)
                 <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 text-sm text-gray-900">{{ $users->firstItem() + $loop->index }}</td>
-                    <td class="px-6 py-4">
+                    <td class="px-4 py-3 text-sm text-gray-900">{{ $users->firstItem() + $loop->index }}</td>
+                    <td class="px-4 py-3">
                         <div class="flex items-center">
                             <div>
                                 <div class="text-sm font-medium text-gray-900">{{ $user->username }}</div>
-                                <div class="text-sm text-gray-500">{{ $user->email }}</div>
+                                <div class="text-xs text-gray-500">{{ $user->email }}</div>
                             </div>
                         </div>
                     </td>
 
-                    <td class="px-6 py-4">
+                    <td class="px-4 py-3">
                         <div class="text-sm text-gray-900">{{ $user->phone ?? '-' }}</div> 
                     </td>
 
-                    <td class="px-6 py-4">
+                    <td class="px-4 py-3">
                         <div class="text-sm text-gray-900">{{ $user->birth_date ? date('d M Y', strtotime($user->birth_date)) : '-' }}</div> 
                     </td>
 
                     <!-- KOLOM ALAMAT -->
-                    <td class="px-6 py-4">
+                    <td class="px-4 py-3">
                         <div class="text-sm text-gray-900">
                             @if($user->province || $user->regency || $user->district || $user->village || $user->address)
                                 @php
@@ -69,9 +69,9 @@
                                 @endphp
                                 
                                 @if($alamatWilayah)
-                                    <div class="font-medium">{{ $alamatWilayah }}</div>
+                                    <div class="font-medium text-xs">{{ $alamatWilayah }}</div>
                                     @if($user->address)
-                                        <div class="text-xs text-gray-600 mt-1">{{ $user->address }}</div>
+                                        <div class="text-xs text-gray-600 mt-0.5">{{ $user->address }}</div>
                                     @endif
                                 @else
                                     {{ $user->address ?? '-' }}
@@ -82,19 +82,19 @@
                         </div>
                     </td>
 
-                    <td class="px-6 py-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <td class="px-4 py-3">
+                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                             {{ $user->role->role_name ?? 'No Role' }}
                         </span>
                     </td>
                     
-                    <td class="px-6 py-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-medium {{ $user->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                    <td class="px-4 py-3">
+                        <span class="px-2 py-1 rounded-full text-xs font-medium {{ $user->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                             {{ $user->is_active ? 'Active' : 'Inactive' }}
                         </span>
                     </td>
                     
-                    <td class="px-6 py-4 text-sm font-medium">
+                    <td class="px-4 py-3 text-sm font-medium">
                         <div class="flex items-center space-x-2">
                             @php
                                 $isSuperAdmin = auth()->user()->role && 
@@ -124,18 +124,18 @@
                                 '{{ $user->regency_id }}', 
                                 '{{ $user->district_id }}',
                                 '{{ $user->village_id }}')"
-                                class="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-colors flex items-center" 
+                                class="text-blue-600 hover:text-blue-900 p-1.5 rounded-lg hover:bg-blue-50 transition-colors flex items-center" 
                                 title="Edit User">
-                                <i class="fas fa-edit"></i>
+                                <i class="fas fa-edit text-sm"></i>
                             </button>
                             @endif
                             
                             @if($canDelete)
                             <button type="button" 
                                 onclick="deleteUser('{{ $user->user_id }}', '{{ route('users.destroy', $user->user_id) }}', '{{ csrf_token() }}')"
-                                class="text-red-600 hover:text-red-900 p-2 rounded-lg hover:bg-red-50 transition-colors flex items-center" 
+                                class="text-red-600 hover:text-red-900 p-1.5 rounded-lg hover:bg-red-50 transition-colors flex items-center" 
                                 title="Delete User">
-                                <i class="fas fa-trash"></i>
+                                <i class="fas fa-trash text-sm"></i>
                             </button>
                             @endif
                         </div>
@@ -145,6 +145,4 @@
             </tbody>
         </table>
     </div>
-    </div>
-    
 </div>
