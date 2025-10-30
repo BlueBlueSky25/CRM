@@ -43,30 +43,26 @@
         <!-- Search and Filter Section -->
         <div style="padding: 1.5rem; background-color: #f9fafb; border-bottom: 1px solid #e5e7eb;">
             <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
-                <!-- Search Box -->
-                <div style="flex: 1; min-width: 250px;">
-                    <div style="position: relative;">
-                        <i class="fas fa-search" style="position: absolute; left: 0.875rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.875rem;"></i>
-                        <input type="text" 
-                            id="searchInput"
-                            style="width: 100%; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.625rem 1rem 0.625rem 2.5rem; font-size: 0.875rem; background-color: #ffffff; transition: all 0.2s;"
-                            placeholder="Cari nama customer, company, atau sales...">
-                    </div>
-                </div>
-
-                <!-- Filter -->
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <label style="font-size: 0.875rem; font-weight: 500; color: #374151; white-space: nowrap;">Filter:</label>
-                    <div style="position: relative;">
-                        <i class="fas fa-filter" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.75rem;"></i>
-                        <select id="filterFollowUp" 
-                            style="border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 2rem 0.5rem 2.25rem; font-size: 0.875rem; background-color: #ffffff; cursor: pointer; transition: all 0.2s; min-width: 180px;">
-                            <option value="">Semua Follow Up</option>
-                            <option value="Ya">Ya</option>
-                            <option value="Tidak">Tidak</option>
-                        </select>
-                    </div>
-                </div>
+                <x-globals.filtersearch
+                    tableId="salesVisitTable"
+                    :columns="[
+                        'number',
+                        'sales',
+                        'customer',
+                        'company',
+                        'location',
+                        'visit_date',
+                        'purpose',
+                        'follow_up',
+                        'actions'
+                    ]"
+                    :filters="[
+                        'Sales' => $salesUsers, 
+                        'Province' => $provinces
+                    ]"
+                    ajaxUrl="{{ route('salesvisit.search') }}"
+                    placeholder="Cari customer, company, atau alamat..."
+                />
             </div>
         </div>
 
@@ -119,29 +115,28 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('SalesVisit page loaded');
     
+    if (typeof TableHandler === 'undefined') {
+        console.error('TableHandler class not found. search.js may not be loaded.');
+        return;
+    }
+
+    console.log('Creating TableHandler instance...');
+    
+    try {
+        window.salesVisitTableHandler = new TableHandler({
+            tableId: 'salesVisitTable',
+            ajaxUrl: '{{ route("salesvisit.search") }}',
+            filters: ['sales', 'province'], // lowercase!
+            columns: ['number', 'sales', 'customer', 'company', 'location', 'visit_date', 'purpose', 'follow_up', 'actions']
+        });
+        
+        console.log('TableHandler initialized successfully:', window.salesVisitTableHandler);
+    } catch (error) {
+        console.error('Error initializing TableHandler:', error);
+    }
 
     console.log('deleteVisit function available:', typeof deleteVisit !== 'undefined');
     console.log('showNotification function available:', typeof showNotification !== 'undefined');
-    
-    
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            const searchValue = this.value.toLowerCase();
-            console.log('Searching for:', searchValue);
-            
-        });
-    }
-
-    
-    const filterFollowUp = document.getElementById('filterFollowUp');
-    if (filterFollowUp) {
-        filterFollowUp.addEventListener('change', function() {
-            const filterValue = this.value;
-            console.log('Filtering by:', filterValue);
-        
-        });
-    }
 });
 </script>
 @endsection

@@ -15,72 +15,66 @@ use Illuminate\Support\Facades\Response;
 
 class SalesVisitController extends Controller
 {
-    /**
-     * Display a listing of sales visits
-     */
-    public function index(Request $request)
-    {
-        $user = Auth::user();
 
-        // Base query dengan relasi
-        $visitsQuery = SalesVisit::with(['sales', 'province', 'regency', 'district', 'village']);
+   // Di SalesVisitController.php
 
-        // 🔹 SUPERADMIN (role_id = 1) → lihat semua data
-        if ($user->role_id == 1) {
-            // tanpa filter apa pun
-        }
+public function index(Request $request)
+{
+    $user = Auth::user();
 
-        // 🔹 ADMIN (role_id = 7) & MARKETING (role_id = 11)
-        //     → lihat semua data milik SALES (role_id = 12)
-        elseif (in_array($user->role_id, [7, 11])) {
-            $visitsQuery->whereHas('sales', function ($q) {
-                $q->where('role_id', 12); // hanya user sales
-            });
-        }
+    // Base query dengan relasi
+    $visitsQuery = SalesVisit::with(['sales', 'province', 'regency', 'district', 'village']);
 
-        // 🔹 SALES (role_id = 12) → hanya data milik sendiri
-        elseif ($user->role_id == 12) {
-            $visitsQuery->where('sales_id', $user->user_id);
-        }
-
-        // kalau role lain (misalnya belum dikategorikan)
-        else {
-            $visitsQuery->whereNull('id'); // tampil kosong aja
-        }
-
-        // Ambil data final dengan pagination
-        $salesVisits = $visitsQuery->orderBy('visit_date', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-
-        // Get sales users (users dengan role sales) - FIXED
-        $salesUsers = User::whereHas('role', function($query) {
-        $query->where('role_id', 12); // Langsung filter by role_id = 12 (sales)
-        })
-        ->select('user_id', 'username', 'email')
-        ->orderBy('username')
-        ->get();
-
-        // Get all provinces
-        $provinces = Province::orderBy('name')->get();
-
-        // KPI Sales Visit (berdasarkan query filter di atas)
-        $totalVisits = (clone $visitsQuery)->count();
-        $followUpVisits = (clone $visitsQuery)->where('is_follow_up', true)->count();
-        $uniqueCustomers = (clone $visitsQuery)->distinct('customer_name')->count('customer_name');
-        $uniqueSales = (clone $visitsQuery)->distinct('sales_id')->count('sales_id');
-
-        return view('pages.salesvisit', compact(
-            'salesVisits',
-            'salesUsers',
-            'provinces',
-            'totalVisits',
-            'followUpVisits',
-            'uniqueCustomers',
-            'uniqueSales'
-        ));
+    // Role-based filtering
+    if ($user->role_id == 1) {
+        // superadmin
+    } elseif (in_array($user->role_id, [7, 11])) {
+        $visitsQuery->whereHas('sales', function ($q) {
+            $q->where('role_id', 12);
+        });
+    } elseif ($user->role_id == 12) {
+        $visitsQuery->where('sales_id', $user->user_id);
+    } else {
+        $visitsQuery->whereNull('id');
     }
 
+    $salesVisits = $visitsQuery->orderBy('visit_date', 'desc')
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
+
+    // ✅ Return as OBJECT Collection (bukan array)
+    $salesUsers = User::where('role_id', 12)
+        ->select('user_id', 'username', 'email')
+        ->orderBy('username')
+        ->get()
+        ->map(function($user) {
+            // ✅ Tambahkan property 'id' dan 'name' untuk component filter
+            $user->id = $user->user_id;  // Component butuh 'id'
+            $user->name = $user->username . ' - ' . $user->email;  // Component butuh 'name'
+            return $user;  // Return object, bukan array!
+        });
+
+    // Provinces
+    $provinces = Province::select('id', 'name')
+        ->orderBy('name')
+        ->get();
+
+    // KPI
+    $totalVisits = (clone $visitsQuery)->count();
+    $followUpVisits = (clone $visitsQuery)->where('is_follow_up', true)->count();
+    $uniqueCustomers = (clone $visitsQuery)->distinct('customer_name')->count('customer_name');
+    $uniqueSales = (clone $visitsQuery)->distinct('sales_id')->count('sales_id');
+
+    return view('pages.salesvisit', compact(
+        'salesVisits',
+        'salesUsers',
+        'provinces',
+        'totalVisits',
+        'followUpVisits',
+        'uniqueCustomers',
+        'uniqueSales'
+    ));
+}
     
 
 public function getSalesUsers()
@@ -96,36 +90,128 @@ public function getSalesUsers()
 }
 
 
-    public function search(Request $request)
+  public function search(Request $request)
 {
-    $query = User::with('role');
-    
-    // Search by keyword
-    if ($request->filled('search') || $request->filled('query')) {
-        $keyword = $request->input('search') ?? $request->input('query');
-        $query->where(function($q) use ($keyword) {
-            $q->where('username', 'like', '%' . $keyword . '%')
-              ->orWhere('email', 'like', '%' . $keyword . '%');
-        });
-    }
-    
-    // Filter by role NAME (bukan role_id)
-    if ($request->filled('role')) {
-        $roleName = strtolower($request->role);
-        $query->whereHas('role', function($q) use ($roleName) {
-            $q->whereRaw('LOWER(role_name) LIKE ?', ['%' . $roleName . '%']);
-        });
-    }
-    
-    $users = $query->select('user_id', 'username', 'email', 'role_id')
-        ->orderBy('username')
-        ->get();
-    
-    return response()->json([
-        'users' => $users
-    ]);
-}
+    try {
+        \Log::info('SalesVisit Search Request', $request->all());
 
+        $user = Auth::user();
+
+        // Base query
+        $query = SalesVisit::with(['sales', 'province', 'regency', 'district', 'village']);
+
+        // Role-based filtering
+        if ($user->role_id == 1) {
+            // superadmin
+        } elseif (in_array($user->role_id, [7, 11])) {
+            $query->whereHas('sales', function ($q) {
+                $q->where('role_id', 12);
+            });
+        } elseif ($user->role_id == 12) {
+            $query->where('sales_id', $user->user_id);
+        } else {
+            $query->whereNull('id');
+        }
+
+        // ✅ SEARCH by keyword
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('customer_name', 'like', "%{$search}%")
+                  ->orWhere('company_name', 'like', "%{$search}%")
+                  ->orWhere('address', 'like', "%{$search}%")
+                  ->orWhere('visit_purpose', 'like', "%{$search}%");
+            });
+            \Log::info('Search applied', ['search' => $search]);
+        }
+
+        // ✅ FILTER by Sales
+        // Component generate: salesVisitTable_sales_filter (lowercase karena Str::slug)
+        if ($request->filled('salesvisittable_sales_filter')) {
+            $query->where('sales_id', $request->salesvisittable_sales_filter);
+            \Log::info('Sales filter applied', ['sales_id' => $request->salesvisittable_sales_filter]);
+        }
+
+        // ✅ FILTER by Province
+        // Component generate: salesVisitTable_province_filter
+        if ($request->filled('salesvisittable_province_filter')) {
+            $query->where('province_id', $request->salesvisittable_province_filter);
+            \Log::info('Province filter applied', ['province_id' => $request->salesvisittable_province_filter]);
+        }
+
+        // Sort
+        $query->orderBy('visit_date', 'desc')->orderBy('created_at', 'desc');
+
+        // Paginate
+        $salesVisits = $query->paginate(10);
+
+        \Log::info('Visits found', ['count' => $salesVisits->count()]);
+
+        // ✅ Format response
+        $items = $salesVisits->map(function($visit, $index) use ($salesVisits) {
+            // Format location
+            $alamatWilayah = collect([
+                optional($visit->village)->name,
+                optional($visit->district)->name,
+                optional($visit->regency)->name,
+                optional($visit->province)->name,
+            ])->filter()->implode(', ');
+            
+            $locationDisplay = $alamatWilayah ?: (optional($visit->province)->name ?? '-');
+
+            $actions = [];
+            try {
+                $actions = $this->getVisitActions($visit);
+            } catch (\Exception $e) {
+                \Log::error('Error generating actions', [
+                    'visit_id' => $visit->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
+            return [
+                'number' => $salesVisits->firstItem() + $index,
+                'sales' => [
+                    'username' => optional($visit->sales)->username ?? '-',
+                    'email' => optional($visit->sales)->email ?? 'No email'
+                ],
+                'customer' => $visit->customer_name ?? '-',
+                'company' => $visit->company_name ?? '-',
+                'location' => $locationDisplay,
+                'visit_date' => $visit->visit_date 
+                    ? $visit->visit_date->format('d M Y') 
+                    : '-',
+                'purpose' => $visit->visit_purpose 
+                    ? \Illuminate\Support\Str::limit($visit->visit_purpose, 45) 
+                    : '-',
+                'follow_up' => $visit->is_follow_up ? 'Ya' : 'Tidak',
+                'actions' => $actions
+            ];
+        })->toArray();
+
+        \Log::info('Response prepared successfully');
+
+        return response()->json([
+            'items' => $items,
+            'pagination' => [
+                'current_page' => $salesVisits->currentPage(),
+                'last_page' => $salesVisits->lastPage(),
+                'from' => $salesVisits->firstItem(),
+                'to' => $salesVisits->lastItem(),
+                'total' => $salesVisits->total()
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('SalesVisit Search Error: ' . $e->getMessage());
+        \Log::error('Stack trace: ' . $e->getTraceAsString());
+        
+        return response()->json([
+            'error' => 'Server error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+}
     /**
      * Store a newly created sales visit
      * 🔥 FIXED: Sesuaikan validation dengan name attribute di form
@@ -543,50 +629,57 @@ public function getSalesUsers()
         }
     }
 
-    /**
-     * Get actions for visit based on user permissions
-     */
-    private function getVisitActions($visit)
-    {
-        $currentMenuId = view()->shared('currentMenuId', null);
-        
-        $canEdit = auth()->check() && auth()->user()->canAccess($currentMenuId ?? 1, 'edit');
-        $canDelete = auth()->check() && auth()->user()->canAccess($currentMenuId ?? 1, 'delete');
+   private function getVisitActions($visit)
+{
+    $actions = [];
 
-        $actions = [];
-
-        if ($canEdit) {
-            $actions[] = [
-                'type' => 'edit',
-                'onclick' => "openEditVisitModal({
-    id: {$visit->id},
-    salesId: {$visit->sales_id},
-    customerName: '" . addslashes($visit->customer_name) . "',
-    company: '" . addslashes($visit->company_name ?? '') . "',
-    provinceId: {$visit->province_id},
-    regencyId: " . ($visit->regency_id ?? 'null') . ",
-    districtId: " . ($visit->district_id ?? 'null') . ",
-    villageId: " . ($visit->village_id ?? 'null') . ",
-    address: '" . addslashes($visit->address ?? '') . "',
-    visitDate: '{$visit->visit_date->format('Y-m-d')}',
-    purpose: '" . addslashes($visit->visit_purpose) . "',
-    followUp: " . ($visit->is_follow_up ? 1 : 0) . "
-})",
-                'title' => 'Edit Visit'
-            ];
-        }
-
-        if ($canDelete) {
-            $csrfToken = csrf_token();
-            $deleteRoute = route('salesvisit.destroy', $visit->id);
-            
-            $actions[] = [
-                'type' => 'delete',
-                'onclick' => "deleteVisit('{$visit->id}', '{$deleteRoute}', '{$csrfToken}')",
-                'title' => 'Delete Visit'
-            ];
-        }
-
+    if (!auth()->check()) {
         return $actions;
     }
+
+    $canEdit = true;
+    $canDelete = true;
+
+    try {
+        $currentMenuId = session('currentMenuId', 1);
+        $canEdit = auth()->user()->canAccess($currentMenuId, 'edit');
+        $canDelete = auth()->user()->canAccess($currentMenuId, 'delete');
+    } catch (\Exception $e) {
+        \Log::error('Error checking permissions: ' . $e->getMessage());
+    }
+
+    if ($canEdit) {
+        $actions[] = [
+            'type' => 'edit',
+            'onclick' => "openEditVisitModal(" . json_encode([
+                'id' => $visit->id,
+                'salesId' => $visit->sales_id,
+                'customerName' => $visit->customer_name,
+                'company' => $visit->company_name ?? '',
+                'provinceId' => $visit->province_id,
+                'regencyId' => $visit->regency_id,
+                'districtId' => $visit->district_id,
+                'villageId' => $visit->village_id,
+                'address' => $visit->address ?? '',
+                'visitDate' => $visit->visit_date->format('Y-m-d'),
+                'purpose' => $visit->visit_purpose,
+                'followUp' => $visit->is_follow_up ? 1 : 0
+            ]) . ")",
+            'title' => 'Edit Visit'
+        ];
+    }
+
+    if ($canDelete) {
+        $csrfToken = csrf_token();
+        $deleteRoute = route('salesvisit.destroy', $visit->id);
+        
+        $actions[] = [
+            'type' => 'delete',
+            'onclick' => "deleteVisit('{$visit->id}', '{$deleteRoute}', '{$csrfToken}')",
+            'title' => 'Delete Visit'
+        ];
+    }
+
+    return $actions;
+}
 }

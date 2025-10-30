@@ -145,92 +145,113 @@ class TableHandler {
     }
 
     renderRow(item) {
-        let row = `<tr class="hover:bg-gray-50">`;
+    let row = `<tr class="hover:bg-gray-50">`;
 
-        this.config.columns.forEach(col => {
-            if (col === 'actions') return;
+    this.config.columns.forEach(col => {
+        if (col === 'actions') return;
 
-            let value = item[col];
+        let value = item[col];
 
-            // Handle nested values
-            if (value === undefined && col.includes('.')) {
-                value = this.getNestedValue(item, col);
-            }
-
-            // Default to '-' if empty
-            if (value === undefined || value === null || value === '') {
-                value = '-';
-            }
-
-            // Special handling for 'user' column (object with username and email)
-            if (col === 'user' && typeof item.user === 'object' && item.user !== null) {
-                const username = item.user.username || '-';
-                const email = item.user.email || '-';
-                row += `
-                    <td class="px-6 py-4">
-                        <div class="flex items-center">
-                            <div>
-                                <div class="text-sm font-medium text-gray-900">${this.escapeHTML(username)}</div>
-                                <div class="text-sm text-gray-500">${this.escapeHTML(email)}</div>
-                            </div>
-                        </div>
-                    </td>`;
-                return;
-            }
-
-            // Role badge
-            if (col === 'role') {
-                row += `<td class="px-6 py-4">
-                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        ${this.escapeHTML(String(value))}
-                    </span>
-                </td>`;
-                return;
-            }
-
-            // Status badge
-            if (col === 'status') {
-                const isActive = String(value).toLowerCase() === 'active';
-                const bgColor = isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-                row += `<td class="px-6 py-4">
-                    <span class="px-3 py-1 rounded-full text-xs font-medium ${bgColor}">
-                        ${this.escapeHTML(String(value))}
-                    </span>
-                </td>`;
-                return;
-            }
-
-            // Address with special formatting
-            if (col === 'alamat') {
-                let alamatHtml = `<div class="text-sm text-gray-900">`;
-
-                if (String(value) !== '-' && String(value).includes(' - ')) {
-                    const [wilayah, detail] = String(value).split(' - ');
-                    alamatHtml += `
-                        <div class="font-medium">${this.escapeHTML(wilayah)}</div>
-                        <div class="text-xs text-gray-600 mt-1">${this.escapeHTML(detail)}</div>
-                    `;
-                } else {
-                    alamatHtml += this.escapeHTML(String(value));
-                }
-
-                alamatHtml += `</div>`;
-                row += `<td class="px-6 py-4">${alamatHtml}</td>`;
-                return;
-            }
-
-            // Default column
-            row += `<td class="px-6 py-4 text-sm text-gray-700">${this.escapeHTML(String(value))}</td>`;
-        });
-
-        // Actions column
-        if (this.config.columns.includes('actions')) {
-            row += this.renderActions(item.actions || []);
+        // Handle nested values
+        if (value === undefined && col.includes('.')) {
+            value = this.getNestedValue(item, col);
         }
 
-        row += `</tr>`;
-        return row;
+        // Default to '-' if empty
+        if (value === undefined || value === null || value === '') {
+            value = '-';
+        }
+
+        // ✅ TAMBAHKAN INI - Special handling for 'sales' column
+        if (col === 'sales' && typeof item.sales === 'object' && item.sales !== null) {
+            const username = item.sales.username || '-';
+            const email = item.sales.email || 'No email';
+            row += `
+                <td style="padding: 0.375rem 0.75rem 0.5rem 0.75rem; white-space: nowrap;">
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 2rem; height: 2rem; flex-shrink: 0;">
+                            <div style="width: 2rem; height: 2rem; border-radius: 9999px; background-color: #e0e7ff; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-user-tie" style="color: #6366f1; font-size: 0.75rem;"></i>
+                            </div>
+                        </div>
+                        <div style="margin-left: 0.5rem;">
+                            <div style="font-size: 0.8125rem; font-weight: 500; color: #111827;">${this.escapeHTML(username)}</div>
+                            <div style="font-size: 0.6875rem; color: #6b7280;">${this.escapeHTML(email)}</div>
+                        </div>
+                    </div>
+                </td>`;
+            return;
+        }
+
+        // Special handling for 'user' column (object with username and email)
+        if (col === 'user' && typeof item.user === 'object' && item.user !== null) {
+            const username = item.user.username || '-';
+            const email = item.user.email || '-';
+            row += `
+                <td class="px-6 py-4">
+                    <div class="flex items-center">
+                        <div>
+                            <div class="text-sm font-medium text-gray-900">${this.escapeHTML(username)}</div>
+                            <div class="text-sm text-gray-500">${this.escapeHTML(email)}</div>
+                        </div>
+                    </div>
+                </td>`;
+            return;
+        }
+
+        // Role badge
+        if (col === 'role') {
+            row += `<td class="px-6 py-4">
+                <span class="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    ${this.escapeHTML(String(value))}
+                </span>
+            </td>`;
+            return;
+        }
+
+        // Status badge
+        if (col === 'status') {
+            const isActive = String(value).toLowerCase() === 'active';
+            const bgColor = isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+            row += `<td class="px-6 py-4">
+                <span class="px-3 py-1 rounded-full text-xs font-medium ${bgColor}">
+                    ${this.escapeHTML(String(value))}
+                </span>
+            </td>`;
+            return;
+        }
+
+        // Address with special formatting
+        if (col === 'alamat') {
+            let alamatHtml = `<div class="text-sm text-gray-900">`;
+
+            if (String(value) !== '-' && String(value).includes(' - ')) {
+                const [wilayah, detail] = String(value).split(' - ');
+                alamatHtml += `
+                    <div class="font-medium">${this.escapeHTML(wilayah)}</div>
+                    <div class="text-xs text-gray-600 mt-1">${this.escapeHTML(detail)}</div>
+                `;
+            } else {
+                alamatHtml += this.escapeHTML(String(value));
+            }
+
+            alamatHtml += `</div>`;
+            row += `<td class="px-6 py-4">${alamatHtml}</td>`;
+            return;
+        }
+
+        // Default column
+        row += `<td class="px-6 py-4 text-sm text-gray-700">${this.escapeHTML(String(value))}</td>`;
+    });
+
+    // Actions column
+    if (this.config.columns.includes('actions')) {
+        row += this.renderActions(item.actions || []);
     }
+
+    row += `</tr>`;
+    return row;
+}
 
     renderActions(actions) {
         if (!Array.isArray(actions)) actions = [];
