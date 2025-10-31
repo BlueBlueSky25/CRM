@@ -4,7 +4,7 @@
 @section('content')
 <div class="pt-20">  <!-- CUMA pt-20, TANPA px -->
     <!-- Ringkasan Metrik -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-8 px-4 sm:px-6 lg:px-8">
+    <div class="px-4 sm:px-6 lg:px-8 mb-6">
         <x-dashboard.kpi />
     </div>
 

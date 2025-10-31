@@ -5,25 +5,25 @@
     <table id="salesVisitTable" class="w-full" style="margin: 0; border-collapse: collapse;">
         <thead style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb;">
             <tr>
-                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">No</th>
-                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Sales</th>
-                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Customer Name</th>
-                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Company</th>
-                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Location</th>
-                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Visit Date</th>
-                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Purpose</th>
-                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Follow Up</th>
-                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: right; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Aksi</th>
+                <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">No</th>
+                <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Sales</th>
+                <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Customer Name</th>
+                <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Company</th>
+                <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Location</th>
+                <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Visit Date</th>
+                <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Purpose</th>
+                <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Follow Up</th>
+                <th style="padding: 0.5rem 0.75rem; text-align: right; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Aksi</th>
             </tr>
         </thead>
         <tbody style="background-color: #ffffff; border-top: 1px solid #e5e7eb;">
             @forelse($salesVisits as $index => $visit)
             <tr style="border-bottom: 1px solid #e5e7eb; transition: background-color 0.15s;" onmouseover="this.style.backgroundColor='#f9fafb'" onmouseout="this.style.backgroundColor='#ffffff'">
-                <td style="padding: 0.375rem 0.75rem 0.5rem 0.75rem; font-size: 0.8125rem; color: #111827; white-space: nowrap;">
+                <td style="padding: 0.5rem 0.75rem; font-size: 0.8125rem; color: #111827; white-space: nowrap;">
                     <span style="font-weight: 500;">{{ $salesVisits->firstItem() + $index }}</span>
                 </td>
                 
-                <td style="padding: 0.375rem 0.75rem 0.5rem 0.75rem; white-space: nowrap;">
+                <td style="padding: 0.5rem 0.75rem; white-space: nowrap;">
                     <div style="display: flex; align-items: center;">
                         <div style="width: 2rem; height: 2rem; flex-shrink: 0;">
                             <div style="width: 2rem; height: 2rem; border-radius: 9999px; background-color: #e0e7ff; display: flex; align-items: center; justify-content: center;">
@@ -37,15 +37,15 @@
                     </div>
                 </td>
                 
-                <td style="padding: 0.375rem 0.75rem 0.5rem 0.75rem; white-space: nowrap;">
+                <td style="padding: 0.5rem 0.75rem; white-space: nowrap;">
                     <div style="font-size: 0.8125rem; font-weight: 500; color: #111827;">{{ $visit->customer_name ?? '-' }}</div>
                 </td>
                 
-                <td style="padding: 0.375rem 0.75rem 0.5rem 0.75rem;">
+                <td style="padding: 0.5rem 0.75rem;">
                     <div style="font-size: 0.8125rem; color: #111827;">{{ $visit->company_name ?? '-' }}</div>
                 </td>
                 
-                <td style="padding: 0.375rem 0.75rem 0.5rem 0.75rem;">
+                <td style="padding: 0.5rem 0.75rem;">
                     <div style="font-size: 0.8125rem; color: #111827;">
                         <div style="display: flex; align-items: center; gap: 0.25rem;">
                             <i class="fas fa-map-marker-alt" style="color: #9ca3af; font-size: 0.6875rem;"></i>
@@ -57,7 +57,7 @@
                     </div>
                 </td>
                 
-                <td style="padding: 0.375rem 0.75rem 0.5rem 0.75rem; white-space: nowrap;">
+                <td style="padding: 0.5rem 0.75rem; white-space: nowrap;">
                     <div style="font-size: 0.8125rem; color: #111827;">
                         @if($visit->visit_date)
                             <div style="display: flex; align-items: center; gap: 0.375rem;">
@@ -70,7 +70,7 @@
                     </div>
                 </td>
                 
-                <td style="padding: 0.375rem 0.75rem 0.5rem 0.75rem;">
+                <td style="padding: 0.5rem 0.75rem;">
                     <div style="font-size: 0.8125rem; color: #374151; max-width: 16rem;">
                         @if($visit->visit_purpose)
                             <span style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" title="{{ $visit->visit_purpose }}">

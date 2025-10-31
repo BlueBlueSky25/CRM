@@ -1,4 +1,4 @@
-<div class="pt-2 max-w-7xl mx-auto fade-in">
+<div class="pt-2 max-w-7xl mx-auto">
     <!-- KPI Cards Company - Mini Version -->
     <div class="mt-2 mb-0">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">

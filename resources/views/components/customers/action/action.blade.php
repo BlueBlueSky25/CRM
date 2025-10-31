@@ -31,7 +31,7 @@
 
 <!-- Modal Tambah/Edit Customer -->
 <div id="customerModal"
-    class="modal hidden fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 p-4">
+    class="modal hidden fixed inset-0 bg-black bgA-opacity-50 items-center justify-center z-50 p-4">
     <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-hidden animate-fadeIn">
         <!-- Modal Header - WARNA BARU PURPLE BLUE -->
         <div class="px-6 py-5 border-b border-gray-200" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #3b82f6 100%);">

@@ -1,20 +1,6 @@
 @props(['salesUsers', 'provinces', 'currentMenuId'])
 
 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden fade-in">
-    <!-- Header -->
-    <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-        <div>
-            <h3 class="text-base font-semibold text-gray-900">Sales Management</h3>
-            <p class="text-xs text-gray-600 mt-0.5">Kelola data sales dan informasinya</p>
-        </div>
-        @if(auth()->user()->canAccess($currentMenuId, 'create'))
-        <button onclick="openAddSalesModal()" 
-            class="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
-            <i class="fas fa-plus text-xs"></i>
-            Tambah Sales
-        </button>
-        @endif
-    </div>
 
     <!-- Table -->
     <div class="overflow-x-auto">

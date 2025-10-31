@@ -5,23 +5,23 @@
     <table id="picTable" class="w-full" style="margin: 0; border-collapse: collapse;">
         <thead style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb;">
             <tr>
-                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">No</th>
-                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Nama PIC</th>
-                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Jabatan</th>
-                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Email</th>
-                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Telepon</th>
-                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Perusahaan</th>
-                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: right; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Aksi</th>
+                <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">No</th>
+                <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Nama PIC</th>
+                <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Jabatan</th>
+                <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Email</th>
+                <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Telepon</th>
+                <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Perusahaan</th>
+                <th style="padding: 0.5rem 0.75rem; text-align: right; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Aksi</th>
             </tr>
         </thead>
         <tbody style="background-color: #ffffff; border-top: 1px solid #e5e7eb;">
             @forelse($pics as $index => $pic)
             <tr style="border-bottom: 1px solid #e5e7eb; transition: background-color 0.15s;" onmouseover="this.style.backgroundColor='#f9fafb'" onmouseout="this.style.backgroundColor='#ffffff'">
-                <td style="padding: 0.375rem 0.75rem 0.5rem 0.75rem; font-size: 0.8125rem; color: #111827; white-space: nowrap;">
+                <td style="padding: 0.5rem 0.75rem; font-size: 0.8125rem; color: #111827; white-space: nowrap;">
                     <span style="font-weight: 500;">{{ $pics->firstItem() + $index }}</span>
                 </td>
                 
-                <td style="padding: 0.375rem 0.75rem 0.5rem 0.75rem; white-space: nowrap;">
+                <td style="padding: 0.5rem 0.75rem; white-space: nowrap;">
                     <div style="display: flex; align-items: center;">
                         <div style="width: 2rem; height: 2rem; flex-shrink: 0;">
                             <div style="width: 2rem; height: 2rem; border-radius: 9999px; background-color: #e0e7ff; display: flex; align-items: center; justify-content: center;">
@@ -34,7 +34,7 @@
                     </div>
                 </td>
                 
-                <td style="padding: 0.375rem 0.75rem 0.5rem 0.75rem; white-space: nowrap;">
+                <td style="padding: 0.5rem 0.75rem; white-space: nowrap;">
                     @if($pic->position)
                         <span style="display: inline-flex; align-items: center; padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.6875rem; font-weight: 500; background-color: #f3e8ff; color: #7c3aed;">
                             {{ $pic->position }}
@@ -44,7 +44,7 @@
                     @endif
                 </td>
                 
-                <td style="padding: 0.375rem 0.75rem 0.5rem 0.75rem; white-space: nowrap;">
+                <td style="padding: 0.5rem 0.75rem; white-space: nowrap;">
                     @if($pic->email)
                         <a href="mailto:{{ $pic->email }}" style="font-size: 0.8125rem; color: #6366f1; text-decoration: none; display: flex; align-items: center; gap: 0.375rem;" onmouseover="this.style.color='#4f46e5'" onmouseout="this.style.color='#6366f1'">
                             <i class="fas fa-envelope" style="font-size: 0.6875rem;"></i>
@@ -55,7 +55,7 @@
                     @endif
                 </td>
                 
-                <td style="padding: 0.375rem 0.75rem 0.5rem 0.75rem; white-space: nowrap;">
+                <td style="padding: 0.5rem 0.75rem; white-space: nowrap;">
                     @if($pic->phone)
                         <a href="tel:{{ $pic->phone }}" style="font-size: 0.8125rem; color: #6366f1; text-decoration: none; display: flex; align-items: center; gap: 0.375rem;" onmouseover="this.style.color='#4f46e5'" onmouseout="this.style.color='#6366f1'">
                             <i class="fas fa-phone" style="font-size: 0.6875rem;"></i>
@@ -66,7 +66,7 @@
                     @endif
                 </td>
                 
-                <td style="padding: 0.375rem 0.75rem 0.5rem 0.75rem;">
+                <td style="padding: 0.5rem 0.75rem;">
                     <div style="font-size: 0.8125rem; color: #111827;">
                         <div style="display: flex; align-items: center; gap: 0.25rem;">
                             <i class="fas fa-building" style="color: #9ca3af; font-size: 0.6875rem;"></i>
