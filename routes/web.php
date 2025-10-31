@@ -11,6 +11,8 @@ use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\SalesVisitController;
+use App\Http\Controllers\PicController;
+
 
 // ==========================
 // Public Routes (Login / Logout)
@@ -67,7 +69,9 @@ Route::middleware(['auth', 'permission'])->group(function () {
 
 
 
-// ==================== SALES VISIT ROUTES ====================
+// ==================== 
+// SALES VISIT ROUTES 
+// ====================
 
 Route::middleware(['auth'])->group(function () {
     
@@ -90,6 +94,21 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/salesvisit/export', [SalesVisitController::class, 'export'])->name('salesvisit.export');
     Route::post('/salesvisit/import', [SalesVisitController::class, 'import'])->name('salesvisit.import');
 });
+
+
+    // ==========================
+    // Pic
+    // ==========================
+    Route::middleware(['auth'])->group(function () {
+    Route::get('/pic', [PicController::class, 'index'])->name('pic');
+    Route::post('/pic', [PicController::class, 'store'])->name('pics.store');
+    Route::put('/pic/{id}', [PicController::class, 'update'])->name('pics.update');
+    Route::delete('/pic/{id}', [PicController::class, 'destroy'])->name('pics.destroy');
+    Route::get('/pic/search', [PicController::class, 'search'])->name('pics.search');
+});
+
+
+
 
     
     // ==========================
@@ -120,7 +139,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user', [UserController::class, 'index'])->name('user');
     Route::get('/role', [RoleController::class, 'index'])->name('role'); 
     Route::get('/menu', [MenuController::class, 'index'])->name('menu');
-    Route::get('/pic', fn() => view('pages.pic'))->name('pic');
+    
    
 
     // ==========================

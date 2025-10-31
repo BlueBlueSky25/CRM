@@ -102,7 +102,7 @@ public function getSalesUsers()
 
         // Role-based filtering
         if ($user->role_id == 1) {
-            // superadmin
+            // superadmin - lihat semua
         } elseif (in_array($user->role_id, [7, 11])) {
             $query->whereHas('sales', function ($q) {
                 $q->where('role_id', 12);
@@ -113,27 +113,38 @@ public function getSalesUsers()
             $query->whereNull('id');
         }
 
-        // ✅ SEARCH by keyword
-        if ($request->filled('search')) {
-            $search = $request->search;
+        // ✅ SEARCH by keyword - INI YANG PENTING!
+        // Pastikan nama parameter nya 'q' atau 'search' sesuai dengan yang dikirim dari frontend
+        if ($request->filled('q')) {
+            $search = $request->q;
             $query->where(function($q) use ($search) {
-                $q->where('customer_name', 'like', "%{$search}%")
-                  ->orWhere('company_name', 'like', "%{$search}%")
-                  ->orWhere('address', 'like', "%{$search}%")
-                  ->orWhere('visit_purpose', 'like', "%{$search}%");
+                $q->where('customer_name', 'ILIKE', "%{$search}%")
+                  ->orWhere('company_name', 'ILIKE', "%{$search}%")
+                  ->orWhere('address', 'ILIKE', "%{$search}%")
+                  ->orWhere('visit_purpose', 'ILIKE', "%{$search}%");
             });
             \Log::info('Search applied', ['search' => $search]);
         }
 
+        // Fallback kalau pakai 'search' sebagai parameter name
+        if ($request->filled('search') && !$request->filled('q')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('customer_name', 'ILIKE', "%{$search}%")
+                  ->orWhere('company_name', 'ILIKE', "%{$search}%")
+                  ->orWhere('address', 'ILIKE', "%{$search}%")
+                  ->orWhere('visit_purpose', 'ILIKE', "%{$search}%");
+            });
+            \Log::info('Search applied (fallback)', ['search' => $search]);
+        }
+
         // ✅ FILTER by Sales
-        // Component generate: salesVisitTable_sales_filter (lowercase karena Str::slug)
         if ($request->filled('salesvisittable_sales_filter')) {
             $query->where('sales_id', $request->salesvisittable_sales_filter);
             \Log::info('Sales filter applied', ['sales_id' => $request->salesvisittable_sales_filter]);
         }
 
         // ✅ FILTER by Province
-        // Component generate: salesVisitTable_province_filter
         if ($request->filled('salesvisittable_province_filter')) {
             $query->where('province_id', $request->salesvisittable_province_filter);
             \Log::info('Province filter applied', ['province_id' => $request->salesvisittable_province_filter]);
@@ -145,7 +156,7 @@ public function getSalesUsers()
         // Paginate
         $salesVisits = $query->paginate(10);
 
-        \Log::info('Visits found', ['count' => $salesVisits->count()]);
+        \Log::info('Visits found', ['count' => $salesVisits->count(), 'total' => $salesVisits->total()]);
 
         // ✅ Format response
         $items = $salesVisits->map(function($visit, $index) use ($salesVisits) {
@@ -189,7 +200,7 @@ public function getSalesUsers()
             ];
         })->toArray();
 
-        \Log::info('Response prepared successfully');
+        \Log::info('Response prepared successfully', ['items_count' => count($items)]);
 
         return response()->json([
             'items' => $items,

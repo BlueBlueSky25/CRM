@@ -1,4 +1,4 @@
-@props(['provinces' => [], 'companies' => [], 'currentMenuId'])
+@props(['companies' => [], 'currentMenuId'])
 
 <!-- Modal Tambah PIC -->
 <div id="picModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -19,22 +19,22 @@
 
         <!-- Body -->
         <div class="overflow-y-auto max-h-[calc(90vh-140px)]" style="background-color: #f3f4f6; padding: 1.5rem;">
-            <form id="picForm" action="#" method="POST" style="display: flex; flex-direction: column; gap: 1rem;">
+            <form id="picForm" action="{{ route('pics.store') }}" method="POST" style="display: flex; flex-direction: column; gap: 1rem;">
                 @csrf
                 
                 <!-- Perusahaan -->
                 <div>
                     <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
-                        Perusahaan
+                        Perusahaan <span style="color: #ef4444;">*</span>
                     </label>
                     <div style="position: relative;">
                         <i class="fas fa-building" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
-                        <select name="company_id"
+                        <select name="company_id" required
                             style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem 1rem 0.75rem 2.5rem; font-size: 0.875rem;">
                             <option value="">-- Pilih Perusahaan --</option>
-                            <option value="1">PT Maju Jaya</option>
-                            <option value="2">CV Sejahtera</option>
-                            <option value="3">PT Teknologi Nusantara</option>
+                            @foreach($companies as $company)
+                                <option value="{{ $company->company_id }}">{{ $company->company_name }}</option>
+                            @endforeach
                         </select>
                     </div>
                 </div>
@@ -180,12 +180,5 @@ document.getElementById('picModal')?.addEventListener('click', function(e) {
     if (e.target === this) {
         closePICModal();
     }
-});
-
-// Form submit
-document.getElementById('picForm')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    alert('Form submitted! (Backend belum ada)');
-    closePICModal();
 });
 </script>

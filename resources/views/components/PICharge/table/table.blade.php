@@ -1,194 +1,150 @@
-@props(['currentMenuId' => 10])
+@props(['currentMenuId' => 10, 'pics', 'companies'])
 
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden fade-in" style="margin: 0;">
-    <!-- Header -->
-    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-        <div>
-            <h3 class="text-lg font-semibold text-gray-900">PIC Management</h3>
-            <p class="text-sm text-gray-600 mt-1">Kelola data Person In Charge dan informasinya</p>
-        </div>
-        <button onclick="openPICModal()" 
-            class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
-            <i class="fas fa-plus"></i>
-            Tambah PIC
-        </button>
-    </div>
-
-    <!-- Table -->
-    <div class="overflow-x-auto" style="margin: 0; padding: 0;">
-        <table id="picTable" class="w-full" style="margin: 0; border-collapse: collapse;">
-            <thead class="bg-gray-50 border-b border-gray-200">
-                <tr>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">No</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama PIC</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Jabatan</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Telepon</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Perusahaan</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-                <!-- Sample Data 1 -->
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-4 py-3 text-sm text-gray-900">1</td>
-                    <td class="px-4 py-3">
-                        <div class="flex items-center">
-                            <div class="h-8 w-8 flex-shrink-0">
-                                <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
-                                    <i class="fas fa-user-tie text-indigo-600 text-xs"></i>
-                                </div>
-                            </div>
-                            <div class="ml-3">
-                                <div class="text-sm font-medium text-gray-900">Andi Saputra</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-4 py-3 text-sm text-gray-900">
-                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                            Manager
-                        </span>
-                    </td>
-                    <td class="px-4 py-3">
-                        <a href="mailto:andi@example.com" class="text-indigo-600 hover:text-indigo-900 flex items-center gap-1 text-sm">
-                            <i class="fas fa-envelope text-xs"></i>
-                            andi@example.com
-                        </a>
-                    </td>
-                    <td class="px-4 py-3">
-                        <a href="tel:0812-3456-7890" class="text-indigo-600 hover:text-indigo-900 flex items-center gap-1 text-sm">
-                            <i class="fas fa-phone text-xs"></i>
-                            0812-3456-7890
-                        </a>
-                    </td>
-                    <td class="px-4 py-3 text-sm">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-building text-gray-400 text-xs"></i>
-                            <span class="text-gray-900">PT Maju Jaya</span>
-                        </div>
-                    </td>
-                    <td class="px-4 py-3 text-sm font-medium">
-                        <div class="flex items-center space-x-2">
-                            <button onclick="openEditPICModal('Andi Saputra', 'Manager', 'andi@example.com', '0812-3456-7890', '1')" 
-                                class="text-blue-600 hover:text-blue-900 p-1.5 rounded-lg hover:bg-blue-50 flex items-center transition-colors" 
-                                title="Edit PIC">
-                                <i class="fas fa-edit text-sm"></i>
-                            </button>
-                            <button onclick="deletePIC(1)" 
-                                class="text-red-600 hover:text-red-900 p-1.5 rounded-lg hover:bg-red-50 flex items-center transition-colors" 
-                                title="Hapus PIC">
-                                <i class="fas fa-trash text-sm"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
+<!-- Table Only (No Header, No Pagination) -->
+<div class="overflow-x-auto" style="margin: 0; padding: 0;">
+    <table id="picTable" class="w-full" style="margin: 0; border-collapse: collapse;">
+        <thead style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+            <tr>
+                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">No</th>
+                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Nama PIC</th>
+                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Jabatan</th>
+                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Email</th>
+                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Telepon</th>
+                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Perusahaan</th>
+                <th style="padding: 0.5rem 0.75rem 0.375rem 0.75rem; text-align: right; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Aksi</th>
+            </tr>
+        </thead>
+        <tbody style="background-color: #ffffff; border-top: 1px solid #e5e7eb;">
+            @forelse($pics as $index => $pic)
+            <tr style="border-bottom: 1px solid #e5e7eb; transition: background-color 0.15s;" onmouseover="this.style.backgroundColor='#f9fafb'" onmouseout="this.style.backgroundColor='#ffffff'">
+                <td style="padding: 0.375rem 0.75rem 0.5rem 0.75rem; font-size: 0.8125rem; color: #111827; white-space: nowrap;">
+                    <span style="font-weight: 500;">{{ $pics->firstItem() + $index }}</span>
+                </td>
                 
-                <!-- Sample Data 2 -->
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-4 py-3 text-sm text-gray-900">2</td>
-                    <td class="px-4 py-3">
-                        <div class="flex items-center">
-                            <div class="h-8 w-8 flex-shrink-0">
-                                <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
-                                    <i class="fas fa-user-tie text-indigo-600 text-xs"></i>
-                                </div>
-                            </div>
-                            <div class="ml-3">
-                                <div class="text-sm font-medium text-gray-900">Budi Santoso</div>
+                <td style="padding: 0.375rem 0.75rem 0.5rem 0.75rem; white-space: nowrap;">
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 2rem; height: 2rem; flex-shrink: 0;">
+                            <div style="width: 2rem; height: 2rem; border-radius: 9999px; background-color: #e0e7ff; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-user-tie" style="color: #6366f1; font-size: 0.75rem;"></i>
                             </div>
                         </div>
-                    </td>
-                    <td class="px-4 py-3 text-sm text-gray-900">
-                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                            Supervisor
+                        <div style="margin-left: 0.5rem;">
+                            <div style="font-size: 0.8125rem; font-weight: 500; color: #111827;">{{ $pic->name }}</div>
+                        </div>
+                    </div>
+                </td>
+                
+                <td style="padding: 0.375rem 0.75rem 0.5rem 0.75rem; white-space: nowrap;">
+                    @if($pic->position)
+                        <span style="display: inline-flex; align-items: center; padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.6875rem; font-weight: 500; background-color: #f3e8ff; color: #7c3aed;">
+                            {{ $pic->position }}
                         </span>
-                    </td>
-                    <td class="px-4 py-3">
-                        <a href="mailto:budi@example.com" class="text-indigo-600 hover:text-indigo-900 flex items-center gap-1 text-sm">
-                            <i class="fas fa-envelope text-xs"></i>
-                            budi@example.com
+                    @else
+                        <span style="color: #9ca3af;">-</span>
+                    @endif
+                </td>
+                
+                <td style="padding: 0.375rem 0.75rem 0.5rem 0.75rem; white-space: nowrap;">
+                    @if($pic->email)
+                        <a href="mailto:{{ $pic->email }}" style="font-size: 0.8125rem; color: #6366f1; text-decoration: none; display: flex; align-items: center; gap: 0.375rem;" onmouseover="this.style.color='#4f46e5'" onmouseout="this.style.color='#6366f1'">
+                            <i class="fas fa-envelope" style="font-size: 0.6875rem;"></i>
+                            {{ $pic->email }}
                         </a>
-                    </td>
-                    <td class="px-4 py-3">
-                        <a href="tel:0813-2222-3333" class="text-indigo-600 hover:text-indigo-900 flex items-center gap-1 text-sm">
-                            <i class="fas fa-phone text-xs"></i>
-                            0813-2222-3333
+                    @else
+                        <span style="color: #9ca3af;">-</span>
+                    @endif
+                </td>
+                
+                <td style="padding: 0.375rem 0.75rem 0.5rem 0.75rem; white-space: nowrap;">
+                    @if($pic->phone)
+                        <a href="tel:{{ $pic->phone }}" style="font-size: 0.8125rem; color: #6366f1; text-decoration: none; display: flex; align-items: center; gap: 0.375rem;" onmouseover="this.style.color='#4f46e5'" onmouseout="this.style.color='#6366f1'">
+                            <i class="fas fa-phone" style="font-size: 0.6875rem;"></i>
+                            {{ $pic->phone }}
                         </a>
-                    </td>
-                    <td class="px-4 py-3 text-sm">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-building text-gray-400 text-xs"></i>
-                            <span class="text-gray-900">CV Sejahtera</span>
+                    @else
+                        <span style="color: #9ca3af;">-</span>
+                    @endif
+                </td>
+                
+                <td style="padding: 0.375rem 0.75rem 0.5rem 0.75rem;">
+                    <div style="font-size: 0.8125rem; color: #111827;">
+                        <div style="display: flex; align-items: center; gap: 0.25rem;">
+                            <i class="fas fa-building" style="color: #9ca3af; font-size: 0.6875rem;"></i>
+                            <span>{{ $pic->company->company_name ?? '-' }}</span>
                         </div>
-                    </td>
-                    <td class="px-4 py-3 text-sm font-medium">
-                        <div class="flex items-center space-x-2">
-                            <button onclick="openEditPICModal('Budi Santoso', 'Supervisor', 'budi@example.com', '0813-2222-3333', '2')" 
-                                class="text-blue-600 hover:text-blue-900 p-1.5 rounded-lg hover:bg-blue-50 flex items-center transition-colors" 
-                                title="Edit PIC">
-                                <i class="fas fa-edit text-sm"></i>
-                            </button>
-                            <button onclick="deletePIC(2)" 
-                                class="text-red-600 hover:text-red-900 p-1.5 rounded-lg hover:bg-red-50 flex items-center transition-colors" 
-                                title="Hapus PIC">
-                                <i class="fas fa-trash text-sm"></i>
-                            </button>
+                    </div>
+                </td>
+                
+                <td style="padding: 0.5rem 0.75rem; font-size: 0.8125rem; font-weight: 500; text-align: right; white-space: nowrap;">
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.375rem;">
+                        @if(auth()->user()->canAccess($currentMenuId, 'edit'))
+                        <button 
+                            onclick="openEditPICModal('{{ $pic->pic_id }}', '{{ $pic->company_id }}', '{{ addslashes($pic->name) }}', '{{ addslashes($pic->position ?? '') }}', '{{ addslashes($pic->email ?? '') }}', '{{ addslashes($pic->phone ?? '') }}')"
+                            style="color: #2563eb; background: transparent; border: none; padding: 0.375rem; border-radius: 0.375rem; cursor: pointer; transition: all 0.15s; font-size: 0.875rem;"
+                            onmouseover="this.style.backgroundColor='#dbeafe'; this.style.color='#1e40af';"
+                            onmouseout="this.style.backgroundColor='transparent'; this.style.color='#2563eb';"
+                            title="Edit PIC">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        @endif
+                        
+                        @if(auth()->user()->canAccess($currentMenuId, 'delete'))
+                        <button type="button" 
+                            onclick="deletePIC('{{ $pic->pic_id }}', '{{ route('pics.destroy', $pic->pic_id) }}', '{{ csrf_token() }}')"
+                            style="color: #dc2626; background: transparent; border: none; padding: 0.375rem; border-radius: 0.375rem; cursor: pointer; transition: all 0.15s; font-size: 0.875rem;"
+                            onmouseover="this.style.backgroundColor='#fee2e2'; this.style.color='#991b1b';"
+                            onmouseout="this.style.backgroundColor='transparent'; this.style.color='#dc2626';"
+                            title="Hapus PIC">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        @endif
+                    </div>
+                </td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="7" style="padding: 3rem 1.5rem; text-align: center;">
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <div style="width: 6rem; height: 6rem; border-radius: 9999px; background-color: #f3f4f6; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                            <i class="fas fa-inbox" style="font-size: 3rem; color: #d1d5db;"></i>
                         </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+                        <h3 style="font-size: 1.125rem; font-weight: 500; color: #111827; margin: 0 0 0.25rem 0;">Belum Ada Data</h3>
+                        <p style="font-size: 0.875rem; color: #6b7280; margin: 0;">Belum ada data PIC yang tersedia</p>
+                        @if(auth()->user()->canAccess($currentMenuId, 'create'))
+                        <button onclick="openPICModal()" style="margin-top: 1rem; padding: 0.5rem 1rem; background-color: #6366f1; color: white; border: none; border-radius: 0.5rem; cursor: pointer; transition: background-color 0.2s;">
+                            <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
+                            Tambah PIC
+                        </button>
+                        @endif
+                    </div>
+                </td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
 </div>
 
 <style>
-@keyframes fadeIn {
-    from { 
-        opacity: 0; 
-        transform: translateY(10px);
+/* Responsive improvements */
+@media (max-width: 1024px) {
+    #picTable {
+        font-size: 0.8125rem;
     }
-    to { 
-        opacity: 1; 
-        transform: translateY(0);
+    
+    #picTable th,
+    #picTable td {
+        padding: 0.4rem 0.65rem;
     }
 }
 
-.fade-in {
-    animation: fadeIn 0.3s ease-in;
-}
-
-#picTable tbody tr {
-    transition: all 0.2s ease;
-}
-
-#picTable tbody tr:hover {
-    background-color: #f9fafb;
-    transform: scale(1.001);
-}
-
-#picTable button {
-    transition: all 0.2s ease;
-}
-
-#picTable button:hover {
-    transform: translateY(-1px);
-}
-
-.h-8.w-8.rounded-full {
-    transition: all 0.3s ease;
-}
-
-#picTable tbody tr:hover .h-8.w-8.rounded-full {
-    transform: scale(1.1);
-    box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+@media (max-width: 768px) {
+    #picTable {
+        font-size: 0.75rem;
+    }
+    
+    #picTable th,
+    #picTable td {
+        padding: 0.375rem 0.5rem;
+    }
 }
 </style>
-
-<script>
-function deletePIC(id) {
-    if (confirm('Yakin ingin menghapus PIC ini?')) {
-        alert('PIC ID ' + id + ' dihapus! (Backend belum ada)');
-        // location.reload(); // Uncomment ketika backend sudah siap
-    }
-}
-</script>
