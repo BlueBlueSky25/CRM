@@ -65,13 +65,35 @@ class PicController extends Controller
     }
 
     public function destroy($id)
-    {
+{
+    try {
         $pic = CompanyPic::findOrFail($id);
         $pic->delete();
 
-        return redirect()->route('pic')->with('success', 'PIC berhasil dihapus!');
-    }
+        // Jika request AJAX, return JSON response
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'PIC berhasil dihapus!'
+            ]);
+        }
 
+        // Jika regular request, redirect
+        return redirect()->route('pic')->with('success', 'PIC berhasil dihapus!');
+
+    } catch (\Exception $e) {
+        // Jika request AJAX, return JSON error
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus PIC: ' . $e->getMessage()
+            ], 500);
+        }
+
+        // Jika regular request, redirect dengan error
+        return redirect()->back()->with('error', 'Gagal menghapus PIC: ' . $e->getMessage());
+    }
+}
     public function search(Request $request)
     {
         $query = CompanyPic::with('company');

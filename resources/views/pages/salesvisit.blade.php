@@ -113,30 +113,52 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('SalesVisit page loaded');
+    console.log('🚀 SalesVisit page loaded');
     
     if (typeof TableHandler === 'undefined') {
-        console.error('TableHandler class not found. search.js may not be loaded.');
+        console.error('❌ TableHandler class not found. search.js may not be loaded.');
         return;
     }
 
-    console.log('Creating TableHandler instance...');
+    console.log('✅ Creating TableHandler instance...');
     
     try {
         window.salesVisitTableHandler = new TableHandler({
             tableId: 'salesVisitTable',
             ajaxUrl: '{{ route("salesvisit.search") }}',
-            filters: ['sales', 'province'], // lowercase!
-            columns: ['number', 'sales', 'customer', 'company', 'location', 'visit_date', 'purpose', 'follow_up', 'actions']
+            filters: ['sales', 'province'], // ✅ Nama filter (lowercase)
+            columns: ['number', 'sales', 'customer', 'company', 'location', 'visit_date', 'purpose', 'follow_up', 'actions'],
+            searchParam: 'q' // ✅ PENTING: Backend pakai 'q' bukan 'search'
         });
         
-        console.log('TableHandler initialized successfully:', window.salesVisitTableHandler);
+        console.log('✅ TableHandler initialized successfully');
+        
+        // ✅ Debug helpers - bisa dipanggil dari console
+        window.testSearch = function(keyword) {
+            console.log('🧪 Testing search with:', keyword);
+            window.salesVisitTableHandler.search(keyword);
+        };
+        
+        window.testFilter = function(filterName, value) {
+            console.log('🧪 Testing filter:', { filterName, value });
+            const filterElement = document.querySelector(`[data-filter="${filterName}"]`);
+            if (filterElement) {
+                filterElement.value = value;
+                filterElement.dispatchEvent(new Event('change', { bubbles: true }));
+            } else {
+                console.error('Filter element not found:', filterName);
+            }
+        };
+        
+        window.getLastParams = function() {
+            const params = window.salesVisitTableHandler.getLastParams();
+            console.log('📤 Last params sent:', params);
+            return params;
+        };
+        
     } catch (error) {
-        console.error('Error initializing TableHandler:', error);
+        console.error('❌ Error initializing TableHandler:', error);
     }
-
-    console.log('deleteVisit function available:', typeof deleteVisit !== 'undefined');
-    console.log('showNotification function available:', typeof showNotification !== 'undefined');
 });
 </script>
 @endsection

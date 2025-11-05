@@ -187,16 +187,28 @@
 
 @push('scripts')
 <script>
-    // Show toast notifications on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        @if(session('success'))
-            showToast('success', '{{ session('success') }}');
-        @endif
-
-        @if($errors->any())
-            const errors = @json($errors->all());
-            showToast('error', errors);
-        @endif
-    });
+    function deletePIC(picId, deleteUrl, csrfToken) {
+        if (confirm('Apakah Anda yakin ingin menghapus PIC ini?')) {
+            // Simple form submission approach
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = deleteUrl;
+            
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'DELETE';
+            form.appendChild(methodInput);
+            
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
 </script>
 @endpush

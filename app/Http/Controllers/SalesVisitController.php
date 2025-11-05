@@ -42,16 +42,20 @@ public function index(Request $request)
         ->orderBy('created_at', 'desc')
         ->paginate(10);
 
-    // ✅ Return as OBJECT Collection (bukan array)
+    // ✅ PERBAIKAN: Kembalikan dengan format yang KONSISTEN untuk filter component
     $salesUsers = User::where('role_id', 12)
         ->select('user_id', 'username', 'email')
         ->orderBy('username')
         ->get()
         ->map(function($user) {
-            // ✅ Tambahkan property 'id' dan 'name' untuk component filter
-            $user->id = $user->user_id;  // Component butuh 'id'
-            $user->name = $user->username . ' - ' . $user->email;  // Component butuh 'name'
-            return $user;  // Return object, bukan array!
+            // Component filter butuh 'id' dan 'name'
+            return (object)[
+                'id' => $user->user_id,  // Untuk value filter
+                'name' => $user->username . ' - ' . $user->email,  // Untuk display
+                'user_id' => $user->user_id,  // Keep original
+                'username' => $user->username,  // Keep original
+                'email' => $user->email  // Keep original
+            ];
         });
 
     // Provinces
@@ -90,65 +94,93 @@ public function getSalesUsers()
 }
 
 
-  public function search(Request $request)
+ public function search(Request $request)
 {
     try {
-        \Log::info('SalesVisit Search Request', $request->all());
+        \Log::info('🔍 SalesVisit Search Request', [
+            'all_params' => $request->all(),
+            'query' => $request->q,
+            'sales' => $request->sales,
+            'province' => $request->province
+        ]);
 
         $user = Auth::user();
 
-        // Base query
+        // Base query dengan eager loading
         $query = SalesVisit::with(['sales', 'province', 'regency', 'district', 'village']);
 
         // Role-based filtering
         if ($user->role_id == 1) {
-            // superadmin - lihat semua
+            \Log::info('✅ Superadmin access - all data');
         } elseif (in_array($user->role_id, [7, 11])) {
             $query->whereHas('sales', function ($q) {
                 $q->where('role_id', 12);
             });
+            \Log::info('✅ Manager access - sales only');
         } elseif ($user->role_id == 12) {
             $query->where('sales_id', $user->user_id);
+            \Log::info('✅ Sales access - own data only', ['user_id' => $user->user_id]);
         } else {
             $query->whereNull('id');
+            \Log::info('⛔ No access');
         }
 
-        // ✅ SEARCH by keyword - INI YANG PENTING!
-        // Pastikan nama parameter nya 'q' atau 'search' sesuai dengan yang dikirim dari frontend
-        if ($request->filled('q')) {
-            $search = $request->q;
-            $query->where(function($q) use ($search) {
-                $q->where('customer_name', 'ILIKE', "%{$search}%")
-                  ->orWhere('company_name', 'ILIKE', "%{$search}%")
-                  ->orWhere('address', 'ILIKE', "%{$search}%")
-                  ->orWhere('visit_purpose', 'ILIKE', "%{$search}%");
+        // ✅ FILTER by Sales - SEBELUM search
+        if ($request->filled('sales') && $request->sales !== '' && $request->sales !== 'all') {
+            $salesId = $request->sales;
+            $query->where('sales_id', $salesId);
+            \Log::info('✅ Sales filter applied', ['sales_id' => $salesId]);
+        }
+
+        // ✅ FILTER by Province - SEBELUM search
+        if ($request->filled('province') && $request->province !== '' && $request->province !== 'all') {
+            $provinceId = $request->province;
+            $query->where('province_id', $provinceId);
+            \Log::info('✅ Province filter applied', ['province_id' => $provinceId]);
+        }
+
+        // ✅ SEARCH - INCLUDE SALES NAME! (PostgreSQL Compatible)
+        if ($request->filled('q') && trim($request->q) !== '') {
+            $search = trim($request->q);
+            $searchPattern = "%{$search}%";
+            
+            $query->where(function($q) use ($searchPattern, $search) {
+                // Search di sales_visits table
+                $q->where('customer_name', 'ILIKE', $searchPattern)
+                  ->orWhere('company_name', 'ILIKE', $searchPattern)
+                  ->orWhere('address', 'ILIKE', $searchPattern)
+                  ->orWhere('visit_purpose', 'ILIKE', $searchPattern)
+                  
+                  // ✅ NEW: Search di sales (users) table - username
+                  ->orWhereHas('sales', function($sq) use ($searchPattern) {
+                      $sq->where('username', 'ILIKE', $searchPattern)
+                         ->orWhere('email', 'ILIKE', $searchPattern);
+                  })
+                  
+                  // ✅ NEW: Search di province table
+                  ->orWhereHas('province', function($pq) use ($searchPattern) {
+                      $pq->where('name', 'ILIKE', $searchPattern);
+                  })
+                  
+                  // ✅ NEW: Search di regency table
+                  ->orWhereHas('regency', function($rq) use ($searchPattern) {
+                      $rq->where('name', 'ILIKE', $searchPattern);
+                  });
             });
-            \Log::info('Search applied', ['search' => $search]);
+            
+            \Log::info('✅ Search applied with relations', [
+                'keyword' => $search,
+                'searches' => ['customer', 'company', 'address', 'purpose', 'sales_name', 'sales_email', 'province', 'regency']
+            ]);
         }
 
-        // Fallback kalau pakai 'search' sebagai parameter name
-        if ($request->filled('search') && !$request->filled('q')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('customer_name', 'ILIKE', "%{$search}%")
-                  ->orWhere('company_name', 'ILIKE', "%{$search}%")
-                  ->orWhere('address', 'ILIKE', "%{$search}%")
-                  ->orWhere('visit_purpose', 'ILIKE', "%{$search}%");
-            });
-            \Log::info('Search applied (fallback)', ['search' => $search]);
-        }
-
-        // ✅ FILTER by Sales
-        if ($request->filled('salesvisittable_sales_filter')) {
-            $query->where('sales_id', $request->salesvisittable_sales_filter);
-            \Log::info('Sales filter applied', ['sales_id' => $request->salesvisittable_sales_filter]);
-        }
-
-        // ✅ FILTER by Province
-        if ($request->filled('salesvisittable_province_filter')) {
-            $query->where('province_id', $request->salesvisittable_province_filter);
-            \Log::info('Province filter applied', ['province_id' => $request->salesvisittable_province_filter]);
-        }
+        // ✅ DEBUG: Log SQL query
+        $sql = $query->toSql();
+        $bindings = $query->getBindings();
+        \Log::info('📊 Final Query', [
+            'sql' => $sql,
+            'bindings' => $bindings
+        ]);
 
         // Sort
         $query->orderBy('visit_date', 'desc')->orderBy('created_at', 'desc');
@@ -156,11 +188,13 @@ public function getSalesUsers()
         // Paginate
         $salesVisits = $query->paginate(10);
 
-        \Log::info('Visits found', ['count' => $salesVisits->count(), 'total' => $salesVisits->total()]);
+        \Log::info('📊 Results', [
+            'count' => $salesVisits->count(), 
+            'total' => $salesVisits->total()
+        ]);
 
-        // ✅ Format response
+        // Format response
         $items = $salesVisits->map(function($visit, $index) use ($salesVisits) {
-            // Format location
             $alamatWilayah = collect([
                 optional($visit->village)->name,
                 optional($visit->district)->name,
@@ -200,33 +234,40 @@ public function getSalesUsers()
             ];
         })->toArray();
 
-        \Log::info('Response prepared successfully', ['items_count' => count($items)]);
-
         return response()->json([
+            'success' => true,
             'items' => $items,
             'pagination' => [
                 'current_page' => $salesVisits->currentPage(),
                 'last_page' => $salesVisits->lastPage(),
                 'from' => $salesVisits->firstItem(),
                 'to' => $salesVisits->lastItem(),
-                'total' => $salesVisits->total()
+                'total' => $salesVisits->total(),
+                'per_page' => $salesVisits->perPage()
+            ],
+            'debug' => [
+                'database' => 'PostgreSQL',
+                'search_includes' => ['customer', 'company', 'address', 'purpose', 'sales_name', 'sales_email', 'location'],
+                'has_search' => $request->filled('q'),
+                'search_term' => $request->q,
+                'total_in_db' => SalesVisit::count()
             ]
         ]);
 
     } catch (\Exception $e) {
-        \Log::error('SalesVisit Search Error: ' . $e->getMessage());
+        \Log::error('❌ SalesVisit Search Error: ' . $e->getMessage());
         \Log::error('Stack trace: ' . $e->getTraceAsString());
         
         return response()->json([
+            'success' => false,
             'error' => 'Server error',
             'message' => $e->getMessage()
         ], 500);
     }
 }
-    /**
-     * Store a newly created sales visit
-     * 🔥 FIXED: Sesuaikan validation dengan name attribute di form
-     */
+
+
+
     public function store(Request $request)
 {
     // Debug: lihat data yang masuk
