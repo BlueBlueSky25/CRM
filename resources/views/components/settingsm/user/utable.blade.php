@@ -1,17 +1,5 @@
 <!-- User Management Table -->
 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden" style="margin: 0;">
-    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-        <div>
-            <h3 class="text-lg font-semibold text-gray-900">User Management</h3>
-            <p class="text-sm text-gray-600 mt-1">Manage users and their access privileges</p>
-        </div>
-        @if(auth()->user()->canAccess($currentMenuId, 'create'))
-        <button onclick="openUserModal()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center space-x-2">
-            <i class="fas fa-plus"></i>
-            <span>Add New User</span>
-        </button>
-        @endif
-    </div>
 
     <!-- Notifikasi -->
     @if(session('success'))
