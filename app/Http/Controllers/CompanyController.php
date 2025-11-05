@@ -10,57 +10,53 @@ use Illuminate\Support\Facades\Auth;
 
 class CompanyController extends Controller
 {
-    public function index()
-    {
-        $user = Auth::user();
+   public function index()
+{
+    $user = Auth::user();
 
-        // base query dengan relasi
-        $companiesQuery = Company::with('companyType', 'user');
+    // base query dengan relasi
+    $companiesQuery = Company::with('companyType', 'user');
 
-        // 🔹 SUPERADMIN (role_id = 1) → lihat semua data
-        if ($user->role_id == 1) {
-            // tanpa filter apa pun
-        }
-
-        // 🔹 ADMIN (role_id = 7) & MARKETING (role_id = 11)
-        //     → lihat semua data milik SALES (role_id = 12)
-        elseif (in_array($user->role_id, [7, 11])) {
-            $companiesQuery->whereHas('user', function ($q) {
-                $q->where('role_id', 12); // hanya user sales
-            });
-        }
-
-        // 🔹 SALES (role_id = 12) → hanya data milik sendiri
-        elseif ($user->role_id == 12) {
-            $companiesQuery->where('user_id', $user->user_id);
-        }
-
-        // kalau role lain (misalnya belum dikategorikan)
-        else {
-            $companiesQuery->whereNull('company_id'); // tampil kosong aja
-        }
-
-        // ambil data final
-        $companies = $companiesQuery->paginate(10);
-
-        // dropdown company type aktif
-        $types = CompanyType::where('is_active', true)->get();
-
-        // KPI Company (berdasarkan query filter di atas)
-        $totalCompanies   = $companiesQuery->count();
-        $jenisCompanies   = $companiesQuery->distinct('company_type_id')->count('company_type_id');
-        $tierCompanies    = $companiesQuery->distinct('tier')->count('tier');
-        $activeCompanies  = (clone $companiesQuery)->where('status', 'active')->count();
-
-        return view('pages.company', compact(
-            'companies',
-            'types',
-            'totalCompanies',
-            'jenisCompanies',
-            'tierCompanies',
-            'activeCompanies'
-        ));
+    // 🔹 SUPERADMIN (role_id = 1) → lihat semua data
+    if ($user->role_id == 1) {
+        // tanpa filter apa pun
     }
+    // 🔹 ADMIN (role_id = 7) & MARKETING (role_id = 11)
+    elseif (in_array($user->role_id, [7, 11])) {
+        $companiesQuery->whereHas('user', function ($q) {
+            $q->where('role_id', 12); // hanya user sales
+        });
+    }
+    // 🔹 SALES (role_id = 12) → hanya data milik sendiri
+    elseif ($user->role_id == 12) {
+        $companiesQuery->where('user_id', $user->user_id);
+    }
+    // kalau role lain
+    else {
+        $companiesQuery->whereNull('company_id'); // tampil kosong aja
+    }
+
+    // 🔴 FIX: Hitung KPI SEBELUM pagination
+    $totalCompanies   = (clone $companiesQuery)->count();
+    $jenisCompanies   = (clone $companiesQuery)->distinct('company_type_id')->count('company_type_id');
+    $tierCompanies    = (clone $companiesQuery)->distinct('tier')->count('tier');
+    $activeCompanies  = (clone $companiesQuery)->where('status', 'active')->count();
+
+    // 🟢 SEKARANG baru paginate untuk table
+    $companies = $companiesQuery->paginate(10);
+
+    // dropdown company type aktif
+    $types = CompanyType::where('is_active', true)->get();
+
+    return view('pages.company', compact(
+        'companies',
+        'types',
+        'totalCompanies',
+        'jenisCompanies',
+        'tierCompanies',
+        'activeCompanies'
+    ));
+}
 
 
     public function search(Request $request)
