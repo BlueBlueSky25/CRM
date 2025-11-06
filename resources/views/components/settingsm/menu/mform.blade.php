@@ -1,96 +1,212 @@
 <!-- Add Menu Modal -->
 <div id="addMenuModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden animate-modal-in">
-        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[95vh] overflow-hidden animate-fadeIn">
+        <!-- Modal Header -->
+        <div class="px-6 py-4 border-b border-gray-200" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #3b82f6 100%);">
             <div class="flex justify-between items-center">
-                <h3 class="text-xl font-semibold text-white">Add New Menu</h3>
-                <button onclick="closeAddMenuModal()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
-                    <i class="fas fa-times text-lg"></i>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-bars text-white text-lg"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-white">Tambah Menu</h3>
+                </div>
+                <button onclick="closeAddMenuModal()" class="text-white hover:text-gray-200 transition-colors p-2">
+                    <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
         </div>
 
-        <div class="overflow-y-auto max-h-[calc(90vh-140px)] p-6">
-            <form id="addMenuForm" action="{{ route('menus.store') }}" method="POST" class="space-y-4">
-                @csrf
-                
-                <div class="space-y-4">
-                    <div>
-                        <label for="addMenuName" class="block text-sm font-medium text-gray-700 mb-1">Menu Name <span class="text-red-500">*</span></label>
-                        <input type="text" id="addMenuName" name="nama_menu" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" placeholder="Enter menu name" required>
-                    </div>
+        <!-- Modal Body -->
+        <form id="addMenuForm" action="{{ route('menus.store') }}" method="POST" class="overflow-y-auto max-h-[calc(95vh-140px)]">
+            @csrf
+            
+            <div class="px-4 py-4 space-y-4">
+                <!-- Menu Information -->
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                        <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                        Informasi Menu
+                    </h4>
                     
-                    <div>
-                        <label for="addMenuRoute" class="block text-sm font-medium text-gray-700 mb-1">Route</label>
-                        <input type="text" id="addMenuRoute" name="route" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" placeholder="e.g., users.index">
-                    </div>
-
-                    <div>
-                        <label for="addMenuOrder" class="block text-sm font-medium text-gray-700 mb-1">Order</label>
-                        <input type="number" id="addMenuOrder" name="order" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" placeholder="Order Number">
-                    </div>
-
-                    <div>
-                        <label for="addMenuIcon" class="block text-sm font-medium text-gray-700 mb-1">Icon</label>
-                        <div class="relative">
-                            <input type="text" id="addMenuIcon" name="icon" class="w-full border border-gray-300 rounded-lg pl-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" placeholder="e.g., fas fa-users">
-                            <div class="absolute right-3 top-2.5">
-                                <i id="addIconPreview" class="text-gray-400"></i>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- Menu Name -->
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                Nama Menu <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-tag text-gray-400 text-xs"></i>
+                                </div>
+                                <input type="text" id="addMenuName" name="nama_menu"
+                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                    placeholder="Masukkan nama menu" required>
                             </div>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">Use FontAwesome classes (e.g., fas fa-users)</p>
+
+                        <!-- Route -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                Route
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-route text-gray-400 text-xs"></i>
+                                </div>
+                                <input type="text" id="addMenuRoute" name="route"
+                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                    placeholder="e.g., users.index">
+                            </div>
+                        </div>
+
+                        <!-- Order -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                Order
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-sort-numeric-down text-gray-400 text-xs"></i>
+                                </div>
+                                <input type="number" id="addMenuOrder" name="order"
+                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                    placeholder="Urutan menu">
+                            </div>
+                        </div>
+
+                        <!-- Icon -->
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                Icon
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-icons text-gray-400 text-xs"></i>
+                                </div>
+                                <input type="text" id="addMenuIcon" name="icon"
+                                    class="w-full pl-9 pr-12 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                    placeholder="e.g., fas fa-users">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                    <i id="addIconPreview" class="text-gray-400 text-sm"></i>
+                                </div>
+                            </div>
+                            <div class="mt-2 p-2 bg-blue-50 rounded border border-blue-200">
+                                <p class="text-xs text-blue-800 flex items-start">
+                                    <i class="fas fa-info-circle mr-2 mt-0.5"></i>
+                                    <span>Gunakan class FontAwesome (contoh: <code class="bg-blue-100 px-1 rounded">fas fa-users</code>)</span>
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
-                    <button type="button" onclick="closeAddMenuModal()" class="px-6 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">Cancel</button>
-                    <button type="submit" class="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 font-medium shadow-md hover:shadow-lg">Add Menu</button>
-                </div>
-            </form>
-        </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+                <button type="button" onclick="closeAddMenuModal()" 
+                    class="px-4 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2">
+                    <i class="fas fa-times"></i>
+                    Batal
+                </button>
+                <button type="submit" 
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-lg shadow-blue-500/30">
+                    <i class="fas fa-save"></i>
+                    Simpan
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
+<!-- Styles -->
+<style>
+@keyframes fadeIn { 
+    from { 
+        opacity: 0; 
+        transform: scale(0.95) translateY(-10px); 
+    } 
+    to { 
+        opacity: 1; 
+        transform: scale(1) translateY(0); 
+    } 
+}
+
+.animate-fadeIn { 
+    animation: fadeIn 0.3s ease-out; 
+}
+
+/* Custom scrollbar */
+.overflow-y-auto::-webkit-scrollbar {
+    width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Smooth transitions */
+input:focus, select:focus, textarea:focus {
+    outline: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .grid-cols-2 {
+        grid-template-columns: 1fr !important;
+    }
+}
+</style>
+
 <script>
-    function openMenuModal() {
-        document.getElementById('addMenuModal').classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
+function openMenuModal() {
+    document.getElementById('addMenuModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeAddMenuModal() {
+    document.getElementById('addMenuModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    document.getElementById('addMenuForm').reset();
+    document.getElementById('addIconPreview').className = 'text-gray-400 text-sm';
+}
+
+// Icon preview untuk add modal
+document.addEventListener('DOMContentLoaded', function() {
+    const addIconInput = document.getElementById('addMenuIcon');
+    if (addIconInput) {
+        addIconInput.addEventListener('input', function(e) {
+            const iconPreview = document.getElementById('addIconPreview');
+            const iconValue = e.target.value.trim();
+            iconPreview.className = iconValue ? `${iconValue} text-sm` : 'text-gray-400 text-sm';
+        });
     }
+});
 
-    function closeAddMenuModal() {
-        document.getElementById('addMenuModal').classList.add('hidden');
-        document.body.style.overflow = 'auto';
-        document.getElementById('addMenuForm').reset();
-        document.getElementById('addIconPreview').className = 'text-gray-400';
+// Close modal when clicking outside
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('addMenuModal');
+    if (e.target === modal) {
+        closeAddMenuModal();
     }
+});
 
-    // Icon preview untuk add modal
-    document.addEventListener('DOMContentLoaded', function() {
-        const addIconInput = document.getElementById('addMenuIcon');
-        if (addIconInput) {
-            addIconInput.addEventListener('input', function(e) {
-                const iconPreview = document.getElementById('addIconPreview');
-                const iconValue = e.target.value.trim();
-                iconPreview.className = iconValue || 'text-gray-400';
-            });
-        }
-    });
-
-    // Close modal when clicking outside
-    document.addEventListener('click', function(e) {
+// Close modal with ESC key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
         const modal = document.getElementById('addMenuModal');
-        if (e.target === modal) {
+        if (modal && !modal.classList.contains('hidden')) {
             closeAddMenuModal();
         }
-    });
-
-    // Close modal with ESC key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            const modal = document.getElementById('addMenuModal');
-            if (modal && !modal.classList.contains('hidden')) {
-                closeAddMenuModal();
-            }
-        }
-    });
+    }
+});
 </script>

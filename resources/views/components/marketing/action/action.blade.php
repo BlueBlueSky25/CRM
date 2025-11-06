@@ -1,12 +1,12 @@
 <!-- Modal Add Sales -->
 <div id="addSalesModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-modal-in">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden animate-modal-in">
         <!-- Header -->
-        <div style="background: linear-gradient(to right, #4f46e5, #7c3aed); padding: 1.25rem 1.5rem;">
+        <div style="background: linear-gradient(to right, #4f46e5, #7c3aed); padding: 1rem 1.25rem;">
             <div class="flex justify-between items-center">
                 <div>
-                    <h3 class="text-xl font-semibold text-white">Tambah Marketing Baru</h3>
-                    <p class="text-sm text-indigo-100 mt-1">Lengkapi formulir berikut untuk menambahkan marketing</p>
+                    <h3 class="text-lg font-semibold text-white">Tambah Marketing Baru</h3>
+                    <p class="text-xs text-indigo-100 mt-0.5">Lengkapi formulir berikut untuk menambahkan marketing</p>
                 </div>
                 <button onclick="closeAddSalesModal()" 
                     class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
@@ -16,143 +16,173 @@
         </div>
 
         <!-- Body -->
-        <div class="overflow-y-auto max-h-[calc(90vh-140px)]" style="background-color: #f3f4f6; padding: 1.5rem;">
-            <form id="addSalesForm" action="{{ route('marketing.sales.store') }}" method="POST" style="display: flex; flex-direction: column; gap: 1rem;">
+        <div class="overflow-y-auto max-h-[calc(90vh-120px)]" style="background-color: #f3f4f6; padding: 1rem;">
+            <form id="addSalesForm" action="{{ route('marketing.sales.store') }}" method="POST" style="display: flex; flex-direction: column; gap: 0.75rem;">
                 @csrf
                 
-                <!-- Nama -->
-                <div>
-                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
-                        Nama Lengkap <span style="color: #ef4444;">*</span>
-                    </label>
-                    <div style="position: relative;">
-                        <i class="fas fa-user" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
-                        <input type="text" 
-                            name="username" 
-                            style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem 1rem 0.75rem 2.5rem; font-size: 0.875rem;" 
-                            required>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+                    <!-- Nama -->
+                    <div>
+                        <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
+                            Nama Lengkap <span style="color: #ef4444;">*</span>
+                        </label>
+                        <div style="position: relative;">
+                            <i class="fas fa-user" style="position: absolute; left: 0.625rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.75rem;"></i>
+                            <input type="text" 
+                                name="username" 
+                                style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem 0.5rem 2rem; font-size: 0.875rem;" 
+                                placeholder="Masukkan nama lengkap"
+                                required>
+                        </div>
                     </div>
-                </div>
-                
-                <!-- Email -->
-                <div>
-                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
-                        Email <span style="color: #ef4444;">*</span>
-                    </label>
-                    <div style="position: relative;">
-                        <i class="fas fa-envelope" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
-                        <input type="email" 
-                            name="email" 
-                            style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem 1rem 0.75rem 2.5rem; font-size: 0.875rem;" 
-                            required>
+                    
+                    <!-- Email -->
+                    <div>
+                        <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
+                            Email <span style="color: #ef4444;">*</span>
+                        </label>
+                        <div style="position: relative;">
+                            <i class="fas fa-envelope" style="position: absolute; left: 0.625rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.75rem;"></i>
+                            <input type="email" 
+                                name="email" 
+                                style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem 0.5rem 2rem; font-size: 0.875rem;" 
+                                placeholder="email@example.com"
+                                required>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Phone -->
-                <div>
-                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
-                        No. Telepon
-                    </label>
-                    <div style="position: relative;">
-                        <i class="fas fa-phone" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
-                        <input type="text" 
-                            name="phone" 
-                            style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem 1rem 0.75rem 2.5rem; font-size: 0.875rem;">
+                    <!-- Phone -->
+                    <div>
+                        <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
+                            No. Telepon
+                        </label>
+                        <div style="position: relative;">
+                            <i class="fas fa-phone" style="position: absolute; left: 0.625rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.75rem;"></i>
+                            <input type="text" 
+                                name="phone" 
+                                style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem 0.5rem 2rem; font-size: 0.875rem;"
+                                placeholder="08xxxxxxxxxx">
+                        </div>
                     </div>
-                </div>
 
-                <!-- Birth Date -->
-                <div>
-                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
-                        Tanggal Lahir
-                    </label>
-                    <div style="position: relative;">
-                        <i class="fas fa-calendar" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
-                        <input type="date" 
-                            name="birth_date" 
-                            style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem 1rem 0.75rem 2.5rem; font-size: 0.875rem;"
-                            max="{{ date('Y-m-d') }}">
+                    <!-- Birth Date -->
+                    <div>
+                        <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
+                            Tanggal Lahir
+                        </label>
+                        <div style="position: relative;">
+                            <i class="fas fa-calendar" style="position: absolute; left: 0.625rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.75rem;"></i>
+                            <input type="date" 
+                                name="birth_date" 
+                                style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem 0.5rem 2rem; font-size: 0.875rem;"
+                                max="{{ date('Y-m-d') }}">
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div style="grid-column: span 2;">
+                        <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
+                            Password <span style="color: #ef4444;">*</span>
+                        </label>
+                        <div style="position: relative;">
+                            <i class="fas fa-lock" style="position: absolute; left: 0.625rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.75rem;"></i>
+                            <input type="password" 
+                                name="password" 
+                                style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem 0.5rem 2rem; font-size: 0.875rem;" 
+                                placeholder="Minimal 6 karakter"
+                                required>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Address Section -->
-                <div class="mb-6">
-                    <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                        <i class="fas fa-map-marker-alt text-indigo-500 mr-2"></i>
-                        Address Information
+                <div style="background: linear-gradient(to bottom right, #eff6ff, #e0e7ff); border: 1px solid #c7d2fe; border-radius: 0.5rem; padding: 0.75rem;">
+                    <h4 style="font-size: 0.875rem; font-weight: 600; color: #1f2937; margin-bottom: 0.75rem; display: flex; align-items: center;">
+                        <i class="fas fa-map-marker-alt" style="color: #6366f1; margin-right: 0.5rem; font-size: 0.875rem;"></i>
+                        Informasi Alamat
                     </h4>
                     
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Provinsi <span class="text-red-500">*</span></label>
-                        <select id="create-province" name="province_id" class="cascade-province w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                            <option value="">-- Pilih Provinsi --</option>
-                            @foreach($provinces as $province)
-                                <option value="{{ $province->id }}">{{ $province->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Kabupaten/Kota -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Kabupaten/Kota <span class="text-red-500">*</span></label>
-                        <select id="create-regency" name="regency_id" class="cascade-regency w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                            <option value="">-- Pilih Kabupaten/Kota --</option>
-                        </select>
-                    </div>
-
-                    <!-- Kecamatan -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Kecamatan <span class="text-red-500">*</span></label>
-                        <select id="create-district" name="district_id" class="cascade-district w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                            <option value="">-- Pilih Kecamatan --</option>
-                        </select>
-                    </div>
-
-                    <!-- Kelurahan/Desa -->
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Kelurahan/Desa <span class="text-red-500">*</span></label>
-                        <select id="create-village" name="village_id" class="cascade-village w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                            <option value="">-- Pilih Kelurahan/Desa --</option>
-                        </select>
-                    </div>
-        
-
-                    <!-- Detail Alamat (full width) -->
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Detail Alamat</label>
-                        <div class="relative">
-                            <i class="fas fa-home absolute left-3 top-3 text-gray-400"></i>
-                            <textarea id="address" name="address" rows="3" placeholder="Contoh: Jl. Merdeka No. 123, RT 01/RW 02" 
-                                    class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"></textarea>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+                        <!-- Provinsi -->
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
+                                Provinsi <span style="color: #ef4444;">*</span>
+                            </label>
+                            <select id="create-province" name="province_id" 
+                                    class="cascade-province" 
+                                    style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;" 
+                                    required>
+                                <option value="">-- Pilih Provinsi --</option>
+                                @foreach($provinces as $province)
+                                    <option value="{{ $province->id }}">{{ $province->name }}</option>
+                                @endforeach
+                            </select>
                         </div>
-                        <small class="text-gray-500">Isi dengan detail alamat seperti nama jalan, nomor rumah, RT/RW</small>
-                    </div>
-                </div>
 
-                <!-- Password -->
-                <div>
-                    <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">
-                        Password <span style="color: #ef4444;">*</span>
-                    </label>
-                    <div style="position: relative;">
-                        <i class="fas fa-lock" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
-                        <input type="password" 
-                            name="password" 
-                            style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem 1rem 0.75rem 2.5rem; font-size: 0.875rem;" 
-                            required>
+                        <!-- Kabupaten/Kota -->
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
+                                Kabupaten/Kota <span style="color: #ef4444;">*</span>
+                            </label>
+                            <select id="create-regency" name="regency_id" 
+                                    class="cascade-regency" 
+                                    style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;" 
+                                    required disabled>
+                                <option value="">-- Pilih Kabupaten/Kota --</option>
+                            </select>
+                        </div>
+
+                        <!-- Kecamatan -->
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
+                                Kecamatan <span style="color: #ef4444;">*</span>
+                            </label>
+                            <select id="create-district" name="district_id" 
+                                    class="cascade-district" 
+                                    style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;" 
+                                    required disabled>
+                                <option value="">-- Pilih Kecamatan --</option>
+                            </select>
+                        </div>
+
+                        <!-- Kelurahan/Desa -->
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
+                                Kelurahan/Desa <span style="color: #ef4444;">*</span>
+                            </label>
+                            <select id="create-village" name="village_id" 
+                                    class="cascade-village" 
+                                    style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;" 
+                                    required disabled>
+                                <option value="">-- Pilih Kelurahan/Desa --</option>
+                            </select>
+                        </div>
+
+                        <!-- Detail Alamat (full width) -->
+                        <div style="grid-column: span 2;">
+                            <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
+                                Detail Alamat
+                            </label>
+                            <div style="position: relative;">
+                                <i class="fas fa-home" style="position: absolute; left: 0.625rem; top: 0.625rem; color: #9ca3af; font-size: 0.75rem;"></i>
+                                <textarea id="address" name="address" rows="2" 
+                                        placeholder="Contoh: Jl. Merdeka No. 123, RT 01/RW 02" 
+                                        style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem 0.5rem 2rem; font-size: 0.875rem; resize: none;"></textarea>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- Tombol -->
-                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; margin-top: 1.5rem;">
+                <div style="display: flex; justify-content: flex-end; gap: 0.5rem; padding-top: 0.75rem; border-top: 1px solid #e5e7eb; margin-top: 0.5rem;">
                     <button type="button" 
                             onclick="closeAddSalesModal()" 
-                            style="background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.625rem 1.5rem; font-weight: 500; font-size: 0.875rem; cursor: pointer; transition: all 0.2s;">
+                            style="background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 1.25rem; font-weight: 500; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;">
                         Batal
                     </button>
                     <button type="submit" 
-                            style="background-color: #4f46e5; color: white; border: none; border-radius: 0.5rem; padding: 0.625rem 1.5rem; font-weight: 500; font-size: 0.875rem; cursor: pointer; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); transition: all 0.2s;">
-                        <i class="fas fa-save" style="margin-right: 0.5rem;"></i>
+                            style="background-color: #4f46e5; color: white; border: none; border-radius: 0.5rem; padding: 0.5rem 1.25rem; font-weight: 500; font-size: 0.75rem; cursor: pointer; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); transition: all 0.2s;">
+                        <i class="fas fa-save" style="margin-right: 0.375rem;"></i>
                         Simpan Data
                     </button>
                 </div>
@@ -160,8 +190,6 @@
         </div>
     </div>
 </div>
-
-
 
 <style>
     .bg-gradient-to-r {
@@ -175,7 +203,7 @@
     @keyframes modal-in {
         from {
             opacity: 0;
-            transform: scale(0.9) translateY(-20px);
+            transform: scale(0.95) translateY(-20px);
         }
         to {
             opacity: 1;
@@ -213,7 +241,7 @@
 
     /* Responsive adjustments */
     @media (max-width: 640px) {
-        #salesModal .bg-white {
+        #addSalesModal .bg-white {
             margin: 1rem;
             max-width: calc(100% - 2rem);
         }
@@ -246,29 +274,30 @@
     }
 
     /* Enhanced focus states */
-    input:focus, textarea:focus {
+    input:focus, textarea:focus, select:focus {
         outline: none;
         border-color: #3b82f6;
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
-    /* Icon styling */
-    .fa-user, .fa-envelope, .fa-phone, .fa-lock, .fa-calendar, .fa-map-marker-alt {
-        font-size: 14px;
-    }
-
     /* Form validation styling */
     .error {
-        border-color: #ef4444;
+        border-color: #ef4444 !important;
     }
 
     .error:focus {
-        border-color: #ef4444;
-        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        border-color: #ef4444 !important;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
     }
 
     .success {
         border-color: #10b981;
+    }
+
+    select:disabled {
+        background-color: #f3f4f6;
+        cursor: not-allowed;
+        opacity: 0.6;
     }
 </style>
 
@@ -276,9 +305,8 @@
 // Modal Functions untuk Add Sales Modal
 function openAddSalesModal() {
     document.getElementById('addSalesModal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
     
-    // Focus on first input after animation
     setTimeout(() => {
         const firstInput = document.querySelector('#addSalesModal input[name="username"]');
         if (firstInput) firstInput.focus();
@@ -287,27 +315,10 @@ function openAddSalesModal() {
 
 function closeAddSalesModal() {
     document.getElementById('addSalesModal').classList.add('hidden');
-    document.body.style.overflow = 'auto'; // Restore scrolling
+    document.body.style.overflow = 'auto';
     
-    // Reset form
     document.querySelector('#addSalesModal form').reset();
     clearValidation();
-}
-
-// Password visibility toggle
-function togglePassword(fieldId) {
-    const field = document.getElementById(fieldId);
-    const toggle = document.getElementById(fieldId + '-toggle');
-    
-    if (field.type === 'password') {
-        field.type = 'text';
-        toggle.classList.remove('fa-eye');
-        toggle.classList.add('fa-eye-slash');
-    } else {
-        field.type = 'password';
-        toggle.classList.remove('fa-eye-slash');
-        toggle.classList.add('fa-eye');
-    }
 }
 
 // Form validation
@@ -347,15 +358,16 @@ function showFieldError(field, message) {
     field.classList.add('error');
     field.classList.remove('success');
     
-    // Remove existing error message
     const existingError = field.parentNode.querySelector('.error-message');
     if (existingError) {
         existingError.remove();
     }
     
-    // Add error message
     const errorDiv = document.createElement('div');
-    errorDiv.className = 'error-message text-red-500 text-xs mt-1';
+    errorDiv.className = 'error-message';
+    errorDiv.style.color = '#ef4444';
+    errorDiv.style.fontSize = '0.75rem';
+    errorDiv.style.marginTop = '0.25rem';
     errorDiv.textContent = message;
     field.parentNode.appendChild(errorDiv);
 }
@@ -391,51 +403,12 @@ document.querySelector('#addSalesModal form').addEventListener('submit', functio
     const submitBtn = this.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
     
-    // Show loading state
     submitBtn.classList.add('btn-loading');
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 0.375rem;"></i>Menyimpan...';
     submitBtn.disabled = true;
     
-    // Submit form
     this.submit();
 });
-
-// Notification system
-function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 z-[60] p-4 rounded-lg shadow-lg text-white transform transition-all duration-300 translate-x-full`;
-    
-    const bgColor = {
-        success: 'bg-green-500',
-        error: 'bg-red-500',
-        info: 'bg-blue-500'
-    };
-    
-    notification.classList.add(bgColor[type]);
-    notification.innerHTML = `
-        <div class="flex items-center gap-2">
-            <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : 'info'}-circle"></i>
-            <span>${message}</span>
-        </div>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // Animate in
-    setTimeout(() => {
-        notification.classList.remove('translate-x-full');
-    }, 100);
-    
-    // Auto remove
-    setTimeout(() => {
-        notification.classList.add('translate-x-full');
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 300);
-    }, 3000);
-}
 
 // Close modal on ESC key
 document.addEventListener('keydown', function(e) {

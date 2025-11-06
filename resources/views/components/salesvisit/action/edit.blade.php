@@ -1,4 +1,4 @@
-@props(['currentMenuId'])
+{{-- @props(['currentMenuId'])
 
 <!-- EDIT SALES VISIT MODAL -->
 <div id="editVisitModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -174,4 +174,4 @@
 .animate-modal-in { 
     animation: modalSlideIn 0.25s ease-out; 
 }
-</style>
+</style> --}}

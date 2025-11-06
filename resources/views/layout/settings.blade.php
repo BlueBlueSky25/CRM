@@ -34,8 +34,6 @@
         @yield('content')
     </main>
 
-    <!-- Footer -->
-    <x-settingsm.footer />
         <script>
         window.rolePermissions = @json($rolePermissions ?? []);
         </script>
