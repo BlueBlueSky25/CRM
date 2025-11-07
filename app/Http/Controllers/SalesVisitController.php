@@ -8,6 +8,7 @@ use App\Models\Province;
 use App\Models\Regency;
 use App\Models\District;
 use App\Models\Village;
+use App\Models\CompanyType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -16,14 +17,12 @@ use Illuminate\Support\Facades\Response;
 class SalesVisitController extends Controller
 {
 
-   // Di SalesVisitController.php
-
 public function index(Request $request)
 {
     $user = Auth::user();
 
     // Base query dengan relasi
-    $visitsQuery = SalesVisit::with(['sales', 'province', 'regency', 'district', 'village']);
+    $visitsQuery = SalesVisit::with(['sales', 'company', 'province', 'regency', 'district', 'village']);
 
     // Role-based filtering
     if ($user->role_id == 1) {
@@ -42,19 +41,18 @@ public function index(Request $request)
         ->orderBy('created_at', 'desc')
         ->paginate(10);
 
-    // ✅ PERBAIKAN: Kembalikan dengan format yang KONSISTEN untuk filter component
+    // Sales Users
     $salesUsers = User::where('role_id', 12)
         ->select('user_id', 'username', 'email')
         ->orderBy('username')
         ->get()
         ->map(function($user) {
-            // Component filter butuh 'id' dan 'name'
             return (object)[
-                'id' => $user->user_id,  // Untuk value filter
-                'name' => $user->username . ' - ' . $user->email,  // Untuk display
-                'user_id' => $user->user_id,  // Keep original
-                'username' => $user->username,  // Keep original
-                'email' => $user->email  // Keep original
+                'id' => $user->user_id,
+                'name' => $user->username . ' - ' . $user->email,
+                'user_id' => $user->user_id,
+                'username' => $user->username,
+                'email' => $user->email
             ];
         });
 
@@ -62,6 +60,9 @@ public function index(Request $request)
     $provinces = Province::select('id', 'name')
         ->orderBy('name')
         ->get();
+
+    // 🔥 PASTIKAN INI: Company Types
+    $types = CompanyType::where('is_active', true)->get();
 
     // KPI
     $totalVisits = (clone $visitsQuery)->count();
@@ -73,6 +74,7 @@ public function index(Request $request)
         'salesVisits',
         'salesUsers',
         'provinces',
+        'types', // 🔥 PASTIKAN INI ADA
         'totalVisits',
         'followUpVisits',
         'uniqueCustomers',
@@ -81,9 +83,12 @@ public function index(Request $request)
 }
     
 
+
+
+
 public function getSalesUsers()
 {
-    $salesUsers = User::where('role_id', 12) // 12 = sales role
+    $salesUsers = User::where('role_id', 12)
         ->select('user_id', 'username', 'email')
         ->orderBy('username')
         ->get();
@@ -106,8 +111,8 @@ public function getSalesUsers()
 
         $user = Auth::user();
 
-        // Base query dengan eager loading
-        $query = SalesVisit::with(['sales', 'province', 'regency', 'district', 'village']);
+        // Base query dengan eager loading (tambahkan 'company')
+        $query = SalesVisit::with(['sales', 'company', 'province', 'regency', 'district', 'village']);
 
         // Role-based filtering
         if ($user->role_id == 1) {
@@ -125,62 +130,54 @@ public function getSalesUsers()
             \Log::info('⛔ No access');
         }
 
-        // ✅ FILTER by Sales - SEBELUM search
+        // Filter by Sales
         if ($request->filled('sales') && $request->sales !== '' && $request->sales !== 'all') {
             $salesId = $request->sales;
             $query->where('sales_id', $salesId);
             \Log::info('✅ Sales filter applied', ['sales_id' => $salesId]);
         }
 
-        // ✅ FILTER by Province - SEBELUM search
+        // Filter by Province
         if ($request->filled('province') && $request->province !== '' && $request->province !== 'all') {
             $provinceId = $request->province;
             $query->where('province_id', $provinceId);
             \Log::info('✅ Province filter applied', ['province_id' => $provinceId]);
         }
 
-        // ✅ SEARCH - INCLUDE SALES NAME! (PostgreSQL Compatible)
+        // SEARCH - Include company name
         if ($request->filled('q') && trim($request->q) !== '') {
             $search = trim($request->q);
             $searchPattern = "%{$search}%";
             
-            $query->where(function($q) use ($searchPattern, $search) {
-                // Search di sales_visits table
+            $query->where(function($q) use ($searchPattern) {
                 $q->where('customer_name', 'ILIKE', $searchPattern)
-                  ->orWhere('company_name', 'ILIKE', $searchPattern)
                   ->orWhere('address', 'ILIKE', $searchPattern)
                   ->orWhere('visit_purpose', 'ILIKE', $searchPattern)
                   
-                  // ✅ NEW: Search di sales (users) table - username
+                  // Search company name
+                  ->orWhereHas('company', function($cq) use ($searchPattern) {
+                      $cq->where('company_name', 'ILIKE', $searchPattern);
+                  })
+                  
+                  // Search sales name
                   ->orWhereHas('sales', function($sq) use ($searchPattern) {
                       $sq->where('username', 'ILIKE', $searchPattern)
                          ->orWhere('email', 'ILIKE', $searchPattern);
                   })
                   
-                  // ✅ NEW: Search di province table
+                  // Search province
                   ->orWhereHas('province', function($pq) use ($searchPattern) {
                       $pq->where('name', 'ILIKE', $searchPattern);
                   })
                   
-                  // ✅ NEW: Search di regency table
+                  // Search regency
                   ->orWhereHas('regency', function($rq) use ($searchPattern) {
                       $rq->where('name', 'ILIKE', $searchPattern);
                   });
             });
             
-            \Log::info('✅ Search applied with relations', [
-                'keyword' => $search,
-                'searches' => ['customer', 'company', 'address', 'purpose', 'sales_name', 'sales_email', 'province', 'regency']
-            ]);
+            \Log::info('✅ Search applied', ['keyword' => $search]);
         }
-
-        // ✅ DEBUG: Log SQL query
-        $sql = $query->toSql();
-        $bindings = $query->getBindings();
-        \Log::info('📊 Final Query', [
-            'sql' => $sql,
-            'bindings' => $bindings
-        ]);
 
         // Sort
         $query->orderBy('visit_date', 'desc')->orderBy('created_at', 'desc');
@@ -221,7 +218,7 @@ public function getSalesUsers()
                     'email' => optional($visit->sales)->email ?? 'No email'
                 ],
                 'customer' => $visit->customer_name ?? '-',
-                'company' => $visit->company_name ?? '-',
+                'company' => optional($visit->company)->company_name ?? '-',
                 'location' => $locationDisplay,
                 'visit_date' => $visit->visit_date 
                     ? $visit->visit_date->format('d M Y') 
@@ -244,19 +241,11 @@ public function getSalesUsers()
                 'to' => $salesVisits->lastItem(),
                 'total' => $salesVisits->total(),
                 'per_page' => $salesVisits->perPage()
-            ],
-            'debug' => [
-                'database' => 'PostgreSQL',
-                'search_includes' => ['customer', 'company', 'address', 'purpose', 'sales_name', 'sales_email', 'location'],
-                'has_search' => $request->filled('q'),
-                'search_term' => $request->q,
-                'total_in_db' => SalesVisit::count()
             ]
         ]);
 
     } catch (\Exception $e) {
         \Log::error('❌ SalesVisit Search Error: ' . $e->getMessage());
-        \Log::error('Stack trace: ' . $e->getTraceAsString());
         
         return response()->json([
             'success' => false,
@@ -270,13 +259,12 @@ public function getSalesUsers()
 
     public function store(Request $request)
 {
-    // Debug: lihat data yang masuk
     \Log::info('Store Request Data:', $request->all());
     
     $request->validate([
         'sales_id' => 'required|exists:users,user_id',
         'customer_name' => 'required|string|max:255',
-        'company_name' => 'nullable|string|max:255',
+        'company_id' => 'nullable|exists:companies,company_id',
         'province_id' => 'required|exists:provinces,id',
         'regency_id' => 'nullable|exists:regencies,id',
         'district_id' => 'nullable|exists:districts,id',
@@ -309,7 +297,7 @@ public function getSalesUsers()
             'sales_id' => $request->sales_id,
             'user_id' => $user->user_id,
             'customer_name' => $request->customer_name,
-            'company_name' => $request->company_name ?? null,
+            'company_id' => $request->company_id ?? null,
             'province_id' => $request->province_id,
             'regency_id' => $request->regency_id ?? null,
             'district_id' => $request->district_id ?? null,
@@ -329,7 +317,6 @@ public function getSalesUsers()
     } catch (\Exception $e) {
         DB::rollBack();
         \Log::error('Error storing sales visit: ' . $e->getMessage());
-        \Log::error('Error trace: ' . $e->getTraceAsString());
         
         return redirect()->back()
             ->with('error', 'Gagal menambahkan data: ' . $e->getMessage())
@@ -337,16 +324,12 @@ public function getSalesUsers()
     }
 }
 
-    /**
-     * Update the specified sales visit
-     * 🔥 FIXED: Sesuaikan validation dengan name attribute di form
-     */
     public function update(Request $request, $id)
 {
     $request->validate([
         'sales_id' => 'required|exists:users,user_id',
         'customer_name' => 'required|string|max:255',
-        'company_name' => 'nullable|string|max:255',
+        'company_id' => 'nullable|exists:companies,company_id',
         'province_id' => 'required|exists:provinces,id',
         'regency_id' => 'nullable|exists:regencies,id',
         'district_id' => 'nullable|exists:districts,id',
@@ -363,7 +346,6 @@ public function getSalesUsers()
     // Check permission
     $userRoleName = strtolower($user->role->role_name ?? '');
     
-    // Sales hanya boleh edit data miliknya sendiri
     if ($userRoleName === 'sales' && $visit->sales_id !== $user->user_id) {
         return redirect()->back()->with('error', 'Anda tidak boleh mengedit data kunjungan milik sales lain.');
     }
@@ -373,7 +355,7 @@ public function getSalesUsers()
             'sales_id' => $request->sales_id,
             'user_id' => $user->user_id,
             'customer_name' => $request->customer_name,
-            'company_name' => $request->company_name ?? null,
+            'company_id' => $request->company_id ?? null,
             'province_id' => $request->province_id,
             'regency_id' => $request->regency_id ?? null,
             'district_id' => $request->district_id ?? null,
@@ -394,9 +376,6 @@ public function getSalesUsers()
     }
 }
 
-    /**
-     * Remove the specified sales visit
-     */
   public function destroy($id)
 {
     $user = Auth::user();
@@ -411,10 +390,8 @@ public function getSalesUsers()
             ], 404);
         }
 
-        // Check permission
         $userRoleName = strtolower($user->role->role_name ?? '');
         
-        // Sales hanya bisa hapus data miliknya sendiri
         if ($userRoleName === 'sales' && $visit->sales_id !== $user->user_id) {
             return response()->json([
                 'success' => false,
@@ -439,10 +416,6 @@ public function getSalesUsers()
     }
 }
 
-
-
-
-
  public function getProvinces()
     {
         try {
@@ -466,9 +439,6 @@ public function getSalesUsers()
         }
     }
 
-    /**
-     * Get regencies by province ID
-     */
     public function getRegencies($provinceId)
     {
         try {
@@ -496,9 +466,6 @@ public function getSalesUsers()
         }
     }
 
-    /**
-     * Get districts by regency ID
-     */
     public function getDistricts($regencyId)
     {
         try {
@@ -526,9 +493,6 @@ public function getSalesUsers()
         }
     }
 
-    /**
-     * Get villages by district ID
-     */
     public function getVillages($districtId)
     {
         try {
@@ -556,17 +520,10 @@ public function getSalesUsers()
         }
     }
 
-
-
-
-
-    /**
-     * IMPORT from CSV
-     */
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:csv,txt|max:5120', // max 5MB
+            'file' => 'required|mimes:csv,txt|max:5120',
         ]);
 
         try {
@@ -574,7 +531,6 @@ public function getSalesUsers()
             $path = $file->getRealPath();
             $data = array_map('str_getcsv', file($path));
             
-            // Skip header row
             $header = array_shift($data);
             
             $imported = 0;
@@ -583,30 +539,26 @@ public function getSalesUsers()
             DB::beginTransaction();
 
             foreach ($data as $index => $row) {
-                $rowNumber = $index + 2; // +2 karena header di row 1 dan mulai dari row 2
+                $rowNumber = $index + 2;
                 
                 try {
-                    // Validasi minimal data
                     if (count($row) < 8) {
                         $errors[] = "Row $rowNumber: Data tidak lengkap";
                         continue;
                     }
 
-                    // Cari sales by username
                     $sales = User::where('username', trim($row[1]))->first();
                     if (!$sales) {
                         $errors[] = "Row $rowNumber: Sales '{$row[1]}' tidak ditemukan";
                         continue;
                     }
 
-                    // Cari province by name
                     $province = Province::where('name', 'like', '%' . trim($row[4]) . '%')->first();
                     if (!$province) {
                         $errors[] = "Row $rowNumber: Province '{$row[4]}' tidak ditemukan";
                         continue;
                     }
 
-                    // Optional: regency, district, village
                     $regency = null;
                     $district = null;
                     $village = null;
@@ -629,7 +581,6 @@ public function getSalesUsers()
                             ->first();
                     }
 
-                    // Parse date
                     $visitDate = null;
                     if (!empty(trim($row[9]))) {
                         try {
@@ -639,14 +590,13 @@ public function getSalesUsers()
                         }
                     }
 
-                    // Parse follow up
                     $followUp = in_array(strtolower(trim($row[11] ?? '')), ['ya', 'yes', '1', 'true']);
 
                     SalesVisit::create([
                         'sales_id' => $sales->user_id,
                         'user_id' => auth()->id(),
                         'customer_name' => trim($row[2]),
-                        'company_name' => trim($row[3]) ?: null,
+                        'company_id' => null, // Untuk import, company_id null
                         'province_id' => $province->id,
                         'regency_id' => $regency?->id,
                         'district_id' => $district?->id,
@@ -707,7 +657,8 @@ public function getSalesUsers()
                 'id' => $visit->id,
                 'salesId' => $visit->sales_id,
                 'customerName' => $visit->customer_name,
-                'company' => $visit->company_name ?? '',
+                'companyId' => $visit->company_id,
+                'companyName' => optional($visit->company)->company_name ?? '',
                 'provinceId' => $visit->province_id,
                 'regencyId' => $visit->regency_id,
                 'districtId' => $visit->district_id,

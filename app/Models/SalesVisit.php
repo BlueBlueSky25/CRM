@@ -19,6 +19,7 @@ class SalesVisit extends Model
         'user_id',
         'customer_name',
         'company_name',
+        'company_id',
         'province_id',
         'regency_id',
         'district_id',
@@ -36,7 +37,11 @@ class SalesVisit extends Model
         'updated_at' => 'datetime',
     ];
 
-    /** Relasi ke User (Sales) */
+    public function company()
+    {
+    return $this->belongsTo(Company::class, 'company_id', 'company_id');
+    }   
+    
     public function sales()
     {
         return $this->belongsTo(User::class, 'sales_id', 'user_id');

@@ -214,6 +214,117 @@ class CompanyController extends Controller
         return redirect()->route('company')->with('success', 'Perusahaan berhasil dihapus');
     }
 
+    // ==================== NEW METHODS FOR SALESVISIT DROPDOWN ====================
+    
+    /**
+     * Get all companies for dropdown (digunakan di SalesVisit)
+     */
+    public function getCompaniesForDropdown()
+    {
+        try {
+            $user = Auth::user();
+            
+            // Base query
+            $companiesQuery = Company::query();
+            
+            // Role-based filtering (sama seperti index)
+            if ($user->role_id == 1) {
+                // superadmin - all data
+            } elseif (in_array($user->role_id, [7, 11])) {
+                // admin & marketing - hanya company dari sales
+                $companiesQuery->whereHas('user', function ($q) {
+                    $q->where('role_id', 12);
+                });
+            } elseif ($user->role_id == 12) {
+                // sales - hanya milik sendiri
+                $companiesQuery->where('user_id', $user->user_id);
+            } else {
+                $companiesQuery->whereNull('company_id');
+            }
+            
+            $companies = $companiesQuery
+                ->where('status', 'active') // hanya yang aktif
+                ->select('company_id as id', 'company_name as name')
+                ->orderBy('company_name', 'asc')
+                ->get();
+            
+            \Log::info("Fetched companies for dropdown: " . $companies->count());
+            
+            return response()->json([
+                'success' => true,
+                'companies' => $companies
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error("Error fetching companies: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to load companies'
+            ], 500);
+        }
+    }
+
+    /**
+     * Store new company (AJAX - digunakan di SalesVisit modal)
+     */
+    public function storeCompanyAjax(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255|unique:companies,company_name',
+            'company_type_id' => 'nullable|exists:company_type,company_type_id'
+        ]);
+
+        try {
+            $user = Auth::user();
+            
+            // Check permission
+            $allowedRoles = ['superadmin', 'admin', 'marketing', 'sales'];
+            $userRoleName = strtolower($user->role->role_name ?? '');
+            
+            if (!in_array($userRoleName, $allowedRoles)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki izin untuk menambah company'
+                ], 403);
+            }
+
+            // Jika tidak ada company_type_id, gunakan default atau type pertama
+            $companyTypeId = $request->company_type_id;
+            if (!$companyTypeId) {
+                $defaultType = CompanyType::where('is_active', true)->first();
+                $companyTypeId = $defaultType?->company_type_id;
+            }
+
+            $company = Company::create([
+                'company_name' => trim($request->name),
+                'company_type_id' => $companyTypeId,
+                'status' => 'active',
+                'user_id' => $user->user_id,
+                'tier' => $request->tier ?? null,
+                'description' => $request->description ?? null
+            ]);
+
+            \Log::info('Company created via AJAX:', $company->toArray());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Company berhasil ditambahkan!',
+                'company' => [
+                    'id' => $company->company_id,
+                    'name' => $company->company_name
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error storing company via AJAX: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menambahkan company: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     private function getCompanyActions($company)
     {
         $currentMenuId = view()->shared('currentMenuId', null);

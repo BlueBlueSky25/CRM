@@ -48,7 +48,9 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::put('/company/{id}', [CompanyController::class, 'update'])->name('company.update');
     Route::delete('/company/{id}', [CompanyController::class, 'destroy'])->name('company.destroy');
     Route::get('/company/search', [CompanyController::class, 'search'])->name('company.search');
-
+// Company routes untuk SalesVisit dropdown
+Route::get('/company/get-companies-dropdown', [CompanyController::class, 'getCompaniesForDropdown']);
+Route::post('/company/store-company-ajax', [CompanyController::class, 'storeCompanyAjax']);
     
     // ==========================
     // ✅ Customer Management (FIXED)
@@ -93,6 +95,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/salesvisit/export', [SalesVisitController::class, 'export'])->name('salesvisit.export');
     Route::post('/salesvisit/import', [SalesVisitController::class, 'import'])->name('salesvisit.import');
+
+    // Company routes untuk SalesVisit dropdown
+    Route::get('/salesvisit/get-companies', [CompanyController::class, 'getCompaniesForDropdown']);
+    Route::post('/salesvisit/store-company', [CompanyController::class, 'storeCompanyAjax']);
 });
 
 

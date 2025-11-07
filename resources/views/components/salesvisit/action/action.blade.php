@@ -1,4 +1,4 @@
-@props(['currentMenuId', 'salesUsers', 'provinces'])
+@props(['currentMenuId', 'salesUsers', 'provinces', 'types' => []])
 
 <!-- Tambah Kunjungan Modal -->
 <div id="visitModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -20,7 +20,7 @@
         </div>
 
         <!-- Modal Body -->
-        <form action="{{ route('salesvisit.store') }}" method="POST" class="overflow-y-auto max-h-[calc(95vh-140px)]">
+        <form action="{{ route('salesvisit.store') }}" method="POST" class="overflow-y-auto max-h-[calc(95vh-140px)]" id="visitForm">
             @csrf
 
             @php
@@ -83,18 +83,41 @@
                             </div>
                         </div>
 
-                        <!-- Company -->
+                        <!-- Company with Dropdown + Add New -->
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1.5">
                                 Company
                             </label>
                             <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
                                     <i class="fas fa-building text-gray-400 text-xs"></i>
                                 </div>
-                                <input type="text" name="company_name"
-                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                    placeholder="Masukkan nama perusahaan">
+                                
+                                <!-- Hidden input untuk company_id yang akan di-submit -->
+                                <input type="hidden" name="company_id" id="create-company-id">
+                                
+                                <!-- Searchable Input -->
+                                <input type="text" 
+                                    id="create-company-search" 
+                                    placeholder="Ketik atau pilih company..."
+                                    autocomplete="off"
+                                    class="w-full pl-9 pr-20 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                                
+                                <!-- Add New Button -->
+                                <button type="button" 
+                                    onclick="showAddCompanyModal('create')"
+                                    class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600 transition-colors flex items-center gap-1 z-10">
+                                    <i class="fas fa-plus text-[10px]"></i>
+                                    <span>Baru</span>
+                                </button>
+                                
+                                <!-- Dropdown List -->
+                                <div id="create-company-dropdown" 
+                                    class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                    <div id="create-company-options" class="py-1">
+                                        <!-- Options will be populated by JS -->
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -275,379 +298,374 @@
     </div>
 </div>
 
-<!-- EDIT SALES VISIT MODAL -->
-<div id="editVisitModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden animate-fadeIn">
-        
-        <!-- Modal Header -->
-        <div class="px-6 py-4 border-b border-gray-200" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #3b82f6 100%);">
+<!-- Add Company Modal (Full Version) -->
+<div id="addCompanyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden animate-modal-in">
+        <!-- Header -->
+        <div style="background: linear-gradient(to right, #4f46e5, #7c3aed); padding: 1rem 1.25rem;">
             <div class="flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-edit text-white text-lg"></i>
-                    </div>
-                    <h2 class="text-xl font-semibold text-white">Edit Kunjungan Sales</h2>
+                <div>
+                    <h3 class="text-lg font-semibold text-white">Tambah Perusahaan Baru</h3>
+                    <p class="text-xs text-indigo-100 mt-0.5">Lengkapi formulir berikut untuk menambahkan perusahaan</p>
                 </div>
-                <button onclick="closeEditVisitModal()" class="text-white hover:text-gray-200 transition-colors p-2">
-                    <i class="fas fa-times text-xl"></i>
+                <button onclick="closeAddCompanyModal()" 
+                    class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
+                    <i class="fas fa-times text-lg"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Modal Body -->
-        <form id="editVisitForm" method="POST" class="overflow-y-auto max-h-[calc(95vh-140px)]">
-            @csrf
-            @method('PUT')
-            
-            <input type="hidden" id="editVisitId" name="visit_id">
-            <input type="hidden" id="editIsSalesRole" value="{{ strtolower(auth()->user()->role->role_name ?? '') === 'sales' ? '1' : '0' }}">
-
-            <div class="px-4 py-4 space-y-4">
-                <!-- Basic Information -->
-                <div>
-                    <h4 class="text-sm font-semibold text-gray-800 mb-3 flex items-center">
-                        <i class="fas fa-id-card text-blue-500 mr-2"></i>
-                        Informasi Dasar
-                    </h4>
+        <!-- Body -->
+        <div class="overflow-y-auto max-h-[calc(90vh-120px)]" style="background-color: #f3f4f6; padding: 1rem;">
+            <form id="addCompanyForm" class="space-y-4">
+                @csrf
+                <input type="hidden" id="company-form-type" value="create">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Nama -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">
+                            Nama Perusahaan <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                            name="company_name" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                            placeholder="Masukkan nama perusahaan"
+                            required>
+                    </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <!-- Sales -->
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                Sales <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-user-tie text-gray-400 text-xs"></i>
-                                </div>
-                                <select name="sales_id" id="editSalesId"
-                                    class="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none bg-white"
-                                    required>
-                                    <option value="">-- Pilih Sales --</option>
-                                </select>
-                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Customer Name -->
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                Customer Name <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-user text-gray-400 text-xs"></i>
-                                </div>
-                                <input type="text" name="customer_name" id="editCustomerName"
-                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                    placeholder="Masukkan nama customer" required>
-                            </div>
-                        </div>
-
-                        <!-- Company -->
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                Company
-                            </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-building text-gray-400 text-xs"></i>
-                                </div>
-                                <input type="text" name="company_name" id="editCompany"
-                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                    placeholder="Masukkan nama perusahaan">
-                            </div>
-                        </div>
-
-                        <!-- Visit Date -->
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                Visit Date <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-calendar text-gray-400 text-xs"></i>
-                                </div>
-                                <input type="date" name="visit_date" id="editVisitDate"
-                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                    required>
-                            </div>
-                        </div>
+                    <!-- Jenis -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">
+                            Jenis Perusahaan <span class="text-red-500">*</span>
+                        </label>
+                        <select name="company_type_id" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm appearance-none bg-white"
+                                required>
+                            <option value="">-- Pilih Jenis --</option>
+                            @foreach($types as $type)
+                                <option value="{{ $type->company_type_id }}">{{ $type->type_name }}</option>
+                            @endforeach
+                        </select>
                     </div>
-                </div>
-
-                <!-- Address Section -->
-                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-200">
-                    <h4 class="text-sm font-semibold text-gray-800 mb-3 flex items-center">
-                        <i class="fas fa-map-marker-alt text-indigo-600 mr-2"></i>
-                        Informasi Lokasi
-                    </h4>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <!-- Province -->
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                Province <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-map text-gray-400 text-xs"></i>
-                                </div>
-                                <select name="province_id" id="edit-province"
-                                    class="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none bg-white"
-                                    required>
-                                    <option value="">-- Pilih Provinsi --</option>
-                                </select>
-                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Regency -->
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                Regency
-                            </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-city text-gray-400 text-xs"></i>
-                                </div>
-                                <select name="regency_id" id="edit-regency"
-                                    class="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none bg-white">
-                                    <option value="">-- Pilih Kabupaten/Kota --</option>
-                                </select>
-                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- District -->
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                District
-                            </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-map-signs text-gray-400 text-xs"></i>
-                                </div>
-                                <select name="district_id" id="edit-district"
-                                    class="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none bg-white">
-                                    <option value="">-- Pilih Kecamatan --</option>
-                                </select>
-                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Village -->
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                Village
-                            </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-home text-gray-400 text-xs"></i>
-                                </div>
-                                <select name="village_id" id="edit-village"
-                                    class="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none bg-white">
-                                    <option value="">-- Pilih Kelurahan/Desa --</option>
-                                </select>
-                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Address - Full Width -->
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                Address
-                            </label>
-                            <div class="relative">
-                                <div class="absolute top-2 left-3 pointer-events-none">
-                                    <i class="fas fa-map-marked-alt text-gray-400 text-xs"></i>
-                                </div>
-                                <textarea name="address" id="editAddress" rows="2"
-                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"
-                                    placeholder="Contoh: Jl. Merdeka No. 123, RT 01/RW 02"></textarea>
-                            </div>
-                        </div>
+                    <!-- Tier -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">
+                            Tier
+                        </label>
+                        <select name="tier" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm appearance-none bg-white">
+                            <option value="">-- Pilih Tier --</option>
+                            <option value="A">Tier A</option>
+                            <option value="B">Tier B</option>
+                            <option value="C">Tier C</option>
+                            <option value="D">Tier D</option>
+                        </select>
                     </div>
-                </div>
-
-                <!-- Visit Details -->
-                <div>
-                    <h4 class="text-sm font-semibold text-gray-800 mb-3 flex items-center">
-                        <i class="fas fa-cog text-blue-500 mr-2"></i>
-                        Detail Kunjungan
-                    </h4>
                     
-                    <div class="space-y-3">
-                        <!-- Purpose -->
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                <i class="fas fa-bullseye mr-1"></i>Purpose <span class="text-red-500">*</span>
-                            </label>
-                            <textarea name="visit_purpose" id="editPurpose" rows="2"
-                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
-                                placeholder="Masukkan tujuan kunjungan..." required></textarea>
-                        </div>
-
-                        <!-- Follow Up -->
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                <i class="fas fa-tasks mr-1"></i>Follow Up
-                            </label>
-                            <div class="flex items-center gap-4">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="is_follow_up" id="editFollowUpYes" value="1" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
-                                    <span class="text-xs text-gray-700">Ya</span>
-                                </label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="is_follow_up" id="editFollowUpNo" value="0" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
-                                    <span class="text-xs text-gray-700">Tidak</span>
-                                </label>
-                            </div>
-                        </div>
+                    <!-- Status -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">
+                            Status
+                        </label>
+                        <select name="status" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm appearance-none bg-white">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Deskripsi -->
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-medium text-gray-700 mb-2">
+                            Deskripsi
+                        </label>
+                        <textarea name="description" 
+                                  rows="3" 
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm resize-none"
+                                  placeholder="Tambahkan keterangan tentang perusahaan..."></textarea>
                     </div>
                 </div>
-            </div>
-
-            <!-- Modal Footer -->
-            <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
-                <button type="button" onclick="closeEditVisitModal()" 
-                    class="px-4 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2">
-                    <i class="fas fa-times"></i>
-                    Batal
-                </button>
-                <button type="submit" 
-                    class="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-lg shadow-blue-500/30">
-                    <i class="fas fa-save"></i>
-                    Update
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Import Modal -->
-<div id="importModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md animate-fadeIn">
-        <div class="px-6 py-4 border-b border-gray-200" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #3b82f6 100%);">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-file-import text-white text-lg"></i>
-                    </div>
-                    <h2 class="text-xl font-semibold text-white">Import Data CSV</h2>
+                
+                <!-- Tombol -->
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                    <button type="button" 
+                            onclick="closeAddCompanyModal()" 
+                            class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit" 
+                            class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors flex items-center gap-2 shadow-lg shadow-indigo-500/30">
+                        <i class="fas fa-save"></i>
+                        Simpan Data
+                    </button>
                 </div>
-                <button onclick="closeImportModal()" class="text-white hover:text-gray-200 transition-colors p-2">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
+            </form>
         </div>
-        
-        <form action="{{ route('salesvisit.import') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
-            @csrf
-            <div>
-                <label class="block text-xs font-medium text-gray-700 mb-2">
-                    <i class="fas fa-file-csv mr-1 text-green-600"></i>
-                    Pilih File CSV
-                </label>
-                <div class="relative">
-                    <input type="file" name="file" accept=".csv,.txt" required
-                        class="w-full border-2 border-dashed border-gray-300 rounded-lg px-4 py-6 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
-                </div>
-                <div class="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <p class="text-xs text-blue-800 flex items-start">
-                        <i class="fas fa-info-circle mr-2 mt-0.5"></i>
-                        <span><strong>Format:</strong> CSV, maksimal 5MB</span>
-                    </p>
-                </div>
-            </div>
-            
-            <div class="flex justify-end gap-3 pt-2">
-                <button type="button" onclick="closeImportModal()" 
-                    class="px-4 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2">
-                    <i class="fas fa-times"></i>
-                    Batal
-                </button>
-                <button type="submit" 
-                    class="px-4 py-2 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700 transition-colors flex items-center gap-2 shadow-lg shadow-green-500/30">
-                    <i class="fas fa-upload"></i>
-                    Import
-                </button>
-            </div>
-        </form>
     </div>
 </div>
 
 <style>
-@keyframes fadeIn { 
-    from { 
-        opacity: 0; 
-        transform: scale(0.95) translateY(-10px); 
-    } 
-    to { 
-        opacity: 1; 
-        transform: scale(1) translateY(0); 
-    } 
-}
-
-.animate-fadeIn { 
-    animation: fadeIn 0.3s ease-out; 
-}
-
-/* Custom select dropdown arrow hide default */
-select::-ms-expand {
-    display: none;
-}
-
-/* Smooth transitions for all inputs */
-input:focus, select:focus, textarea:focus {
-    outline: none;
-}
-
-/* Custom Scrollbar */
-.overflow-y-auto::-webkit-scrollbar {
-    width: 6px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 3px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 3px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .grid-cols-2 {
-        grid-template-columns: 1fr !important;
+@keyframes modal-in {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-20px);
     }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.animate-modal-in {
+    animation: modal-in 0.3s ease-out;
 }
 </style>
 
 <script>
-function openImportModal() {
-    document.getElementById('importModal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
+// Company Dropdown Management
+let companyDropdownTimeout = null;
+let currentCompanies = [];
+
+// Load companies for dropdown
+async function loadCompanies(search = '') {
+    try {
+        const response = await fetch('/company/get-companies-dropdown');
+        const data = await response.json();
+        
+        if (data.success) {
+            currentCompanies = data.companies;
+            updateCompanyDropdown(search);
+        }
+    } catch (error) {
+        console.error('Error loading companies:', error);
+    }
 }
 
-function closeImportModal() {
-    document.getElementById('importModal').classList.add('hidden');
+// Update dropdown options based on search
+function updateCompanyDropdown(search = '') {
+    const dropdown = document.getElementById('create-company-options');
+    const searchInput = document.getElementById('create-company-search');
+    const searchTerm = search.toLowerCase();
+    
+    // Filter companies based on search
+    const filteredCompanies = currentCompanies.filter(company => 
+        company.name.toLowerCase().includes(searchTerm)
+    );
+    
+    // Clear previous options
+    dropdown.innerHTML = '';
+    
+    if (filteredCompanies.length === 0 && search.trim() !== '') {
+        // Show "add new" option when no matches found
+        const addOption = document.createElement('div');
+        addOption.className = 'px-3 py-2 text-sm text-green-600 hover:bg-green-50 cursor-pointer flex items-center gap-2';
+        addOption.innerHTML = `
+            <i class="fas fa-plus text-xs"></i>
+            <span>Tambah "${search}" sebagai company baru</span>
+        `;
+        addOption.onclick = () => {
+            // Set nama company dari input search ke modal add company
+            document.querySelector('#addCompanyModal input[name="company_name"]').value = search;
+            showAddCompanyModal('create');
+        };
+        dropdown.appendChild(addOption);
+    } else {
+        // Show filtered companies
+        filteredCompanies.forEach(company => {
+            const option = document.createElement('div');
+            option.className = 'px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer';
+            option.textContent = company.name;
+            option.onclick = () => selectCompany(company.id, company.name);
+            dropdown.appendChild(option);
+        });
+    }
+    
+    // Show/hide dropdown
+    const dropdownContainer = document.getElementById('create-company-dropdown');
+    if (filteredCompanies.length > 0 || search.trim() !== '') {
+        dropdownContainer.classList.remove('hidden');
+    } else {
+        dropdownContainer.classList.add('hidden');
+    }
+}
+
+// Select a company from dropdown
+function selectCompany(companyId, companyName) {
+    document.getElementById('create-company-id').value = companyId;
+    document.getElementById('create-company-search').value = companyName;
+    document.getElementById('create-company-dropdown').classList.add('hidden');
+}
+
+// Show add company modal
+function showAddCompanyModal(type = 'create') {
+    document.getElementById('company-form-type').value = type;
+    
+    // Reset dan buka modal
+    document.getElementById('addCompanyForm').reset();
+    document.getElementById('addCompanyModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    
+    // Focus ke input nama company
+    setTimeout(() => {
+        document.querySelector('#addCompanyModal input[name="company_name"]').focus();
+    }, 300);
+}
+
+// Close add company modal
+function closeAddCompanyModal() {
+    document.getElementById('addCompanyModal').classList.add('hidden');
+    document.getElementById('addCompanyForm').reset();
     document.body.style.overflow = 'auto';
 }
+
+// Handle company form submission (AJAX)
+document.getElementById('addCompanyForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    // DEBUG: Lihat data yang akan dikirim
+    console.log('📤 Data yang akan dikirim:');
+    for (let [key, value] of formData.entries()) {
+        console.log(`  ${key}: ${value}`);
+    }
+    
+    try {
+        const response = await fetch('/company/store-company-ajax', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: formData
+        });
+        
+        // Handle validation errors
+        if (response.status === 422) {
+            const errorData = await response.json();
+            console.error('❌ Validation errors:', errorData);
+            
+            // Show detailed validation errors
+            let errorMessages = [];
+            if (errorData.errors) {
+                for (const field in errorData.errors) {
+                    errorMessages.push(`${field}: ${errorData.errors[field].join(', ')}`);
+                }
+            }
+            
+            alert('Validasi gagal:\n' + errorMessages.join('\n'));
+            return;
+        }
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Add new company to dropdown and select it
+            const newCompany = data.company;
+            selectCompany(newCompany.id, newCompany.name);
+            
+            // Refresh companies list
+            loadCompanies();
+            
+            // Close modal
+            closeAddCompanyModal();
+            
+            alert('Company berhasil ditambahkan!');
+        } else {
+            throw new Error(data.message || 'Gagal menambahkan company');
+        }
+    } catch (error) {
+        console.error('❌ Error adding company:', error);
+        alert('Gagal menambahkan company: ' + error.message);
+    }
+});
+
+// Initialize company dropdown when modal opens
+function initCompanyDropdown() {
+    const searchInput = document.getElementById('create-company-search');
+    const dropdown = document.getElementById('create-company-dropdown');
+    
+    // Load companies on focus
+    searchInput.addEventListener('focus', () => {
+        loadCompanies(searchInput.value);
+    });
+    
+    // Handle search input
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(companyDropdownTimeout);
+        companyDropdownTimeout = setTimeout(() => {
+            updateCompanyDropdown(e.target.value);
+        }, 300);
+    });
+    
+    // Handle Enter key - jika tidak ada hasil, buka modal add
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const searchValue = searchInput.value.trim();
+            if (searchValue) {
+                // Cek apakah ada company yang match
+                const matchedCompany = currentCompanies.find(company => 
+                    company.name.toLowerCase() === searchValue.toLowerCase()
+                );
+                
+                if (!matchedCompany) {
+                    // Jika tidak ada match, buka modal add
+                    document.querySelector('#addCompanyModal input[name="company_name"]').value = searchValue;
+                    showAddCompanyModal('create');
+                }
+            }
+        }
+    });
+    
+    // Hide dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
+    
+    // Load initial companies
+    loadCompanies();
+}
+
+// Update openVisitModal function to initialize company dropdown
+const originalOpenVisitModal = window.openVisitModal;
+window.openVisitModal = function() {
+    originalOpenVisitModal();
+    setTimeout(() => {
+        initCompanyDropdown();
+    }, 100);
+};
+
+// Update closeVisitModal function
+const originalCloseVisitModal = window.closeVisitModal;
+window.closeVisitModal = function() {
+    originalCloseVisitModal();
+    document.getElementById('create-company-id').value = '';
+    document.getElementById('create-company-search').value = '';
+    document.getElementById('create-company-dropdown').classList.add('hidden');
+};
+
+// Handle escape key untuk modal company
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        if (!document.getElementById('addCompanyModal').classList.contains('hidden')) {
+            closeAddCompanyModal();
+        }
+    }
+});
+
+// Click outside untuk modal company
+document.addEventListener('click', (e) => {
+    if (e.target.id === 'addCompanyModal') {
+        closeAddCompanyModal();
+    }
+});
 </script>

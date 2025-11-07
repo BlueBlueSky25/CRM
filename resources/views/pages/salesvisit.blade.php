@@ -67,7 +67,7 @@
         </div>
 
         <!-- Table Section - NO PADDING! -->
-        <x-salesvisit.table.table :salesVisits="$salesVisits" :currentMenuId="$currentMenuId" />
+        <x-salesvisit.table.table :salesVisits="$salesVisits" :currentMenuId="$currentMenuId" :types="$types"/>
 
         <!-- Pagination -->
         @if($salesVisits->hasPages())
@@ -79,8 +79,8 @@
 </div>
 
 <!-- Modals -->
-<x-salesvisit.action.action :currentMenuId="$currentMenuId" :salesUsers="$salesUsers" :provinces="$provinces" />
-<x-salesvisit.action.edit :currentMenuId="$currentMenuId" :salesUsers="$salesUsers" :provinces="$provinces" />
+<x-salesvisit.action.action :currentMenuId="$currentMenuId" :salesUsers="$salesUsers" :provinces="$provinces" :types="$types"/>
+<x-salesvisit.action.edit :currentMenuId="$currentMenuId" :salesUsers="$salesUsers" :provinces="$provinces" :types="$types" />
 
 @push('scripts')
 <script src="{{ asset('js/search.js') }}"></script>
