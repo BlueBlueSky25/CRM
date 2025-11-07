@@ -2,7 +2,7 @@
 <div id="editRoleModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[95vh] overflow-hidden animate-fadeIn">
         <!-- Modal Header -->
-        <div class="px-6 py-4 border-b border-gray-200" style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #ef4444 100%);">
+        <div class="px-6 py-4 border-b border-gray-200" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #3b82f6 100%);">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
@@ -26,7 +26,7 @@
                 <!-- Role Information -->
                 <div>
                     <h4 class="text-sm font-semibold text-gray-800 mb-3 flex items-center">
-                        <i class="fas fa-info-circle text-orange-500 mr-2"></i>
+                        <i class="fas fa-info-circle text-blue-500 mr-2"></i>
                         Informasi Role
                     </h4>
                     
@@ -72,7 +72,7 @@
                     Batal
                 </button>
                 <button type="submit" 
-                    class="px-4 py-2 bg-orange-600 text-white rounded-lg text-xs font-medium hover:bg-orange-700 transition-colors flex items-center gap-2 shadow-lg shadow-orange-500/30">
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-lg shadow-orange-500/30">
                     <i class="fas fa-save"></i>
                     Update
                 </button>

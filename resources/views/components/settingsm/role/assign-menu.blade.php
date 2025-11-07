@@ -2,7 +2,7 @@
 <div id="assignMenuModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden animate-fadeIn">
         <!-- Modal Header -->
-        <div class="px-6 py-4 border-b border-gray-200" style="background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);">
+        <div class="px-6 py-4 border-b border-gray-200" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #3b82f6 100%);">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
@@ -122,7 +122,7 @@
                         Batal
                     </button>
                     <button type="submit" 
-                        class="px-4 py-2 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700 transition-colors flex items-center gap-2 shadow-lg shadow-green-500/30">
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-lg shadow-green-500/30">
                         <i class="fas fa-save"></i>
                         Simpan Permissions
                     </button>

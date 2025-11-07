@@ -1,204 +1,206 @@
-<!-- Improved User Modal -->
+<!-- Add User Modal -->
 <div id="userModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden animate-modal-in">
-        <!-- Modal Header -->
-        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden animate-modal-in">
+        <!-- Header -->
+        <div style="background: linear-gradient(to right, #4f46e5, #7c3aed); padding: 1rem 1.25rem;">
             <div class="flex justify-between items-center">
                 <div>
-                    <h3 class="text-xl font-semibold text-white">Add New User</h3>
-                    <p class="text-indigo-100 text-sm mt-1">Create a new user account with role assignment</p>
+                    <h3 class="text-lg font-semibold text-white">Add New User</h3>
+                    <p class="text-xs text-indigo-100 mt-0.5">Create a new user account with role assignment</p>
                 </div>
-                <button onclick="closeUserModal()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
+                <button onclick="closeUserModal()" 
+                    class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
                     <i class="fas fa-times text-lg"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Modal Body - Scrollable -->
-        <div class="overflow-y-auto max-h-[calc(90vh-140px)]">
-            <form action="{{ route('users.store') }}" method="POST" class="p-6">
+        <!-- Body -->
+        <div class="overflow-y-auto max-h-[calc(90vh-120px)]" style="background-color: #f3f4f6; padding: 1rem;">
+            <form action="{{ route('users.store') }}" method="POST" style="display: flex; flex-direction: column; gap: 0.75rem;">
                 @csrf
                 
-                <!-- Personal Information Section -->
-                <div class="mb-6">
-                    <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                        <i class="fas fa-user-circle text-indigo-500 mr-2"></i>
-                        Personal Information
-                    </h4>
-                    
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <!-- Username -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Username <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative">
-                                <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                                <input type="text" name="username" 
-                                    class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
-                                    placeholder="Enter username" required>
-                            </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+                    <!-- Username -->
+                    <div>
+                        <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
+                            Username <span style="color: #ef4444;">*</span>
+                        </label>
+                        <div style="position: relative;">
+                            <i class="fas fa-user" style="position: absolute; left: 0.625rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.75rem;"></i>
+                            <input type="text" name="username" 
+                                style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem 0.5rem 2rem; font-size: 0.875rem;" 
+                                placeholder="Enter username" required>
                         </div>
+                    </div>
 
-                        <!-- Email -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                            <div class="relative">
-                                <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                                <input type="email" name="email" 
-                                    class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
-                                    placeholder="user@example.com">
-                            </div>
+                    <!-- Email -->
+                    <div>
+                        <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
+                            Email Address
+                        </label>
+                        <div style="position: relative;">
+                            <i class="fas fa-envelope" style="position: absolute; left: 0.625rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.75rem;"></i>
+                            <input type="email" name="email" 
+                                style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem 0.5rem 2rem; font-size: 0.875rem;" 
+                                placeholder="user@example.com">
                         </div>
+                    </div>
 
-                        <!-- Phone -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                            <div class="relative">
-                                <i class="fas fa-phone absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                                <input type="text" name="phone" 
-                                    class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
-                                    placeholder="+62 812-3456-7890">
-                            </div>
+                    <!-- Phone -->
+                    <div>
+                        <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
+                            Phone Number
+                        </label>
+                        <div style="position: relative;">
+                            <i class="fas fa-phone" style="position: absolute; left: 0.625rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.75rem;"></i>
+                            <input type="text" name="phone" 
+                                style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem 0.5rem 2rem; font-size: 0.875rem;" 
+                                placeholder="+62 812-3456-7890">
                         </div>
+                    </div>
 
-                        <!-- Birth Date -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Birth Date</label>
-                            <div class="relative">
-                                <i class="fas fa-calendar-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                                <input type="date" name="birth_date" 
-                                    class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
-                                    max="{{ date('Y-M-D') }}">
-                            </div>
+                    <!-- Birth Date -->
+                    <div>
+                        <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
+                            Birth Date
+                        </label>
+                        <div style="position: relative;">
+                            <i class="fas fa-calendar-alt" style="position: absolute; left: 0.625rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.75rem;"></i>
+                            <input type="date" name="birth_date" 
+                                style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem 0.5rem 2rem; font-size: 0.875rem;" 
+                                max="{{ date('Y-m-d') }}">
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
+                            Password <span style="color: #ef4444;">*</span>
+                        </label>
+                        <div style="position: relative;">
+                            <i class="fas fa-lock" style="position: absolute; left: 0.625rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.75rem;"></i>
+                            <input type="password" name="password" id="userPassword"
+                                style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 2.25rem 0.5rem 2rem; font-size: 0.875rem;" 
+                                placeholder="Minimum 6 characters" required>
+                            <button type="button" onclick="toggleUserPassword()" 
+                                style="position: absolute; right: 0.625rem; top: 50%; transform: translateY(-50%); color: #9ca3af; background: none; border: none; cursor: pointer;">
+                                <i class="fas fa-eye" id="userPasswordToggle" style="font-size: 0.75rem;"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Role -->
+                    <div>
+                        <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
+                            Role <span style="color: #ef4444;">*</span>
+                        </label>
+                        <div style="position: relative;">
+                            <i class="fas fa-user-tag" style="position: absolute; left: 0.625rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.75rem; z-index: 10;"></i>
+                            <select name="role_id" 
+                                style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 2rem 0.5rem 2rem; font-size: 0.875rem; appearance: none;" 
+                                required>
+                                <option value="">Select role</option>
+                                @foreach($roles as $role)
+                                    @php
+                                        $isSuperAdmin = auth()->user()->role->role_name === 'Superadmin' || auth()->user()->role->role_name === 'superadmin';
+                                        $isProtectedRole = in_array($role->role_name, ['Admin', 'Superadmin', 'admin', 'superadmin']);
+                                    @endphp
+                                    
+                                    @if(!$isProtectedRole || $isSuperAdmin)
+                                        <option value="{{ $role->role_id }}">{{ $role->role_name }}</option>
+                                    @endif
+                                @endforeach
+                            </select>
+                            <i class="fas fa-chevron-down" style="position: absolute; right: 0.625rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.75rem; pointer-events: none;"></i>
                         </div>
                     </div>
                 </div>
 
                 <!-- Address Section -->
-                <div class="mb-6">
-                    <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                        <i class="fas fa-map-marker-alt text-indigo-500 mr-2"></i>
+                <div style="background: linear-gradient(to bottom right, #eff6ff, #e0e7ff); border: 1px solid #c7d2fe; border-radius: 0.5rem; padding: 0.75rem;">
+                    <h4 style="font-size: 0.875rem; font-weight: 600; color: #1f2937; margin-bottom: 0.75rem; display: flex; align-items: center;">
+                        <i class="fas fa-map-marker-alt" style="color: #6366f1; margin-right: 0.5rem; font-size: 0.875rem;"></i>
                         Address Information
                     </h4>
                     
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Provinsi <span class="text-red-500">*</span></label>
-                        <select id="create-province" name="province_id" class="cascade-province w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                            <option value="">-- Pilih Provinsi --</option>
-                            @foreach($provinces as $province)
-                                <option value="{{ $province->id }}">{{ $province->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Kabupaten/Kota -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Kabupaten/Kota <span class="text-red-500">*</span></label>
-                        <select id="create-regency" name="regency_id" class="cascade-regency w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                            <option value="">-- Pilih Kabupaten/Kota --</option>
-                        </select>
-                    </div>
-
-                    <!-- Kecamatan -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Kecamatan <span class="text-red-500">*</span></label>
-                        <select id="create-district" name="district_id" class="cascade-district w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                            <option value="">-- Pilih Kecamatan --</option>
-                        </select>
-                    </div>
-
-                    <!-- Kelurahan/Desa -->
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Kelurahan/Desa <span class="text-red-500">*</span></label>
-                        <select id="create-village" name="village_id" class="cascade-village w-full border border-gray-300 rounded-lg py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                            <option value="">-- Pilih Kelurahan/Desa --</option>
-                        </select>
-                    </div>
-        
-
-                    <!-- Detail Alamat (full width) -->
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Detail Alamat</label>
-                        <div class="relative">
-                            <i class="fas fa-home absolute left-3 top-3 text-gray-400"></i>
-                            <textarea id="address" name="address" rows="3" placeholder="Contoh: Jl. Merdeka No. 123, RT 01/RW 02" 
-                                    class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"></textarea>
-                        </div>
-                        <small class="text-gray-500">Isi dengan detail alamat seperti nama jalan, nomor rumah, RT/RW</small>
-                    </div>
-                </div>
-
-                <!-- Account Settings Section -->
-                <div class="mb-6">
-                    <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                        <i class="fas fa-cog text-indigo-500 mr-2"></i>
-                        Account Settings
-                    </h4>
-                    
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <!-- Password -->
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+                        <!-- Provinsi -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Password <span class="text-red-500">*</span>
+                            <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
+                                Provinsi <span style="color: #ef4444;">*</span>
                             </label>
-                            <div class="relative">
-                                <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                                <input type="password" name="password" id="userPassword"
-                                    class="w-full border border-gray-300 rounded-lg pl-10 pr-10 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
-                                    placeholder="Minimum 6 characters" required>
-                                <button type="button" onclick="toggleUserPassword()" 
-                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                    <i class="fas fa-eye" id="userPasswordToggle"></i>
-                                </button>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-1">Password must be at least 6 characters long</p>
-                        </div>
-
-                        <!-- Role -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Role <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative">
-                                <i class="fas fa-user-tag absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10"></i>
-                                <select name="role_id" 
-                                    class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none bg-white" 
+                            <select id="create-province" name="province_id" class="cascade-province"
+                                    style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;" 
                                     required>
-                                    <option value="">Select role</option>
-                                    @foreach($roles as $role)
-                                        @php
-                                            $isSuperAdmin = auth()->user()->role->role_name === 'Superadmin' || auth()->user()->role->role_name === 'superadmin';
-                                            $isProtectedRole = in_array($role->role_name, ['Admin', 'Superadmin', 'admin', 'superadmin']);
-                                        @endphp
-                                        
-                                        {{-- Hanya tampilkan role Admin/Superadmin untuk Superadmin --}}
-                                        @if(!$isProtectedRole || $isSuperAdmin)
-                                            <option value="{{ $role->role_id }}">{{ $role->role_name }}</option>
-                                        @endif
-                                    @endforeach
-                                </select>
-                                <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                                <option value="">-- Pilih Provinsi --</option>
+                                @foreach($provinces as $province)
+                                    <option value="{{ $province->id }}">{{ $province->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Kabupaten/Kota -->
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
+                                Kabupaten/Kota <span style="color: #ef4444;">*</span>
+                            </label>
+                            <select id="create-regency" name="regency_id" class="cascade-regency"
+                                    style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;" 
+                                    required disabled>
+                                <option value="">-- Pilih Kabupaten/Kota --</option>
+                            </select>
+                        </div>
+
+                        <!-- Kecamatan -->
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
+                                Kecamatan <span style="color: #ef4444;">*</span>
+                            </label>
+                            <select id="create-district" name="district_id" class="cascade-district"
+                                    style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;" 
+                                    required disabled>
+                                <option value="">-- Pilih Kecamatan --</option>
+                            </select>
+                        </div>
+
+                        <!-- Kelurahan/Desa -->
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
+                                Kelurahan/Desa <span style="color: #ef4444;">*</span>
+                            </label>
+                            <select id="create-village" name="village_id" class="cascade-village"
+                                    style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;" 
+                                    required disabled>
+                                <option value="">-- Pilih Kelurahan/Desa --</option>
+                            </select>
+                        </div>
+
+                        <!-- Detail Alamat (full width) -->
+                        <div style="grid-column: span 2;">
+                            <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
+                                Detail Alamat
+                            </label>
+                            <div style="position: relative;">
+                                <i class="fas fa-home" style="position: absolute; left: 0.625rem; top: 0.625rem; color: #9ca3af; font-size: 0.75rem;"></i>
+                                <textarea id="address" name="address" rows="2" 
+                                        placeholder="Contoh: Jl. Merdeka No. 123, RT 01/RW 02" 
+                                        style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem 0.5rem 2rem; font-size: 0.875rem; resize: none;"></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Role Permission Preview (Optional Enhancement) -->
-                <div id="rolePreview" class="mb-6 p-4 bg-gray-50 rounded-lg hidden">
-                    <h5 class="font-medium text-gray-700 mb-2">Role Permissions Preview</h5>
-                    <div id="rolePermissions" class="text-sm text-gray-600"></div>
-                </div>
-
-                <!-- Form Actions -->
-                <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
-                    <button type="button" onclick="closeUserModal()" 
-                        class="px-6 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                
+                <!-- Tombol -->
+                <div style="display: flex; justify-content: flex-end; gap: 0.5rem; padding-top: 0.75rem; border-top: 1px solid #e5e7eb; margin-top: 0.5rem;">
+                    <button type="button" 
+                            onclick="closeUserModal()" 
+                            style="background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 1.25rem; font-weight: 500; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;">
                         Cancel
                     </button>
                     <button type="submit" 
-                        class="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 font-medium shadow-md hover:shadow-lg">
-                        <i class="fas fa-user-plus mr-2"></i>
+                            style="background-color: #4f46e5; color: white; border: none; border-radius: 0.5rem; padding: 0.5rem 1.25rem; font-weight: 500; font-size: 0.75rem; cursor: pointer; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); transition: all 0.2s;">
+                        <i class="fas fa-user-plus" style="margin-right: 0.375rem;"></i>
                         Create User
                     </button>
                 </div>
@@ -208,123 +210,99 @@
 </div>
 
 <style>
-        /* Modal Animation */
-        @keyframes modal-in {
-            from {
-                opacity: 0;
-                transform: scale(0.9) translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
+    /* Modal Animation */
+    @keyframes modal-in {
+        from {
+            opacity: 0;
+            transform: scale(0.95) translateY(-20px);
         }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
 
-        .animate-modal-in {
-            animation: modal-in 0.3s ease-out;
-        }
+    .animate-modal-in {
+        animation: modal-in 0.3s ease-out;
+    }
 
-        /* Enhanced Form Styling */
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
+    /* Custom Scrollbar for Modal */
+    .overflow-y-auto::-webkit-scrollbar {
+        width: 6px;
+    }
 
-        /* Custom Select Styling */
-        select {
-            background-image: none;
-        }
+    .overflow-y-auto::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 3px;
+    }
 
-        /* Section Dividers */
-        .section-divider {
-            border-left: 4px solid #6366f1;
-            padding-left: 1rem;
-        }
+    .overflow-y-auto::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
+    }
 
-        /* Custom Scrollbar */
-        .overflow-y-auto::-webkit-scrollbar {
-            width: 6px;
-        }
+    .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
 
-        .overflow-y-auto::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 3px;
-        }
+    /* Enhanced focus states */
+    input:focus, textarea:focus, select:focus {
+        outline: none;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    }
 
-        .overflow-y-auto::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
+    select:disabled {
+        background-color: #f3f4f6;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
 
-        .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+        #userModal .bg-white {
+            margin: 1rem;
+            max-width: calc(100% - 2rem);
         }
-
-        /* Form validation states */
-        .error {
-            border-color: #ef4444;
-        }
-
-        .error:focus {
-            border-color: #ef4444;
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-        }
-
-        .success {
-            border-color: #10b981;
-        }
-
-        .success:focus {
-            border-color: #10b981;
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-        }
-
-        /* Loading button state */
-        .btn-loading {
-            position: relative;
-            pointer-events: none;
-        }
-
-        .btn-loading::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 16px;
-            height: 16px;
-            border: 2px solid transparent;
-            border-top: 2px solid currentColor;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
-        /* Role preview styling */
-        #rolePreview {
-            border-left: 4px solid #6366f1;
-            transition: all 0.3s ease;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 640px) {
-            #userModal .bg-white {
-                margin: 1rem;
-                max-width: calc(100% - 2rem);
-            }
-            
-            .grid.md\\:grid-cols-2 {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Icon sizing */
-        .fa-user, .fa-envelope, .fa-phone, .fa-calendar-alt, 
-        .fa-map-marker-alt, .fa-lock, .fa-user-tag {
-            font-size: 14px;
-        }
+    }
 </style>
+
+<script>
+function toggleUserPassword() {
+    const field = document.getElementById('userPassword');
+    const toggle = document.getElementById('userPasswordToggle');
+    
+    if (field.type === 'password') {
+        field.type = 'text';
+        toggle.classList.remove('fa-eye');
+        toggle.classList.add('fa-eye-slash');
+    } else {
+        field.type = 'password';
+        toggle.classList.remove('fa-eye-slash');
+        toggle.classList.add('fa-eye');
+    }
+}
+
+function closeUserModal() {
+    document.getElementById('userModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(e) {
+    const userModal = document.getElementById('userModal');
+    if (e.target === userModal) {
+        closeUserModal();
+    }
+});
+
+// Close modal with ESC key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const userModal = document.getElementById('userModal');
+        if (userModal && !userModal.classList.contains('hidden')) {
+            closeUserModal();
+        }
+    }
+});
+</script>
