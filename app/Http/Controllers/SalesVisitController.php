@@ -264,7 +264,7 @@ public function getSalesUsers()
     $request->validate([
         'sales_id' => 'required|exists:users,user_id',
         'customer_name' => 'required|string|max:255',
-        'company_id' => 'nullable|exists:companies,company_id',
+        'company_id' => 'nullable|exists:company,company_id',
         'province_id' => 'required|exists:provinces,id',
         'regency_id' => 'nullable|exists:regencies,id',
         'district_id' => 'nullable|exists:districts,id',
@@ -329,7 +329,7 @@ public function getSalesUsers()
     $request->validate([
         'sales_id' => 'required|exists:users,user_id',
         'customer_name' => 'required|string|max:255',
-        'company_id' => 'nullable|exists:companies,company_id',
+        'company_id' => 'nullable|exists:company,company_id',
         'province_id' => 'required|exists:provinces,id',
         'regency_id' => 'nullable|exists:regencies,id',
         'district_id' => 'nullable|exists:districts,id',
