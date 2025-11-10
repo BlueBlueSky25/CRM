@@ -93,30 +93,17 @@
                                     <i class="fas fa-building text-gray-400 text-xs"></i>
                                 </div>
                                 
-                                <!-- Hidden input untuk company_id yang akan di-submit -->
                                 <input type="hidden" name="company_id" id="create-company-id">
                                 
-                                <!-- Searchable Input -->
                                 <input type="text" 
                                     id="create-company-search" 
                                     placeholder="Ketik atau pilih company..."
                                     autocomplete="off"
                                     class="w-full pl-9 pr-20 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
                                 
-                                <!-- Add New Button -->
-                                <button type="button" 
-                                    onclick="showAddCompanyModal('create')"
-                                    class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600 transition-colors flex items-center gap-1 z-10">
-                                    <i class="fas fa-plus text-[10px]"></i>
-                                    <span>Baru</span>
-                                </button>
-                                
-                                <!-- Dropdown List -->
                                 <div id="create-company-dropdown" 
                                     class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                                    <div id="create-company-options" class="py-1">
-                                        <!-- Options will be populated by JS -->
-                                    </div>
+                                    <div id="create-company-options" class="py-1"></div>
                                 </div>
                             </div>
                         </div>
@@ -146,7 +133,6 @@
                     </h4>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <!-- Province -->
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1.5">
                                 Province <span class="text-red-500">*</span>
@@ -169,11 +155,8 @@
                             </div>
                         </div>
 
-                        <!-- Regency -->
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                Regency
-                            </label>
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">Regency</label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i class="fas fa-city text-gray-400 text-xs"></i>
@@ -188,11 +171,8 @@
                             </div>
                         </div>
 
-                        <!-- District -->
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                District
-                            </label>
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">District</label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i class="fas fa-map-signs text-gray-400 text-xs"></i>
@@ -207,11 +187,8 @@
                             </div>
                         </div>
 
-                        <!-- Village -->
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                Village
-                            </label>
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">Village</label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i class="fas fa-home text-gray-400 text-xs"></i>
@@ -226,11 +203,8 @@
                             </div>
                         </div>
 
-                        <!-- Address - Full Width -->
                         <div class="md:col-span-2">
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                Address
-                            </label>
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">Address</label>
                             <div class="relative">
                                 <div class="absolute top-2 left-3 pointer-events-none">
                                     <i class="fas fa-map-marked-alt text-gray-400 text-xs"></i>
@@ -250,30 +224,34 @@
                         Detail Kunjungan
                     </h4>
                     
-                    <div class="space-y-3">
-                        <!-- Purpose -->
-                        <div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div class="md:col-span-3">
                             <label class="block text-xs font-medium text-gray-700 mb-1.5">
                                 <i class="fas fa-bullseye mr-1"></i>Purpose <span class="text-red-500">*</span>
                             </label>
-                            <textarea name="visit_purpose" rows="2"
+                            <textarea name="visit_purpose" rows="4"
                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
                                 placeholder="Masukkan tujuan kunjungan..." required></textarea>
                         </div>
 
-                        <!-- Follow Up -->
-                        <div>
+                        <div class="md:col-span-1">
                             <label class="block text-xs font-medium text-gray-700 mb-1.5">
                                 <i class="fas fa-tasks mr-1"></i>Follow Up
                             </label>
-                            <div class="flex items-center gap-4">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="is_follow_up" value="1" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
-                                    <span class="text-xs text-gray-700">Ya</span>
+                            <div class="flex flex-col gap-2">
+                                <label class="relative flex items-center justify-center cursor-pointer group">
+                                    <input type="radio" name="is_follow_up" value="1" class="peer sr-only">
+                                    <div class="w-full px-4 py-2.5 text-xs font-medium text-gray-600 bg-white border-2 border-gray-300 rounded-lg transition-all peer-checked:bg-green-500 peer-checked:border-green-500 peer-checked:text-white group-hover:border-green-400 flex items-center justify-center gap-2">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Ya</span>
+                                    </div>
                                 </label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="is_follow_up" value="0" class="w-4 h-4 text-blue-600 focus:ring-blue-500" checked>
-                                    <span class="text-xs text-gray-700">Tidak</span>
+                                <label class="relative flex items-center justify-center cursor-pointer group">
+                                    <input type="radio" name="is_follow_up" value="0" class="peer sr-only" checked>
+                                    <div class="w-full px-4 py-2.5 text-xs font-medium text-gray-600 bg-white border-2 border-gray-300 rounded-lg transition-all peer-checked:bg-red-500 peer-checked:border-red-500 peer-checked:text-white group-hover:border-red-400 flex items-center justify-center gap-2">
+                                        <i class="fas fa-times-circle"></i>
+                                        <span>Tidak</span>
+                                    </div>
                                 </label>
                             </div>
                         </div>
@@ -298,10 +276,9 @@
     </div>
 </div>
 
-<!-- Add Company Modal (Full Version) -->
+<!-- Add Company Modal -->
 <div id="addCompanyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden animate-modal-in">
-        <!-- Header -->
         <div style="background: linear-gradient(to right, #4f46e5, #7c3aed); padding: 1rem 1.25rem;">
             <div class="flex justify-between items-center">
                 <div>
@@ -315,26 +292,21 @@
             </div>
         </div>
 
-        <!-- Body -->
         <div class="overflow-y-auto max-h-[calc(90vh-120px)]" style="background-color: #f3f4f6; padding: 1rem;">
             <form id="addCompanyForm" class="space-y-4">
                 @csrf
                 <input type="hidden" id="company-form-type" value="create">
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Nama -->
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-2">
                             Nama Perusahaan <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" 
-                            name="company_name" 
+                        <input type="text" name="company_name" 
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
-                            placeholder="Masukkan nama perusahaan"
-                            required>
+                            placeholder="Masukkan nama perusahaan" required>
                     </div>
                     
-                    <!-- Jenis -->
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-2">
                             Jenis Perusahaan <span class="text-red-500">*</span>
@@ -349,11 +321,8 @@
                         </select>
                     </div>
                     
-                    <!-- Tier -->
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-2">
-                            Tier
-                        </label>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">Tier</label>
                         <select name="tier" 
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm appearance-none bg-white">
                             <option value="">-- Pilih Tier --</option>
@@ -364,11 +333,8 @@
                         </select>
                     </div>
                     
-                    <!-- Status -->
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-2">
-                            Status
-                        </label>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">Status</label>
                         <select name="status" 
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm appearance-none bg-white">
                             <option value="active">Active</option>
@@ -376,22 +342,16 @@
                         </select>
                     </div>
                     
-                    <!-- Deskripsi -->
                     <div class="md:col-span-2">
-                        <label class="block text-xs font-medium text-gray-700 mb-2">
-                            Deskripsi
-                        </label>
-                        <textarea name="description" 
-                                  rows="3" 
+                        <label class="block text-xs font-medium text-gray-700 mb-2">Deskripsi</label>
+                        <textarea name="description" rows="3" 
                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm resize-none"
                                   placeholder="Tambahkan keterangan tentang perusahaan..."></textarea>
                     </div>
                 </div>
                 
-                <!-- Tombol -->
                 <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
-                    <button type="button" 
-                            onclick="closeAddCompanyModal()" 
+                    <button type="button" onclick="closeAddCompanyModal()" 
                             class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                         Batal
                     </button>
@@ -407,33 +367,27 @@
 </div>
 
 <style>
-@keyframes modal-in {
-    from {
-        opacity: 0;
-        transform: scale(0.95) translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95) translateY(-20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
 }
+.animate-fadeIn { animation: fadeIn 0.3s ease-out; }
 
-.animate-modal-in {
-    animation: modal-in 0.3s ease-out;
+@keyframes modal-in {
+    from { opacity: 0; transform: scale(0.95) translateY(-20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
 }
+.animate-modal-in { animation: modal-in 0.3s ease-out; }
 </style>
 
 <script>
-// Company Dropdown Management
 let companyDropdownTimeout = null;
 let currentCompanies = [];
 
-// Load companies for dropdown
 async function loadCompanies(search = '') {
     try {
         const response = await fetch('/company/get-companies-dropdown');
         const data = await response.json();
-        
         if (data.success) {
             currentCompanies = data.companies;
             updateCompanyDropdown(search);
@@ -443,36 +397,25 @@ async function loadCompanies(search = '') {
     }
 }
 
-// Update dropdown options based on search
 function updateCompanyDropdown(search = '') {
     const dropdown = document.getElementById('create-company-options');
-    const searchInput = document.getElementById('create-company-search');
     const searchTerm = search.toLowerCase();
-    
-    // Filter companies based on search
     const filteredCompanies = currentCompanies.filter(company => 
         company.name.toLowerCase().includes(searchTerm)
     );
     
-    // Clear previous options
     dropdown.innerHTML = '';
     
     if (filteredCompanies.length === 0 && search.trim() !== '') {
-        // Show "add new" option when no matches found
         const addOption = document.createElement('div');
         addOption.className = 'px-3 py-2 text-sm text-green-600 hover:bg-green-50 cursor-pointer flex items-center gap-2';
-        addOption.innerHTML = `
-            <i class="fas fa-plus text-xs"></i>
-            <span>Tambah "${search}" sebagai company baru</span>
-        `;
+        addOption.innerHTML = `<i class="fas fa-plus text-xs"></i><span>Tambah "${search}" sebagai company baru</span>`;
         addOption.onclick = () => {
-            // Set nama company dari input search ke modal add company
             document.querySelector('#addCompanyModal input[name="company_name"]').value = search;
             showAddCompanyModal('create');
         };
         dropdown.appendChild(addOption);
     } else {
-        // Show filtered companies
         filteredCompanies.forEach(company => {
             const option = document.createElement('div');
             option.className = 'px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer';
@@ -482,7 +425,6 @@ function updateCompanyDropdown(search = '') {
         });
     }
     
-    // Show/hide dropdown
     const dropdownContainer = document.getElementById('create-company-dropdown');
     if (filteredCompanies.length > 0 || search.trim() !== '') {
         dropdownContainer.classList.remove('hidden');
@@ -491,46 +433,31 @@ function updateCompanyDropdown(search = '') {
     }
 }
 
-// Select a company from dropdown
 function selectCompany(companyId, companyName) {
     document.getElementById('create-company-id').value = companyId;
     document.getElementById('create-company-search').value = companyName;
     document.getElementById('create-company-dropdown').classList.add('hidden');
 }
 
-// Show add company modal
 function showAddCompanyModal(type = 'create') {
     document.getElementById('company-form-type').value = type;
-    
-    // Reset dan buka modal
     document.getElementById('addCompanyForm').reset();
     document.getElementById('addCompanyModal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
-    
-    // Focus ke input nama company
     setTimeout(() => {
         document.querySelector('#addCompanyModal input[name="company_name"]').focus();
     }, 300);
 }
 
-// Close add company modal
 function closeAddCompanyModal() {
     document.getElementById('addCompanyModal').classList.add('hidden');
     document.getElementById('addCompanyForm').reset();
     document.body.style.overflow = 'auto';
 }
 
-// Handle company form submission (AJAX)
 document.getElementById('addCompanyForm').addEventListener('submit', async function(e) {
     e.preventDefault();
-    
     const formData = new FormData(this);
-    
-    // DEBUG: Lihat data yang akan dikirim
-    console.log('📤 Data yang akan dikirim:');
-    for (let [key, value] of formData.entries()) {
-        console.log(`  ${key}: ${value}`);
-    }
     
     try {
         const response = await fetch('/company/store-company-ajax', {
@@ -542,81 +469,57 @@ document.getElementById('addCompanyForm').addEventListener('submit', async funct
             body: formData
         });
         
-        // Handle validation errors
         if (response.status === 422) {
             const errorData = await response.json();
-            console.error('❌ Validation errors:', errorData);
-            
-            // Show detailed validation errors
             let errorMessages = [];
             if (errorData.errors) {
                 for (const field in errorData.errors) {
                     errorMessages.push(`${field}: ${errorData.errors[field].join(', ')}`);
                 }
             }
-            
             alert('Validasi gagal:\n' + errorMessages.join('\n'));
             return;
         }
         
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         
         const data = await response.json();
         
         if (data.success) {
-            // Add new company to dropdown and select it
             const newCompany = data.company;
             selectCompany(newCompany.id, newCompany.name);
-            
-            // Refresh companies list
             loadCompanies();
-            
-            // Close modal
             closeAddCompanyModal();
-            
             alert('Company berhasil ditambahkan!');
         } else {
             throw new Error(data.message || 'Gagal menambahkan company');
         }
     } catch (error) {
-        console.error('❌ Error adding company:', error);
+        console.error('Error adding company:', error);
         alert('Gagal menambahkan company: ' + error.message);
     }
 });
 
-// Initialize company dropdown when modal opens
 function initCompanyDropdown() {
     const searchInput = document.getElementById('create-company-search');
     const dropdown = document.getElementById('create-company-dropdown');
     
-    // Load companies on focus
-    searchInput.addEventListener('focus', () => {
-        loadCompanies(searchInput.value);
-    });
+    searchInput.addEventListener('focus', () => loadCompanies(searchInput.value));
     
-    // Handle search input
     searchInput.addEventListener('input', (e) => {
         clearTimeout(companyDropdownTimeout);
-        companyDropdownTimeout = setTimeout(() => {
-            updateCompanyDropdown(e.target.value);
-        }, 300);
+        companyDropdownTimeout = setTimeout(() => updateCompanyDropdown(e.target.value), 300);
     });
     
-    // Handle Enter key - jika tidak ada hasil, buka modal add
     searchInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
             const searchValue = searchInput.value.trim();
             if (searchValue) {
-                // Cek apakah ada company yang match
                 const matchedCompany = currentCompanies.find(company => 
                     company.name.toLowerCase() === searchValue.toLowerCase()
                 );
-                
                 if (!matchedCompany) {
-                    // Jika tidak ada match, buka modal add
                     document.querySelector('#addCompanyModal input[name="company_name"]').value = searchValue;
                     showAddCompanyModal('create');
                 }
@@ -624,27 +527,21 @@ function initCompanyDropdown() {
         }
     });
     
-    // Hide dropdown when clicking outside
     document.addEventListener('click', (e) => {
         if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
             dropdown.classList.add('hidden');
         }
     });
     
-    // Load initial companies
     loadCompanies();
 }
 
-// Update openVisitModal function to initialize company dropdown
 const originalOpenVisitModal = window.openVisitModal;
 window.openVisitModal = function() {
     originalOpenVisitModal();
-    setTimeout(() => {
-        initCompanyDropdown();
-    }, 100);
+    setTimeout(() => initCompanyDropdown(), 100);
 };
 
-// Update closeVisitModal function
 const originalCloseVisitModal = window.closeVisitModal;
 window.closeVisitModal = function() {
     originalCloseVisitModal();
@@ -653,7 +550,6 @@ window.closeVisitModal = function() {
     document.getElementById('create-company-dropdown').classList.add('hidden');
 };
 
-// Handle escape key untuk modal company
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         if (!document.getElementById('addCompanyModal').classList.contains('hidden')) {
@@ -662,7 +558,6 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Click outside untuk modal company
 document.addEventListener('click', (e) => {
     if (e.target.id === 'addCompanyModal') {
         closeAddCompanyModal();

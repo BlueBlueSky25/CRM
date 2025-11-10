@@ -1,177 +1,284 @@
-{{-- @props(['currentMenuId'])
+@props(['currentMenuId'])
 
 <!-- EDIT SALES VISIT MODAL -->
 <div id="editVisitModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-modal-in">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden animate-fadeIn">
         
         <!-- Modal Header -->
-        <div class="px-6 py-5 border-b border-gray-200" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #3b82f6 100%);">
+        <div class="px-6 py-4 border-b border-gray-200" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #3b82f6 100%);">
             <div class="flex justify-between items-center">
-                <div>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-edit text-white text-lg"></i>
+                    </div>
                     <h2 class="text-xl font-semibold text-white">Edit Kunjungan Sales</h2>
-                    <p class="text-purple-100 text-sm mt-1">Ubah data kunjungan sales</p>
                 </div>
-                <button onclick="closeEditVisitModal()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
-                    <i class="fas fa-times text-lg"></i>
+                <button onclick="closeEditVisitModal()" class="text-white hover:text-gray-200 transition-colors p-2">
+                    <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
         </div>
 
         <!-- Modal Body -->
-        <div class="overflow-y-auto max-h-[calc(90vh-140px)] p-6">
-            <form id="editVisitForm" method="POST" class="space-y-4">
-                @csrf
-                @method('PUT')
-                
-                <input type="hidden" id="editVisitId" name="visit_id">
-                <input type="hidden" id="editIsSalesRole" value="{{ strtolower(auth()->user()->role->role_name ?? '') === 'sales' ? '1' : '0' }}">
+        <form id="editVisitForm" method="POST" class="overflow-y-auto max-h-[calc(95vh-140px)]">
+            @csrf
+            @method('PUT')
+            
+            <input type="hidden" id="editVisitId" name="visit_id">
+            <input type="hidden" id="editIsSalesRole" value="{{ strtolower(auth()->user()->role->role_name ?? '') === 'sales' ? '1' : '0' }}">
 
+            <div class="px-4 py-4 space-y-4">
+                <!-- Basic Information -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Sales <span class="text-red-500">*</span></label>
-                    <div class="relative">
-                        <i class="fas fa-user-tie absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <select name="sales_id" id="editSalesId"
-                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                            required>
-                            <option value="">Pilih Sales</option>
-                        </select>
+                    <h4 class="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                        <i class="fas fa-id-card text-blue-500 mr-2"></i>
+                        Informasi Dasar
+                    </h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- Sales -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                Sales <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-user-tie text-gray-400 text-xs"></i>
+                                </div>
+                                <select name="sales_id" id="editSalesId"
+                                    class="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none bg-white"
+                                    required>
+                                    <option value="">-- Pilih Sales --</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Customer Name -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                Customer Name <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-user text-gray-400 text-xs"></i>
+                                </div>
+                                <input type="text" name="customer_name" id="editCustomerName"
+                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                    placeholder="Masukkan nama customer" required>
+                            </div>
+                        </div>
+
+                        <!-- Company -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                Company
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-building text-gray-400 text-xs"></i>
+                                </div>
+                                <input type="text" name="company_name" id="editCompany"
+                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                    placeholder="Masukkan nama perusahaan">
+                            </div>
+                        </div>
+
+                        <!-- Visit Date -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                Visit Date <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-calendar text-gray-400 text-xs"></i>
+                                </div>
+                                <input type="date" name="visit_date" id="editVisitDate"
+                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                    required>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Customer Name <span class="text-red-500">*</span></label>
-                    <div class="relative">
-                        <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <input type="text" name="customer_name" id="editCustomerName"
-                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                            placeholder="Masukkan nama customer" required>
+                <!-- Address Section -->
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-200">
+                    <h4 class="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                        <i class="fas fa-map-marker-alt text-indigo-600 mr-2"></i>
+                        Informasi Lokasi
+                    </h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- Province -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                Province <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-map text-gray-400 text-xs"></i>
+                                </div>
+                                <select name="province_id" id="edit-province"
+                                    class="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none bg-white"
+                                    required>
+                                    <option value="">-- Pilih Provinsi --</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Regency -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                Regency
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-city text-gray-400 text-xs"></i>
+                                </div>
+                                <select name="regency_id" id="edit-regency"
+                                    class="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none bg-white">
+                                    <option value="">-- Pilih Kabupaten/Kota --</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- District -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                District
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-map-signs text-gray-400 text-xs"></i>
+                                </div>
+                                <select name="district_id" id="edit-district"
+                                    class="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none bg-white">
+                                    <option value="">-- Pilih Kecamatan --</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Village -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                Village
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-home text-gray-400 text-xs"></i>
+                                </div>
+                                <select name="village_id" id="edit-village"
+                                    class="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none bg-white">
+                                    <option value="">-- Pilih Kelurahan/Desa --</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Address - Full Width -->
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                Address
+                            </label>
+                            <div class="relative">
+                                <div class="absolute top-2 left-3 pointer-events-none">
+                                    <i class="fas fa-map-marked-alt text-gray-400 text-xs"></i>
+                                </div>
+                                <textarea name="address" id="editAddress" rows="2"
+                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"
+                                    placeholder="Contoh: Jl. Merdeka No. 123, RT 01/RW 02"></textarea>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Visit Details -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Company</label>
-                    <div class="relative">
-                        <i class="fas fa-building absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <input type="text" name="company_name" id="editCompany"
-                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                            placeholder="Masukkan nama perusahaan">
+                    <h4 class="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                        <i class="fas fa-cog text-blue-500 mr-2"></i>
+                        Detail Kunjungan
+                    </h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <!-- Purpose - 3/4 -->
+                        <div class="md:col-span-3">
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                <i class="fas fa-bullseye mr-1"></i>Purpose <span class="text-red-500">*</span>
+                            </label>
+                            <textarea name="visit_purpose" id="editPurpose" rows="4"
+                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
+                                placeholder="Masukkan tujuan kunjungan..." required></textarea>
+                        </div>
+
+                        <!-- Follow Up - 1/4 -->
+                        <div class="md:col-span-1">
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                <i class="fas fa-tasks mr-1"></i>Follow Up
+                            </label>
+                            <div class="flex flex-col gap-2">
+                                <label class="relative flex items-center justify-center cursor-pointer group">
+                                    <input type="radio" name="is_follow_up" id="editFollowUpYes" value="1" class="peer sr-only">
+                                    <div class="w-full px-4 py-2.5 text-xs font-medium text-gray-600 bg-white border-2 border-gray-300 rounded-lg transition-all peer-checked:bg-green-500 peer-checked:border-green-500 peer-checked:text-white group-hover:border-green-400 flex items-center justify-center gap-2">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Ya</span>
+                                    </div>
+                                </label>
+                                <label class="relative flex items-center justify-center cursor-pointer group">
+                                    <input type="radio" name="is_follow_up" id="editFollowUpNo" value="0" class="peer sr-only">
+                                    <div class="w-full px-4 py-2.5 text-xs font-medium text-gray-600 bg-white border-2 border-gray-300 rounded-lg transition-all peer-checked:bg-red-500 peer-checked:border-red-500 peer-checked:text-white group-hover:border-red-400 flex items-center justify-center gap-2">
+                                        <i class="fas fa-times-circle"></i>
+                                        <span>Tidak</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Province <span class="text-red-500">*</span></label>
-                    <div class="relative">
-                        <i class="fas fa-map-marked-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <select name="province_id" id="edit-province"
-                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                            required>
-                            <option value="">Pilih Provinsi</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Regency</label>
-                    <div class="relative">
-                        <i class="fas fa-map-marker-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <select name="regency_id" id="edit-regency"
-                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all">
-                            <option value="">Pilih Kabupaten/Kota</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">District</label>
-                    <div class="relative">
-                        <i class="fas fa-map-pin absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <select name="district_id" id="edit-district"
-                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all">
-                            <option value="">Pilih Kecamatan</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Village</label>
-                    <div class="relative">
-                        <i class="fas fa-location-dot absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <select name="village_id" id="edit-village"
-                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all">
-                            <option value="">Pilih Kelurahan/Desa</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
-                    <div class="relative">
-                        <i class="fas fa-map-location-dot absolute left-3 top-4 text-gray-400"></i>
-                        <textarea name="address" id="editAddress" rows="2"
-                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none transition-all"
-                            placeholder="Masukkan alamat lengkap..."></textarea>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Visit Date <span class="text-red-500">*</span></label>
-                    <div class="relative">
-                        <i class="fas fa-calendar absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <input type="date" name="visit_date" id="editVisitDate"
-                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                            required>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Purpose <span class="text-red-500">*</span></label>
-                    <div class="relative">
-                        <i class="fas fa-bullseye absolute left-3 top-4 text-gray-400"></i>
-                        <textarea name="visit_purpose" id="editPurpose" rows="3"
-                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none transition-all"
-                            placeholder="Masukkan tujuan kunjungan..." required></textarea>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Follow Up</label>
-                    <div class="flex items-center gap-4">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="is_follow_up" id="editFollowUpYes" value="1" class="w-4 h-4 text-purple-600 focus:ring-purple-500">
-                            <span class="text-sm text-gray-700">Ya</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="is_follow_up" id="editFollowUpNo" value="0" class="w-4 h-4 text-purple-600 focus:ring-purple-500">
-                            <span class="text-sm text-gray-700">Tidak</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 mt-6">
-                    <button type="button" onclick="closeEditVisitModal()" class="px-6 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">Batal</button>
-                    <button type="submit" class="px-6 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 transform hover:scale-105 font-medium shadow-md hover:shadow-lg">
-                        <i class="fas fa-save mr-2"></i>
-                        Update Data
-                    </button>
-                </div>
-            </form>
-        </div>
+            <!-- Modal Footer -->
+            <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+                <button type="button" onclick="closeEditVisitModal()" 
+                    class="px-4 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2">
+                    <i class="fas fa-times"></i>
+                    Batal
+                </button>
+                <button type="submit" 
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-lg shadow-blue-500/30">
+                    <i class="fas fa-save"></i>
+                    Update Data
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
 <style>
-@keyframes modalSlideIn {
-    from { 
-        opacity: 0; 
-        transform: translateY(-20px) scale(0.95); 
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-20px);
     }
-    to { 
-        opacity: 1; 
-        transform: translateY(0) scale(1); 
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
     }
 }
 
-.animate-modal-in { 
-    animation: modalSlideIn 0.25s ease-out; 
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
 }
-</style> --}}
+</style>
