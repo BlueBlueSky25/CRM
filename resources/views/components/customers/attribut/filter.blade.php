@@ -6,19 +6,19 @@
                 type="text" 
                 id="searchInput"
                 placeholder="Cari customer..."
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 onkeyup="filterCustomers()"
             />
         </div>
         <div>
-            <select id="filterType" onchange="filterCustomers()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <select id="filterType" onchange="filterCustomers()" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <option value="">Semua Tipe</option>
                 <option value="Personal">Personal</option>
                 <option value="Company">Company</option>
             </select>
         </div>
         <div>
-            <select id="filterStatus" onchange="filterCustomers()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <select id="filterStatus" onchange="filterCustomers()" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <option value="">Semua Status</option>
                 <option value="Lead">Lead</option>
                 <option value="Prospect">Prospect</option>

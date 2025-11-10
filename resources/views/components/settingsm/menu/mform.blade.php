@@ -104,7 +104,7 @@
             <!-- Modal Footer -->
             <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
                 <button type="button" onclick="closeAddMenuModal()" 
-                    class="px-4 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2">
+                    class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2">
                     <i class="fas fa-times"></i>
                     Batal
                 </button>

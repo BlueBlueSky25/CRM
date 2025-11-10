@@ -108,7 +108,7 @@
                 </div>
 
                 <!-- Address Section with Collapsible -->
-                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200 overflow-hidden">
+                <div class="bg-gradient-to-br bg-blue-50 from-blue-50 to-indigo-50 rounded-lg border border-blue-200 overflow-hidden">
                     <!-- Header - Always Visible -->
                     <div class="p-3 cursor-pointer hover:bg-blue-100 transition-colors" onclick="toggleSalesAddressSection()">
                         <div class="flex items-center justify-between">
@@ -224,7 +224,7 @@
                                             <i class="fas fa-map-marked-alt text-gray-400 text-xs"></i>
                                         </div>
                                         <textarea id="address" name="address" rows="2"
-                                            class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"
+                                            class="w-full pl-9 pr-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"
                                             placeholder="Contoh: Jl. Merdeka No. 123, RT 01/RW 02"
                                             oninput="checkSalesAddressCompletion()"></textarea>
                                     </div>
@@ -238,7 +238,7 @@
             <!-- Modal Footer -->
             <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
                 <button type="button" onclick="closeAddSalesModal()" 
-                    class="px-4 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2">
+                    class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2">
                     <i class="fas fa-times"></i>
                     Batal
                 </button>
