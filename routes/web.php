@@ -68,6 +68,7 @@ Route::post('/company/store-company-ajax', [CompanyController::class, 'storeComp
     Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
     Route::put('/customers/{id}', [CustomerController::class, 'update'])->name('customers.update');
     Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+    Route::get('/customers/search', [CustomerController::class, 'search'])->name('customers.search');
 
 
 

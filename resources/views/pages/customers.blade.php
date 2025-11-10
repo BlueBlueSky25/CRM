@@ -41,41 +41,26 @@
         <!-- Search and Filter Section -->
         <div style="padding: 0.5rem 1.5rem; background-color: #f9fafb; border-bottom: 1px solid #e5e7eb;">
             <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
-                <!-- Search Input -->
-                <div style="flex: 1; min-width: 300px;">
-                    <div class="relative">
-                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <input type="text" 
-                            id="searchInput" 
-                            placeholder="Cari customer, email, atau telepon..."
-                            class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                            style="font-size: 0.875rem;">
-                    </div>
-                </div>
-
-                <!-- Filter Type -->
-                <select id="filterType" class="border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" style="font-size: 0.875rem;">
-                    <option value="">Semua Tipe</option>
-                    <option value="Personal">Personal</option>
-                    <option value="Company">Company</option>
-                </select>
-
-                <!-- Filter Status -->
-                <select id="filterStatus" class="border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" style="font-size: 0.875rem;">
-                    <option value="">Semua Status</option>
-                    <option value="Lead">Lead</option>
-                    <option value="Prospect">Prospect</option>
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                </select>
-
-                <!-- Filter Province -->
-                {{-- <select id="filterProvince" class="border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" style="font-size: 0.875rem;">
-                    <option value="">Semua Province</option>
-                    @foreach($provinces as $province)
-                        <option value="{{ $province->id }}">{{ $province->name }}</option>
-                    @endforeach
-                </select> --}}
+                <x-globals.filtersearch
+                    tableId="customersTable"
+                    :columns="[
+                        'number',
+                        'name',
+                        'type',
+                        'email',
+                        'phone',
+                        'address',
+                        'status',
+                        'sales',
+                        'actions'
+                    ]"
+                    :filters="[
+                        'Status' => ['Lead', 'Prospect', 'Active', 'Inactive'],
+                        'Type' => ['Personal', 'Company'],
+                    ]"
+                    ajaxUrl="{{ route('customers.search') }}"
+                    placeholder="Cari nama, email, telepon, atau PIC..."
+                />
             </div>
         </div>
 

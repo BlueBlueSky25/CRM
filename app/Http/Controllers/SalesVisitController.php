@@ -61,7 +61,7 @@ public function index(Request $request)
         ->orderBy('name')
         ->get();
 
-    // 🔥 PASTIKAN INI: Company Types
+    // Company Types
     $types = CompanyType::where('is_active', true)->get();
 
     // KPI
@@ -74,17 +74,13 @@ public function index(Request $request)
         'salesVisits',
         'salesUsers',
         'provinces',
-        'types', // 🔥 PASTIKAN INI ADA
+        'types',
         'totalVisits',
         'followUpVisits',
         'uniqueCustomers',
         'uniqueSales'
     ));
 }
-    
-
-
-
 
 public function getSalesUsers()
 {
@@ -98,8 +94,7 @@ public function getSalesUsers()
     ]);
 }
 
-
- public function search(Request $request)
+public function search(Request $request)
 {
     try {
         \Log::info('🔍 SalesVisit Search Request', [
@@ -111,7 +106,7 @@ public function getSalesUsers()
 
         $user = Auth::user();
 
-        // Base query dengan eager loading (tambahkan 'company')
+        // Base query dengan eager loading
         $query = SalesVisit::with(['sales', 'company', 'province', 'regency', 'district', 'village']);
 
         // Role-based filtering
@@ -255,9 +250,7 @@ public function getSalesUsers()
     }
 }
 
-
-
-    public function store(Request $request)
+public function store(Request $request)
 {
     \Log::info('Store Request Data:', $request->all());
     
@@ -324,7 +317,7 @@ public function getSalesUsers()
     }
 }
 
-    public function update(Request $request, $id)
+public function update(Request $request, $id)
 {
     $request->validate([
         'sales_id' => 'required|exists:users,user_id',
@@ -376,7 +369,7 @@ public function getSalesUsers()
     }
 }
 
-  public function destroy($id)
+public function destroy($id)
 {
     $user = Auth::user();
     
@@ -416,222 +409,222 @@ public function getSalesUsers()
     }
 }
 
- public function getProvinces()
-    {
-        try {
-            $provinces = Province::orderBy('name', 'asc')
-                                ->select('id', 'name')
-                                ->get();
-            
-            \Log::info("Fetched provinces: " . $provinces->count());
-            
-            return response()->json([
-                'success' => true,
-                'provinces' => $provinces
-            ]);
-            
-        } catch (\Exception $e) {
-            \Log::error("Error fetching provinces: " . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'error' => 'Failed to load provinces'
-            ], 500);
-        }
-    }
-
-    public function getRegencies($provinceId)
-    {
-        try {
-            if (empty($provinceId)) {
-                return response()->json(['error' => 'Province ID required'], 400);
-            }
-
-            $provinceExists = Province::where('id', $provinceId)->exists();
-            if (!$provinceExists) {
-                return response()->json(['error' => 'Province not found'], 404);
-            }
-
-            $regencies = Regency::where('province_id', $provinceId)
-                            ->orderBy('name', 'asc')
-                            ->select('id', 'name', 'province_id')
+public function getProvinces()
+{
+    try {
+        $provinces = Province::orderBy('name', 'asc')
+                            ->select('id', 'name')
                             ->get();
-            
-            \Log::info("Fetched regencies for province {$provinceId}: " . $regencies->count());
-            
-            return response()->json($regencies);
-            
-        } catch (\Exception $e) {
-            \Log::error("Error fetching regencies: " . $e->getMessage());
-            return response()->json(['error' => 'Server error'], 500);
-        }
-    }
-
-    public function getDistricts($regencyId)
-    {
-        try {
-            if (empty($regencyId)) {
-                return response()->json(['error' => 'Regency ID required'], 400);
-            }
-
-            $regencyExists = Regency::where('id', $regencyId)->exists();
-            if (!$regencyExists) {
-                return response()->json(['error' => 'Regency not found'], 404);
-            }
-
-            $districts = District::where('regency_id', $regencyId)
-                            ->orderBy('name', 'asc')
-                            ->select('id', 'name', 'regency_id')
-                            ->get();
-            
-            \Log::info("Fetched districts for regency {$regencyId}: " . $districts->count());
-            
-            return response()->json($districts);
-            
-        } catch (\Exception $e) {
-            \Log::error("Error fetching districts: " . $e->getMessage());
-            return response()->json(['error' => 'Server error'], 500);
-        }
-    }
-
-    public function getVillages($districtId)
-    {
-        try {
-            if (empty($districtId)) {
-                return response()->json(['error' => 'District ID required'], 400);
-            }
-
-            $districtExists = District::where('id', $districtId)->exists();
-            if (!$districtExists) {
-                return response()->json(['error' => 'District not found'], 404);
-            }
-
-            $villages = Village::where('district_id', $districtId)
-                            ->orderBy('name', 'asc')
-                            ->select('id', 'name', 'district_id')
-                            ->get();
-            
-            \Log::info("Fetched villages for district {$districtId}: " . $villages->count());
-            
-            return response()->json($villages);
-            
-        } catch (\Exception $e) {
-            \Log::error("Error fetching villages: " . $e->getMessage());
-            return response()->json(['error' => 'Server error'], 500);
-        }
-    }
-
-    public function import(Request $request)
-    {
-        $request->validate([
-            'file' => 'required|mimes:csv,txt|max:5120',
+        
+        \Log::info("Fetched provinces: " . $provinces->count());
+        
+        return response()->json([
+            'success' => true,
+            'provinces' => $provinces
         ]);
-
-        try {
-            $file = $request->file('file');
-            $path = $file->getRealPath();
-            $data = array_map('str_getcsv', file($path));
-            
-            $header = array_shift($data);
-            
-            $imported = 0;
-            $errors = [];
-
-            DB::beginTransaction();
-
-            foreach ($data as $index => $row) {
-                $rowNumber = $index + 2;
-                
-                try {
-                    if (count($row) < 8) {
-                        $errors[] = "Row $rowNumber: Data tidak lengkap";
-                        continue;
-                    }
-
-                    $sales = User::where('username', trim($row[1]))->first();
-                    if (!$sales) {
-                        $errors[] = "Row $rowNumber: Sales '{$row[1]}' tidak ditemukan";
-                        continue;
-                    }
-
-                    $province = Province::where('name', 'like', '%' . trim($row[4]) . '%')->first();
-                    if (!$province) {
-                        $errors[] = "Row $rowNumber: Province '{$row[4]}' tidak ditemukan";
-                        continue;
-                    }
-
-                    $regency = null;
-                    $district = null;
-                    $village = null;
-
-                    if (!empty(trim($row[5]))) {
-                        $regency = Regency::where('province_id', $province->id)
-                            ->where('name', 'like', '%' . trim($row[5]) . '%')
-                            ->first();
-                    }
-
-                    if ($regency && !empty(trim($row[6]))) {
-                        $district = District::where('regency_id', $regency->id)
-                            ->where('name', 'like', '%' . trim($row[6]) . '%')
-                            ->first();
-                    }
-
-                    if ($district && !empty(trim($row[7]))) {
-                        $village = Village::where('district_id', $district->id)
-                            ->where('name', 'like', '%' . trim($row[7]) . '%')
-                            ->first();
-                    }
-
-                    $visitDate = null;
-                    if (!empty(trim($row[9]))) {
-                        try {
-                            $visitDate = \Carbon\Carbon::createFromFormat('d-m-Y', trim($row[9]))->format('Y-m-d');
-                        } catch (\Exception $e) {
-                            $visitDate = date('Y-m-d');
-                        }
-                    }
-
-                    $followUp = in_array(strtolower(trim($row[11] ?? '')), ['ya', 'yes', '1', 'true']);
-
-                    SalesVisit::create([
-                        'sales_id' => $sales->user_id,
-                        'user_id' => auth()->id(),
-                        'customer_name' => trim($row[2]),
-                        'company_id' => null, // Untuk import, company_id null
-                        'province_id' => $province->id,
-                        'regency_id' => $regency?->id,
-                        'district_id' => $district?->id,
-                        'village_id' => $village?->id,
-                        'address' => trim($row[8]) ?: null,
-                        'visit_date' => $visitDate ?: date('Y-m-d'),
-                        'visit_purpose' => trim($row[10]),
-                        'is_follow_up' => $followUp,
-                    ]);
-
-                    $imported++;
-
-                } catch (\Exception $e) {
-                    $errors[] = "Row $rowNumber: " . $e->getMessage();
-                }
-            }
-
-            DB::commit();
-
-            $message = "Berhasil import $imported data.";
-            if (count($errors) > 0) {
-                $message .= " " . count($errors) . " data gagal: " . implode(', ', array_slice($errors, 0, 3));
-            }
-
-            return redirect()->route('salesvisit')
-                ->with('success', $message);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()
-                ->with('error', 'Gagal import: ' . $e->getMessage());
-        }
+        
+    } catch (\Exception $e) {
+        \Log::error("Error fetching provinces: " . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'error' => 'Failed to load provinces'
+        ], 500);
     }
+}
 
-   private function getVisitActions($visit)
+public function getRegencies($provinceId)
+{
+    try {
+        if (empty($provinceId)) {
+            return response()->json(['error' => 'Province ID required'], 400);
+        }
+
+        $provinceExists = Province::where('id', $provinceId)->exists();
+        if (!$provinceExists) {
+            return response()->json(['error' => 'Province not found'], 404);
+        }
+
+        $regencies = Regency::where('province_id', $provinceId)
+                        ->orderBy('name', 'asc')
+                        ->select('id', 'name', 'province_id')
+                        ->get();
+        
+        \Log::info("Fetched regencies for province {$provinceId}: " . $regencies->count());
+        
+        return response()->json($regencies);
+        
+    } catch (\Exception $e) {
+        \Log::error("Error fetching regencies: " . $e->getMessage());
+        return response()->json(['error' => 'Server error'], 500);
+    }
+}
+
+public function getDistricts($regencyId)
+{
+    try {
+        if (empty($regencyId)) {
+            return response()->json(['error' => 'Regency ID required'], 400);
+        }
+
+        $regencyExists = Regency::where('id', $regencyId)->exists();
+        if (!$regencyExists) {
+            return response()->json(['error' => 'Regency not found'], 404);
+        }
+
+        $districts = District::where('regency_id', $regencyId)
+                        ->orderBy('name', 'asc')
+                        ->select('id', 'name', 'regency_id')
+                        ->get();
+        
+        \Log::info("Fetched districts for regency {$regencyId}: " . $districts->count());
+        
+        return response()->json($districts);
+        
+    } catch (\Exception $e) {
+        \Log::error("Error fetching districts: " . $e->getMessage());
+        return response()->json(['error' => 'Server error'], 500);
+    }
+}
+
+public function getVillages($districtId)
+{
+    try {
+        if (empty($districtId)) {
+            return response()->json(['error' => 'District ID required'], 400);
+        }
+
+        $districtExists = District::where('id', $districtId)->exists();
+        if (!$districtExists) {
+            return response()->json(['error' => 'District not found'], 404);
+        }
+
+        $villages = Village::where('district_id', $districtId)
+                        ->orderBy('name', 'asc')
+                        ->select('id', 'name', 'district_id')
+                        ->get();
+        
+        \Log::info("Fetched villages for district {$districtId}: " . $villages->count());
+        
+        return response()->json($villages);
+        
+    } catch (\Exception $e) {
+        \Log::error("Error fetching villages: " . $e->getMessage());
+        return response()->json(['error' => 'Server error'], 500);
+    }
+}
+
+public function import(Request $request)
+{
+    $request->validate([
+        'file' => 'required|mimes:csv,txt|max:5120',
+    ]);
+
+    try {
+        $file = $request->file('file');
+        $path = $file->getRealPath();
+        $data = array_map('str_getcsv', file($path));
+        
+        $header = array_shift($data);
+        
+        $imported = 0;
+        $errors = [];
+
+        DB::beginTransaction();
+
+        foreach ($data as $index => $row) {
+            $rowNumber = $index + 2;
+            
+            try {
+                if (count($row) < 8) {
+                    $errors[] = "Row $rowNumber: Data tidak lengkap";
+                    continue;
+                }
+
+                $sales = User::where('username', trim($row[1]))->first();
+                if (!$sales) {
+                    $errors[] = "Row $rowNumber: Sales '{$row[1]}' tidak ditemukan";
+                    continue;
+                }
+
+                $province = Province::where('name', 'like', '%' . trim($row[4]) . '%')->first();
+                if (!$province) {
+                    $errors[] = "Row $rowNumber: Province '{$row[4]}' tidak ditemukan";
+                    continue;
+                }
+
+                $regency = null;
+                $district = null;
+                $village = null;
+
+                if (!empty(trim($row[5]))) {
+                    $regency = Regency::where('province_id', $province->id)
+                        ->where('name', 'like', '%' . trim($row[5]) . '%')
+                        ->first();
+                }
+
+                if ($regency && !empty(trim($row[6]))) {
+                    $district = District::where('regency_id', $regency->id)
+                        ->where('name', 'like', '%' . trim($row[6]) . '%')
+                        ->first();
+                }
+
+                if ($district && !empty(trim($row[7]))) {
+                    $village = Village::where('district_id', $district->id)
+                        ->where('name', 'like', '%' . trim($row[7]) . '%')
+                        ->first();
+                }
+
+                $visitDate = null;
+                if (!empty(trim($row[9]))) {
+                    try {
+                        $visitDate = \Carbon\Carbon::createFromFormat('d-m-Y', trim($row[9]))->format('Y-m-d');
+                    } catch (\Exception $e) {
+                        $visitDate = date('Y-m-d');
+                    }
+                }
+
+                $followUp = in_array(strtolower(trim($row[11] ?? '')), ['ya', 'yes', '1', 'true']);
+
+                SalesVisit::create([
+                    'sales_id' => $sales->user_id,
+                    'user_id' => auth()->id(),
+                    'customer_name' => trim($row[2]),
+                    'company_id' => null,
+                    'province_id' => $province->id,
+                    'regency_id' => $regency?->id,
+                    'district_id' => $district?->id,
+                    'village_id' => $village?->id,
+                    'address' => trim($row[8]) ?: null,
+                    'visit_date' => $visitDate ?: date('Y-m-d'),
+                    'visit_purpose' => trim($row[10]),
+                    'is_follow_up' => $followUp,
+                ]);
+
+                $imported++;
+
+            } catch (\Exception $e) {
+                $errors[] = "Row $rowNumber: " . $e->getMessage();
+            }
+        }
+
+        DB::commit();
+
+        $message = "Berhasil import $imported data.";
+        if (count($errors) > 0) {
+            $message .= " " . count($errors) . " data gagal: " . implode(', ', array_slice($errors, 0, 3));
+        }
+
+        return redirect()->route('salesvisit')
+            ->with('success', $message);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()->back()
+            ->with('error', 'Gagal import: ' . $e->getMessage());
+    }
+}
+
+private function getVisitActions($visit)
 {
     $actions = [];
 

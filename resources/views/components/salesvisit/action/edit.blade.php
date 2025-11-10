@@ -71,18 +71,31 @@
                             </div>
                         </div>
 
-                        <!-- Company -->
+                        <!-- Company with Dropdown -->
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1.5">
                                 Company
                             </label>
                             <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
                                     <i class="fas fa-building text-gray-400 text-xs"></i>
                                 </div>
-                                <input type="text" name="company_name" id="editCompany"
-                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                    placeholder="Masukkan nama perusahaan">
+                                
+                                <!-- Hidden input untuk company_id -->
+                                <input type="hidden" name="company_id" id="edit-company-id">
+                                
+                                <!-- Input search untuk dropdown -->
+                                <input type="text" 
+                                    id="edit-company-search" 
+                                    placeholder="Ketik atau pilih company..."
+                                    autocomplete="off"
+                                    class="w-full pl-9 pr-20 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                                
+                                <!-- Dropdown list -->
+                                <div id="edit-company-dropdown" 
+                                    class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                    <div id="edit-company-options" class="py-1"></div>
+                                </div>
                             </div>
                         </div>
 
@@ -300,13 +313,11 @@ function checkEditAddressCompletion() {
     const content = document.getElementById('edit-address-content');
     const icon = document.getElementById('edit-address-toggle-icon');
     
-    // Cek apakah province dan address sudah diisi
     if (province && address) {
         statusText.textContent = 'Sudah diisi';
         statusText.classList.remove('text-gray-500');
         statusText.classList.add('text-green-600', 'font-medium');
         
-        // Auto collapse setelah 800ms
         setTimeout(() => {
             if (!content.classList.contains('hidden')) {
                 content.classList.add('hidden');
@@ -320,20 +331,100 @@ function checkEditAddressCompletion() {
     }
 }
 
+// ========== EDIT COMPANY DROPDOWN ==========
+let editCompanyDropdownTimeout = null;
+let editCurrentCompanies = [];
+
+async function loadEditCompanies(search = '') {
+    try {
+        console.log('🔄 Loading edit companies...');
+        const response = await fetch('/company/get-companies-dropdown');
+        const data = await response.json();
+        
+        if (data.success) {
+            editCurrentCompanies = data.companies;
+            updateEditCompanyDropdown(search);
+        }
+    } catch (error) {
+        console.error('❌ Error loading edit companies:', error);
+    }
+}
+
+function updateEditCompanyDropdown(search = '') {
+    const dropdown = document.getElementById('edit-company-options');
+    const searchTerm = search.toLowerCase();
+    const filteredCompanies = editCurrentCompanies.filter(company => 
+        company.name.toLowerCase().includes(searchTerm)
+    );
+    
+    dropdown.innerHTML = '';
+    
+    filteredCompanies.forEach(company => {
+        const option = document.createElement('div');
+        option.className = 'px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer';
+        option.textContent = company.name;
+        option.onclick = () => selectEditCompany(company.id, company.name);
+        dropdown.appendChild(option);
+    });
+    
+    const dropdownContainer = document.getElementById('edit-company-dropdown');
+    if (filteredCompanies.length > 0) {
+        dropdownContainer.classList.remove('hidden');
+    } else {
+        dropdownContainer.classList.add('hidden');
+    }
+}
+
+function selectEditCompany(companyId, companyName) {
+    console.log('✅ Edit company selected:', { companyId, companyName });
+    document.getElementById('edit-company-id').value = companyId;
+    document.getElementById('edit-company-search').value = companyName;
+    document.getElementById('edit-company-dropdown').classList.add('hidden');
+}
+
+function initEditCompanyDropdown() {
+    const searchInput = document.getElementById('edit-company-search');
+    const dropdown = document.getElementById('edit-company-dropdown');
+    
+    if (!searchInput || !dropdown) return;
+    
+    searchInput.addEventListener('focus', () => loadEditCompanies(searchInput.value));
+    
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(editCompanyDropdownTimeout);
+        editCompanyDropdownTimeout = setTimeout(() => updateEditCompanyDropdown(e.target.value), 300);
+    });
+    
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
+    
+    loadEditCompanies();
+}
+
 window.closeEditVisitModal = function() {
     document.getElementById('editVisitModal').classList.add('hidden');
     document.getElementById('editVisitForm').reset();
     document.body.style.overflow = 'auto';
+    
+    // Reset company dropdown
+    document.getElementById('edit-company-id').value = '';
+    document.getElementById('edit-company-search').value = '';
+    document.getElementById('edit-company-dropdown').classList.add('hidden');
     
     // Reset address collapse state
     const content = document.getElementById('edit-address-content');
     const icon = document.getElementById('edit-address-toggle-icon');
     const statusText = document.getElementById('edit-address-status');
     
-    content.classList.add('hidden');
-    icon.style.transform = 'rotate(0deg)';
-    statusText.textContent = 'Belum diisi';
-    statusText.classList.remove('text-green-600', 'font-medium');
-    statusText.classList.add('text-gray-500');
+    if (content) content.classList.add('hidden');
+    if (icon) icon.style.transform = 'rotate(0deg)';
+    if (statusText) {
+        statusText.textContent = 'Belum diisi';
+        statusText.classList.remove('text-green-600', 'font-medium');
+        statusText.classList.add('text-gray-500');
+    }
 };
 </script>

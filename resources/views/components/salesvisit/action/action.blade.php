@@ -93,14 +93,17 @@
                                     <i class="fas fa-building text-gray-400 text-xs"></i>
                                 </div>
                                 
+                                <!-- Hidden input untuk company_id yang akan dikirim ke server -->
                                 <input type="hidden" name="company_id" id="create-company-id">
                                 
+                                <!-- Input search untuk dropdown -->
                                 <input type="text" 
                                     id="create-company-search" 
                                     placeholder="Ketik atau pilih company..."
                                     autocomplete="off"
                                     class="w-full pl-9 pr-20 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
                                 
+                                <!-- Dropdown list -->
                                 <div id="create-company-dropdown" 
                                     class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                     <div id="create-company-options" class="py-1"></div>

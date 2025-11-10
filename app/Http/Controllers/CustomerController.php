@@ -306,6 +306,69 @@ class CustomerController extends Controller
             'message' => $count . ' customer berhasil dihapus'
         ]);
     }
+    // SEARCH & FILTER customers (AJAX)
+public function search(Request $request)
+{
+    $user = Auth::user();
+    
+    // Base query dengan relasi
+    $query = Customer::with(['province', 'regency', 'district', 'village', 'user']);
+
+    // 🔹 Apply role-based filtering
+    if ($user->role_id == 1) {
+        // SUPERADMIN - lihat semua
+    } elseif (in_array($user->role_id, [7, 11])) {
+        // ADMIN & MARKETING - lihat data SALES
+        $query->whereHas('user', function ($q) {
+            $q->where('role_id', 12);
+        });
+    } elseif ($user->role_id == 12) {
+        // SALES - hanya data sendiri
+        $query->where('user_id', $user->user_id);
+    } else {
+        $query->whereNull('id');
+    }
+
+    // 🔍 Search filter
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('name', 'LIKE', "%{$search}%")
+              ->orWhere('email', 'LIKE', "%{$search}%")
+              ->orWhere('phone', 'LIKE', "%{$search}%")
+              ->orWhere('address', 'LIKE', "%{$search}%")
+              ->orWhere('pic', 'LIKE', "%{$search}%")
+              ->orWhere('contact_person_name', 'LIKE', "%{$search}%");
+        });
+    }
+
+    // 🎯 Filter by Status
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    // 🎯 Filter by Type
+    if ($request->filled('type')) {
+        $query->where('type', $request->type);
+    }
+
+    // 🎯 Filter by Province
+    if ($request->filled('province')) {
+        $query->where('province_id', $request->province);
+    }
+
+    // 🎯 Filter by Sales (hanya untuk Admin/Marketing/Superadmin)
+    if ($request->filled('sales') && in_array($user->role_id, [1, 7, 11])) {
+        $query->where('user_id', $request->sales);
+    }
+
+    $customers = $query->orderBy('created_at', 'desc')->get();
+
+    return response()->json([
+        'success' => true,
+        'data' => $customers
+    ]);
+}
 
     // IMPORT dari CSV/Excel
     public function import(Request $request)

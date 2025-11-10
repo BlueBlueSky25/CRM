@@ -38,9 +38,18 @@
                     </div>
                 </td>
                 
-                <!-- Company -->
+                <!-- Company - Ambil dari relasi -->
                 <td style="padding: 0.5rem 0.75rem;">
-                    <div style="font-size: 0.8125rem; color: #111827;">{{ $visit->company_name ?? '-' }}</div>
+                    <div style="font-size: 0.8125rem; color: #111827;">
+                        @if($visit->company)
+                            <span style="display: flex; align-items: center; gap: 0.25rem;">
+                                <i class="fas fa-building" style="color: #9ca3af; font-size: 0.6875rem;"></i>
+                                {{ $visit->company->company_name }}
+                            </span>
+                        @else
+                            <span style="color: #9ca3af;">-</span>
+                        @endif
+                    </div>
                 </td>
                 
                 <!-- Customer Name -->
@@ -113,7 +122,8 @@
                                 'id' => $visit->id,
                                 'salesId' => $visit->sales_id,
                                 'customerName' => $visit->customer_name,
-                                'company' => $visit->company_name ?? '',
+                                'companyId' => $visit->company_id,
+                                'companyName' => optional($visit->company)->company_name ?? '',
                                 'provinceId' => $visit->province_id,
                                 'regencyId' => $visit->regency_id,
                                 'districtId' => $visit->district_id,
