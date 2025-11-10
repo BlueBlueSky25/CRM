@@ -1,245 +1,320 @@
 <!-- Modal Edit User -->
 <div id="editUserModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden animate-modal-in">
-        <!-- Header -->
-        <div style="background: linear-gradient(to right, #4f46e5, #7c3aed); padding: 1rem 1.25rem;">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[95vh] overflow-hidden animate-fadeIn">
+        
+        <!-- Modal Header -->
+        <div class="px-6 py-4 border-b border-gray-200" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #3b82f6 100%);">
             <div class="flex justify-between items-center">
-                <div>
-                    <h3 class="text-lg font-semibold text-white">Edit User</h3>
-                    <p class="text-xs text-indigo-100 mt-0.5">Perbarui data user di formulir berikut</p>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-user-edit text-white text-lg"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-white">Edit User</h3>
                 </div>
-                <button onclick="closeEditSalesModal()" 
-                    class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
-                    <i class="fas fa-times text-lg"></i>
+                <button onclick="closeEditSalesModal()" class="text-white hover:text-gray-200 transition-colors p-2">
+                    <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Body -->
-        <div class="overflow-y-auto max-h-[calc(90vh-120px)]" style="background-color: #f3f4f6; padding: 1rem;">
-            <form id="editUserForm" action="#" method="POST" style="display: flex; flex-direction: column; gap: 0.75rem;">
-                @csrf
-                @method('PUT')
-                <input type="hidden" id="editUserId" name="user_id">
-                
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
-                    <!-- Username -->
-                    <div>
-                        <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
-                            Username <span style="color: #ef4444;">*</span>
-                        </label>
-                        <div style="position: relative;">
-                            <i class="fas fa-user" style="position: absolute; left: 0.625rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.75rem;"></i>
-                            <input type="text" 
-                                id="editUsername"
-                                name="username" 
-                                style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem 0.5rem 2rem; font-size: 0.875rem;" 
-                                placeholder="Masukkan username"
-                                required>
-                        </div>
-                    </div>
-                    
-                    <!-- Email -->
-                    <div>
-                        <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
-                            Email <span style="color: #ef4444;">*</span>
-                        </label>
-                        <div style="position: relative;">
-                            <i class="fas fa-envelope" style="position: absolute; left: 0.625rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.75rem;"></i>
-                            <input type="email" 
-                                id="editEmail"
-                                name="email" 
-                                style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem 0.5rem 2rem; font-size: 0.875rem;" 
-                                placeholder="email@example.com"
-                                required>
-                        </div>
-                    </div>
-
-                    <!-- Phone -->
-                    <div>
-                        <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
-                            No. Telepon
-                        </label>
-                        <div style="position: relative;">
-                            <i class="fas fa-phone" style="position: absolute; left: 0.625rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.75rem;"></i>
-                            <input type="text" 
-                                id="editPhone"
-                                name="phone" 
-                                style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem 0.5rem 2rem; font-size: 0.875rem;"
-                                placeholder="08xxxxxxxxxx">
-                        </div>
-                    </div>
-
-                    <!-- Birth Date -->
-                    <div>
-                        <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
-                            Tanggal Lahir
-                        </label>
-                        <div style="position: relative;">
-                            <i class="fas fa-calendar" style="position: absolute; left: 0.625rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.75rem;"></i>
-                            <input type="date" 
-                                id="editBirthDate"
-                                name="birth_date" 
-                                style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem 0.5rem 2rem; font-size: 0.875rem;"
-                                max="{{ date('Y-m-d') }}">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Address Section -->
-                <div style="background: linear-gradient(to bottom right, #eff6ff, #e0e7ff); border: 1px solid #c7d2fe; border-radius: 0.5rem; padding: 0.75rem;">
-                    <h4 style="font-size: 0.875rem; font-weight: 600; color: #1f2937; margin-bottom: 0.75rem; display: flex; align-items: center;">
-                        <i class="fas fa-map-marker-alt" style="color: #6366f1; margin-right: 0.5rem; font-size: 0.875rem;"></i>
-                        Informasi Alamat
+        <!-- Modal Body -->
+        <form id="editUserForm" action="#" method="POST" class="overflow-y-auto max-h-[calc(95vh-140px)]">
+            @csrf
+            @method('PUT')
+            <input type="hidden" id="editUserId" name="user_id">
+            
+            <div class="px-4 py-4 space-y-4">
+                <!-- Basic Information -->
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                        <i class="fas fa-id-card text-blue-500 mr-2"></i>
+                        Informasi Dasar
                     </h4>
                     
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
-                        <!-- Provinsi -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- Username -->
                         <div>
-                            <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
-                                Provinsi <span style="color: #ef4444;">*</span>
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                Username <span class="text-red-500">*</span>
                             </label>
-                            <select id="edit-province" name="province_id" 
-                                    style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;" 
-                                    required>
-                                <option value="">-- Pilih Provinsi --</option>
-                                @foreach($provinces as $province)
-                                    <option value="{{ $province->id }}">{{ $province->name }}</option>
-                                @endforeach
-                            </select>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-user text-gray-400 text-xs"></i>
+                                </div>
+                                <input type="text" id="editUsername" name="username"
+                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                    placeholder="Masukkan username" required>
+                            </div>
+                        </div>
+                        
+                        <!-- Email -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                Email <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-envelope text-gray-400 text-xs"></i>
+                                </div>
+                                <input type="email" id="editEmail" name="email"
+                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                    placeholder="email@example.com" required>
+                            </div>
                         </div>
 
-                        <!-- Kabupaten/Kota -->
+                        <!-- Phone -->
                         <div>
-                            <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
-                                Kabupaten/Kota <span style="color: #ef4444;">*</span>
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                No. Telepon
                             </label>
-                            <select id="edit-regency" name="regency_id" 
-                                    style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;" 
-                                    required disabled>
-                                <option value="">-- Pilih Kabupaten/Kota --</option>
-                            </select>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-phone text-gray-400 text-xs"></i>
+                                </div>
+                                <input type="text" id="editPhone" name="phone"
+                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                    placeholder="08xxxxxxxxxx">
+                            </div>
                         </div>
 
-                        <!-- Kecamatan -->
+                        <!-- Birth Date -->
                         <div>
-                            <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
-                                Kecamatan <span style="color: #ef4444;">*</span>
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                Tanggal Lahir
                             </label>
-                            <select id="edit-district" name="district_id" 
-                                    style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;" 
-                                    required disabled>
-                                <option value="">-- Pilih Kecamatan --</option>
-                            </select>
-                        </div>
-
-                        <!-- Kelurahan/Desa -->
-                        <div>
-                            <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
-                                Kelurahan/Desa <span style="color: #ef4444;">*</span>
-                            </label>
-                            <select id="edit-village" name="village_id" 
-                                    style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;" 
-                                    required disabled>
-                                <option value="">-- Pilih Kelurahan/Desa --</option>
-                            </select>
-                        </div>
-
-                        <!-- Detail Alamat (full width) -->
-                        <div style="grid-column: span 2;">
-                            <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
-                                Detail Alamat
-                            </label>
-                            <div style="position: relative;">
-                                <i class="fas fa-home" style="position: absolute; left: 0.625rem; top: 0.625rem; color: #9ca3af; font-size: 0.75rem;"></i>
-                                <textarea id="editAlamat" name="address" rows="2" 
-                                        placeholder="Contoh: Jl. Merdeka No. 123, RT 01/RW 02" 
-                                        style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem 0.5rem 2rem; font-size: 0.875rem; resize: none;"></textarea>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-calendar text-gray-400 text-xs"></i>
+                                </div>
+                                <input type="date" id="editBirthDate" name="birth_date"
+                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                    max="{{ date('Y-m-d') }}">
                             </div>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Tombol -->
-                <div style="display: flex; justify-content: flex-end; gap: 0.5rem; padding-top: 0.75rem; border-top: 1px solid #e5e7eb; margin-top: 0.5rem;">
-                    <button type="button" 
-                            onclick="closeEditSalesModal()" 
-                            style="background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 1.25rem; font-weight: 500; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;">
-                        <i class="fas fa-times" style="margin-right: 0.375rem;"></i>
-                        Batal
-                    </button>
-                    <button type="submit" 
-                            style="background-color: #4f46e5; color: white; border: none; border-radius: 0.5rem; padding: 0.5rem 1.25rem; font-weight: 500; font-size: 0.75rem; cursor: pointer; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); transition: all 0.2s;">
-                        <i class="fas fa-save" style="margin-right: 0.375rem;"></i>
-                        Simpan Perubahan
-                    </button>
+
+                <!-- Address Section with Collapsible -->
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200 overflow-hidden">
+                    <!-- Header - Always Visible -->
+                    <div class="p-3 cursor-pointer hover:bg-blue-100 transition-colors" onclick="toggleEditAddressSection()">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-sm font-semibold text-gray-800 flex items-center">
+                                <i class="fas fa-map-marker-alt text-indigo-600 mr-2"></i>
+                                Informasi Alamat
+                            </h4>
+                            <div class="flex items-center gap-2">
+                                <span id="edit-address-status" class="text-xs text-gray-500">Belum diisi</span>
+                                <i id="edit-address-toggle-icon" class="fas fa-chevron-down text-gray-600 transition-transform duration-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Collapsible Content -->
+                    <div id="edit-address-content" class="hidden">
+                        <div class="px-3 pb-3 space-y-3">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <!-- Provinsi -->
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                        Provinsi <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-map text-gray-400 text-xs"></i>
+                                        </div>
+                                        <select id="edit-province" name="province_id"
+                                            class="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none bg-white"
+                                            onchange="checkEditAddressCompletion()"
+                                            required>
+                                            <option value="">-- Pilih Provinsi --</option>
+                                            @foreach($provinces as $province)
+                                                <option value="{{ $province->id }}">{{ $province->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Kabupaten/Kota -->
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                        Kabupaten/Kota <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-city text-gray-400 text-xs"></i>
+                                        </div>
+                                        <select id="edit-regency" name="regency_id"
+                                            class="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none bg-white"
+                                            onchange="checkEditAddressCompletion()"
+                                            required disabled>
+                                            <option value="">-- Pilih Kabupaten/Kota --</option>
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Kecamatan -->
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                        Kecamatan <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-map-signs text-gray-400 text-xs"></i>
+                                        </div>
+                                        <select id="edit-district" name="district_id"
+                                            class="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none bg-white"
+                                            onchange="checkEditAddressCompletion()"
+                                            required disabled>
+                                            <option value="">-- Pilih Kecamatan --</option>
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Kelurahan/Desa -->
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                        Kelurahan/Desa <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-home text-gray-400 text-xs"></i>
+                                        </div>
+                                        <select id="edit-village" name="village_id"
+                                            class="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none bg-white"
+                                            onchange="checkEditAddressCompletion()"
+                                            required disabled>
+                                            <option value="">-- Pilih Kelurahan/Desa --</option>
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Detail Alamat -->
+                                <div class="md:col-span-2">
+                                    <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                        Detail Alamat
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute top-2 left-3 pointer-events-none">
+                                            <i class="fas fa-map-marked-alt text-gray-400 text-xs"></i>
+                                        </div>
+                                        <textarea id="editAlamat" name="address" rows="2"
+                                            class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"
+                                            placeholder="Contoh: Jl. Merdeka No. 123, RT 01/RW 02"
+                                            oninput="checkEditAddressCompletion()"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </form>
-        </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+                <button type="button" onclick="closeEditSalesModal()" 
+                    class="px-4 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2">
+                    <i class="fas fa-times"></i>
+                    Batal
+                </button>
+                <button type="submit" 
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-lg shadow-blue-500/30">
+                    <i class="fas fa-save"></i>
+                    Simpan Perubahan
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
 <style>
-    /* Modal Animation */
-    @keyframes modal-in {
-        from {
-            opacity: 0;
-            transform: scale(0.95) translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-        }
-    }
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95) translateY(-20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.animate-fadeIn { animation: fadeIn 0.3s ease-out; }
 
-    .animate-modal-in {
-        animation: modal-in 0.3s ease-out;
-    }
+select::-ms-expand { display: none; }
+input:focus, select:focus, textarea:focus { outline: none; }
+select:disabled {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
 
-    /* Custom Scrollbar for Modal */
-    .overflow-y-auto::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .overflow-y-auto::-webkit-scrollbar-track {
-        background: #f1f5f9;
-        border-radius: 3px;
-    }
-
-    .overflow-y-auto::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 3px;
-    }
-
-    .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-    }
-
-    /* Enhanced focus states */
-    input:focus, textarea:focus, select:focus {
-        outline: none;
-        border-color: #3b82f6 !important;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
-    }
-
-    select:disabled {
-        background-color: #f3f4f6;
-        cursor: not-allowed;
-        opacity: 0.6;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 640px) {
-        #editUserModal .bg-white {
-            margin: 1rem;
-            max-width: calc(100% - 2rem);
-        }
-    }
+/* Custom Scrollbar */
+.overflow-y-auto::-webkit-scrollbar {
+    width: 6px;
+}
+.overflow-y-auto::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+.overflow-y-auto::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
 </style>
 
 <script>
 let editCascadeInstance = null;
 
+// ========== ADDRESS SECTION TOGGLE ==========
+function toggleEditAddressSection() {
+    const content = document.getElementById('edit-address-content');
+    const icon = document.getElementById('edit-address-toggle-icon');
+    
+    if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        icon.style.transform = 'rotate(180deg)';
+    } else {
+        content.classList.add('hidden');
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
+
+function checkEditAddressCompletion() {
+    const province = document.getElementById('edit-province').value;
+    const address = document.getElementById('editAlamat').value.trim();
+    const statusText = document.getElementById('edit-address-status');
+    const content = document.getElementById('edit-address-content');
+    const icon = document.getElementById('edit-address-toggle-icon');
+    
+    if (province && address) {
+        statusText.textContent = 'Sudah diisi';
+        statusText.classList.remove('text-gray-500');
+        statusText.classList.add('text-green-600', 'font-medium');
+        
+        // Auto collapse setelah 800ms
+        setTimeout(() => {
+            if (!content.classList.contains('hidden')) {
+                content.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }, 800);
+    } else {
+        statusText.textContent = 'Belum diisi';
+        statusText.classList.remove('text-green-600', 'font-medium');
+        statusText.classList.add('text-gray-500');
+    }
+}
+
+// ========== MODAL FUNCTIONS ==========
 function openEditSalesModal(user_id, username, email, phone, birth_date, address, provinceId, regencyId, districtId, villageId) {
     console.log('Opening edit modal with data:', {user_id, username, email, phone, birth_date, address, provinceId, regencyId, districtId, villageId});
     
@@ -283,22 +358,28 @@ function initEditAddressCascade(provinceId, regencyId, districtId, villageId) {
         document.getElementById('edit-province').value = provinceId;
         document.getElementById('edit-province').dispatchEvent(new Event('change'));
         
+        // Check initial address completion
+        checkEditAddressCompletion();
+        
         if (regencyId && regencyId !== 'null' && regencyId !== '') {
             setTimeout(() => {
                 console.log('Setting regency:', regencyId);
                 document.getElementById('edit-regency').value = regencyId;
                 document.getElementById('edit-regency').dispatchEvent(new Event('change'));
+                checkEditAddressCompletion();
                 
                 if (districtId && districtId !== 'null' && districtId !== '') {
                     setTimeout(() => {
                         console.log('Setting district:', districtId);
                         document.getElementById('edit-district').value = districtId;
                         document.getElementById('edit-district').dispatchEvent(new Event('change'));
+                        checkEditAddressCompletion();
                         
                         if (villageId && villageId !== 'null' && villageId !== '') {
                             setTimeout(() => {
                                 console.log('Setting village:', villageId);
                                 document.getElementById('edit-village').value = villageId;
+                                checkEditAddressCompletion();
                             }, 500);
                         }
                     }, 500);
@@ -327,8 +408,20 @@ function closeEditSalesModal() {
     document.getElementById('edit-regency').innerHTML = '<option value="">-- Pilih Kabupaten/Kota --</option>';
     document.getElementById('edit-district').innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
     document.getElementById('edit-village').innerHTML = '<option value="">-- Pilih Kelurahan/Desa --</option>';
+    
+    // Reset address collapse state
+    const content = document.getElementById('edit-address-content');
+    const icon = document.getElementById('edit-address-toggle-icon');
+    const statusText = document.getElementById('edit-address-status');
+    
+    content.classList.add('hidden');
+    icon.style.transform = 'rotate(0deg)';
+    statusText.textContent = 'Belum diisi';
+    statusText.classList.remove('text-green-600', 'font-medium');
+    statusText.classList.add('text-gray-500');
 }
 
+// ========== EVENT LISTENERS ==========
 // Close modal when clicking outside
 document.addEventListener('click', function(e) {
     const modal = document.getElementById('editUserModal');

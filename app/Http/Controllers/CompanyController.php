@@ -7,57 +7,51 @@ use App\Models\CompanyType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-
 class CompanyController extends Controller
 {
-   public function index()
-{
-    $user = Auth::user();
+    public function index()
+    {
+        $user = Auth::user();
 
-    // base query dengan relasi
-    $companiesQuery = Company::with('companyType', 'user');
+        // base query dengan relasi
+        $companiesQuery = Company::with('companyType', 'user');
 
-    // 🔹 SUPERADMIN (role_id = 1) → lihat semua data
-    if ($user->role_id == 1) {
-        // tanpa filter apa pun
+        // Role-based filtering
+        if ($user->role_id == 1) {
+            // superadmin - all data
+        } elseif (in_array($user->role_id, [7, 11])) {
+            // admin & marketing
+            $companiesQuery->whereHas('user', function ($q) {
+                $q->where('role_id', 12);
+            });
+        } elseif ($user->role_id == 12) {
+            // sales - own data only
+            $companiesQuery->where('user_id', $user->user_id);
+        } else {
+            $companiesQuery->whereNull('company_id');
+        }
+
+        // KPI calculations BEFORE pagination
+        $totalCompanies   = (clone $companiesQuery)->count();
+        $jenisCompanies   = (clone $companiesQuery)->distinct('company_type_id')->count('company_type_id');
+        $tierCompanies    = (clone $companiesQuery)->distinct('tier')->count('tier');
+        $activeCompanies  = (clone $companiesQuery)->where('status', 'active')->count();
+
+        // NOW paginate
+        $companies = $companiesQuery->paginate(10);
+
+        // dropdown company type aktif
+        $types = CompanyType::where('is_active', true)->get();
+
+        return view('pages.company', compact(
+            'companies',
+            'types',
+            'totalCompanies',
+            'jenisCompanies',
+            'tierCompanies',
+            'activeCompanies'
+        ));
     }
-    // 🔹 ADMIN (role_id = 7) & MARKETING (role_id = 11)
-    elseif (in_array($user->role_id, [7, 11])) {
-        $companiesQuery->whereHas('user', function ($q) {
-            $q->where('role_id', 12); // hanya user sales
-        });
-    }
-    // 🔹 SALES (role_id = 12) → hanya data milik sendiri
-    elseif ($user->role_id == 12) {
-        $companiesQuery->where('user_id', $user->user_id);
-    }
-    // kalau role lain
-    else {
-        $companiesQuery->whereNull('company_id'); // tampil kosong aja
-    }
-
-    // 🔴 FIX: Hitung KPI SEBELUM pagination
-    $totalCompanies   = (clone $companiesQuery)->count();
-    $jenisCompanies   = (clone $companiesQuery)->distinct('company_type_id')->count('company_type_id');
-    $tierCompanies    = (clone $companiesQuery)->distinct('tier')->count('tier');
-    $activeCompanies  = (clone $companiesQuery)->where('status', 'active')->count();
-
-    // 🟢 SEKARANG baru paginate untuk table
-    $companies = $companiesQuery->paginate(10);
-
-    // dropdown company type aktif
-    $types = CompanyType::where('is_active', true)->get();
-
-    return view('pages.company', compact(
-        'companies',
-        'types',
-        'totalCompanies',
-        'jenisCompanies',
-        'tierCompanies',
-        'activeCompanies'
-    ));
-}
-
 
     public function search(Request $request)
     {
@@ -78,22 +72,20 @@ class CompanyController extends Controller
             });
         }
 
-        // Filter by type - HANDLE BOTH ID DAN NAME
+        // Filter by type
         if ($request->filled('type')) {
             $type = $request->type;
             
-            // Cek apakah numeric (ID) atau string (name)
             if (is_numeric($type)) {
                 $query->where('company_type_id', $type);
             } else {
-                // Search by type_name (case-insensitive)
                 $query->whereHas('companyType', function($q) use ($type) {
                     $q->whereRaw('LOWER(type_name) LIKE ?', ['%' . strtolower($type) . '%']);
                 });
             }
         }
 
-        // Filter by tier - CASE INSENSITIVE
+        // Filter by tier
         if ($request->filled('tier')) {
             $query->whereRaw('LOWER(tier) = ?', [strtolower($request->tier)]);
         }
@@ -106,7 +98,6 @@ class CompanyController extends Controller
         // Pagination
         $companies = $query->orderBy('company_name', 'asc')->paginate(10);
 
-        // Format response untuk AJAX
         return response()->json([
             'items' => $companies->map(function($company, $index) use ($companies) {
                 return [
@@ -132,8 +123,9 @@ class CompanyController extends Controller
 
     public function store(Request $request)
     {
+        // 🔥 FIX: Change 'companies' to 'company' in validation
         $request->validate([
-            'company_name'     => 'required|string|max:255',
+            'company_name'     => 'required|string|max:255|unique:company,company_name', // ← FIXED
             'company_type_id'  => 'required|exists:company_type,company_type_id',
             'tier'             => 'nullable|string|in:A,B,C,D',
             'description'      => 'nullable|string',
@@ -142,7 +134,6 @@ class CompanyController extends Controller
 
         $user = Auth::user();
 
-        // 🔧 FIX: Ganti dari $user->role ke $user->role_id atau $user->role->role_name
         $allowedRoles = ['superadmin', 'admin', 'marketing', 'sales'];
         $userRoleName = strtolower($user->role->role_name ?? '');
         
@@ -156,17 +147,19 @@ class CompanyController extends Controller
             'tier'            => $request->tier,
             'description'     => $request->description,
             'status'          => $request->status ?? 'active',
-            'user_id'         => $user->user_id, // 🔹 simpan user pembuat
+            'user_id'         => $user->user_id,
         ]);
 
         return redirect()->route('company')->with('success', 'Perusahaan berhasil ditambahkan');
     }
 
-
     public function update(Request $request, $id)
     {
+        $company = Company::findOrFail($id);
+        
+        // 🔥 FIX: Change 'companies' to 'company' and ignore current record
         $request->validate([
-            'company_name'     => 'required|string|max:255',
+            'company_name'     => 'required|string|max:255|unique:company,company_name,' . $id . ',company_id', // ← FIXED
             'company_type_id'  => 'required|exists:company_type,company_type_id',
             'tier'             => 'nullable|string|in:A,B,C,D',
             'description'      => 'nullable|string',
@@ -174,12 +167,8 @@ class CompanyController extends Controller
         ]);
 
         $user = Auth::user();
-        $company = Company::findOrFail($id);
-
-        // 🔧 FIX: Ganti dari $user->role ke $user->role->role_name
         $userRoleName = strtolower($user->role->role_name ?? '');
         
-        // 🔹 Sales hanya boleh edit data miliknya sendiri
         if ($userRoleName === 'sales' && $company->user_id !== $user->user_id) {
             return redirect()->back()->with('error', 'Anda tidak boleh mengedit data milik sales lain.');
         }
@@ -195,16 +184,13 @@ class CompanyController extends Controller
         return redirect()->route('company')->with('success', 'Data perusahaan berhasil diperbarui');
     }
 
-
     public function destroy($id)
     {
         $user = Auth::user();
         $company = Company::findOrFail($id);
 
-        // 🔧 FIX: Ganti dari $user->role ke $user->role->role_name
         $userRoleName = strtolower($user->role->role_name ?? '');
         
-        // 🔹 Sales hanya bisa hapus data miliknya sendiri
         if ($userRoleName === 'sales' && $company->user_id !== $user->user_id) {
             return redirect()->route('company')->with('error', 'Anda tidak boleh menghapus data milik sales lain.');
         }
@@ -214,8 +200,6 @@ class CompanyController extends Controller
         return redirect()->route('company')->with('success', 'Perusahaan berhasil dihapus');
     }
 
-    // ==================== NEW METHODS FOR SALESVISIT DROPDOWN ====================
-    
     /**
      * Get all companies for dropdown (digunakan di SalesVisit)
      */
@@ -224,26 +208,25 @@ class CompanyController extends Controller
         try {
             $user = Auth::user();
             
-            // Base query
             $companiesQuery = Company::query();
             
-            // Role-based filtering (sama seperti index)
+            // Role-based filtering
             if ($user->role_id == 1) {
                 // superadmin - all data
             } elseif (in_array($user->role_id, [7, 11])) {
-                // admin & marketing - hanya company dari sales
+                // admin & marketing - only sales companies
                 $companiesQuery->whereHas('user', function ($q) {
                     $q->where('role_id', 12);
                 });
             } elseif ($user->role_id == 12) {
-                // sales - hanya milik sendiri
+                // sales - own data only
                 $companiesQuery->where('user_id', $user->user_id);
             } else {
                 $companiesQuery->whereNull('company_id');
             }
             
             $companies = $companiesQuery
-                ->where('status', 'active') // hanya yang aktif
+                ->where('status', 'active')
                 ->select('company_id as id', 'company_name as name')
                 ->orderBy('company_name', 'asc')
                 ->get();
@@ -265,16 +248,29 @@ class CompanyController extends Controller
     }
 
     /**
-     * Store new company (AJAX - digunakan di SalesVisit modal)
+     * Store new company via AJAX (used in SalesVisit modal)
+     * 🔥 FIXED: Validation table name corrected
      */
     public function storeCompanyAjax(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255|unique:companies,company_name',
-            'company_type_id' => 'nullable|exists:company_type,company_type_id'
-        ]);
-
         try {
+            \Log::info('🔵 Store Company AJAX Request', [
+                'content_type' => $request->header('Content-Type'),
+                'all_data' => $request->all(),
+                'method' => $request->method()
+            ]);
+            
+            // 🔥 CRITICAL FIX: Change 'companies' to 'company'
+            $validated = $request->validate([
+                'company_name' => 'required|string|max:255|unique:company,company_name', // ← FIXED
+                'company_type_id' => 'required|exists:company_type,company_type_id',
+                'tier' => 'nullable|string|in:A,B,C,D',
+                'description' => 'nullable|string',
+                'status' => 'nullable|in:active,inactive'
+            ]);
+            
+            \Log::info('✅ Validation passed', $validated);
+            
             $user = Auth::user();
             
             // Check permission
@@ -287,25 +283,22 @@ class CompanyController extends Controller
                     'message' => 'Anda tidak memiliki izin untuk menambah company'
                 ], 403);
             }
-
-            // Jika tidak ada company_type_id, gunakan default atau type pertama
-            $companyTypeId = $request->company_type_id;
-            if (!$companyTypeId) {
-                $defaultType = CompanyType::where('is_active', true)->first();
-                $companyTypeId = $defaultType?->company_type_id;
-            }
-
+            
+            // Create company
             $company = Company::create([
-                'company_name' => trim($request->name),
-                'company_type_id' => $companyTypeId,
-                'status' => 'active',
-                'user_id' => $user->user_id,
-                'tier' => $request->tier ?? null,
-                'description' => $request->description ?? null
+                'company_name' => trim($validated['company_name']),
+                'company_type_id' => $validated['company_type_id'],
+                'tier' => $validated['tier'] ?? null,
+                'description' => $validated['description'] ?? null,
+                'status' => $validated['status'] ?? 'active',
+                'user_id' => $user->user_id
             ]);
-
-            \Log::info('Company created via AJAX:', $company->toArray());
-
+            
+            \Log::info('✅ Company created successfully', [
+                'company_id' => $company->company_id,
+                'company_name' => $company->company_name
+            ]);
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Company berhasil ditambahkan!',
@@ -313,14 +306,31 @@ class CompanyController extends Controller
                     'id' => $company->company_id,
                     'name' => $company->company_name
                 ]
+            ], 201);
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::warning('⚠️ Validation failed', [
+                'errors' => $e->errors()
             ]);
-
-        } catch (\Exception $e) {
-            \Log::error('Error storing company via AJAX: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menambahkan company: ' . $e->getMessage()
+                'message' => 'Validasi gagal',
+                'errors' => $e->errors()
+            ], 422);
+            
+        } catch (\Exception $e) {
+            \Log::error('❌ Error storing company via AJAX', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menambahkan company',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
             ], 500);
         }
     }

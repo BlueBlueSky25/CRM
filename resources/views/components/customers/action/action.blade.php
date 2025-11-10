@@ -1,8 +1,9 @@
 <!-- Modal Tambah/Edit Customer -->
 <div id="customerModal"
-    class="modal hidden fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-hidden animate-fadeIn">
-        <!-- Modal Header - WARNA BARU PURPLE BLUE -->
+    class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden animate-fadeIn">
+        
+        <!-- Modal Header -->
         <div class="px-6 py-4 border-b border-gray-200" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #3b82f6 100%);">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-3">
@@ -170,154 +171,190 @@
                     </div>
                 </div>
 
-                <!-- Address Section -->
-                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-200">
-                    <h4 class="text-sm font-semibold text-gray-800 mb-3 flex items-center">
-                        <i class="fas fa-map-marker-alt text-indigo-600 mr-2"></i>
-                        Informasi Alamat
-                    </h4>
+                <!-- Address Section with Collapsible -->
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200 overflow-hidden">
+                    <!-- Header - Always Visible -->
+                    <div class="p-3 cursor-pointer hover:bg-blue-100 transition-colors" onclick="toggleCustomerAddressSection()">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-sm font-semibold text-gray-800 flex items-center">
+                                <i class="fas fa-map-marker-alt text-indigo-600 mr-2"></i>
+                                Informasi Alamat
+                            </h4>
+                            <div class="flex items-center gap-2">
+                                <span id="customer-address-status" class="text-xs text-gray-500">Belum diisi</span>
+                                <i id="customer-address-toggle-icon" class="fas fa-chevron-down text-gray-600 transition-transform duration-300"></i>
+                            </div>
+                        </div>
+                    </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <!-- Provinsi -->
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                Provinsi <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-map text-gray-400 text-xs"></i>
+                    <!-- Collapsible Content -->
+                    <div id="customer-address-content" class="hidden">
+                        <div class="px-3 pb-3 space-y-3">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <!-- Provinsi -->
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                        Provinsi <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-map text-gray-400 text-xs"></i>
+                                        </div>
+                                        <select id="create-province" name="province_id" 
+                                            class="cascade-province w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none bg-white"
+                                            onchange="checkCustomerAddressCompletion()"
+                                            required>
+                                            <option value="">-- Pilih Provinsi --</option>
+                                            @foreach($provinces as $province)
+                                                <option value="{{ $province->id }}">{{ $province->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                                        </div>
+                                    </div>
                                 </div>
-                                <select id="create-province" name="province_id" 
-                                    class="cascade-province w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none bg-white" 
-                                    required>
-                                    <option value="">-- Pilih Provinsi --</option>
-                                    @foreach($provinces as $province)
-                                        <option value="{{ $province->id }}">{{ $province->name }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- Kabupaten/Kota -->
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                Kabupaten/Kota <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-city text-gray-400 text-xs"></i>
+                                <!-- Kabupaten/Kota -->
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                        Kabupaten/Kota <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-city text-gray-400 text-xs"></i>
+                                        </div>
+                                        <select id="create-regency" name="regency_id" 
+                                            class="cascade-regency w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none bg-white"
+                                            onchange="checkCustomerAddressCompletion()"
+                                            required disabled>
+                                            <option value="">-- Pilih Kabupaten/Kota --</option>
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                                        </div>
+                                    </div>
                                 </div>
-                                <select id="create-regency" name="regency_id" 
-                                    class="cascade-regency w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none bg-white" 
-                                    required disabled>
-                                    <option value="">-- Pilih Kabupaten/Kota --</option>
-                                </select>
-                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- Kecamatan -->
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                Kecamatan <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-map-signs text-gray-400 text-xs"></i>
+                                <!-- Kecamatan -->
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                        Kecamatan <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-map-signs text-gray-400 text-xs"></i>
+                                        </div>
+                                        <select id="create-district" name="district_id" 
+                                            class="cascade-district w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none bg-white"
+                                            onchange="checkCustomerAddressCompletion()"
+                                            required disabled>
+                                            <option value="">-- Pilih Kecamatan --</option>
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                                        </div>
+                                    </div>
                                 </div>
-                                <select id="create-district" name="district_id" 
-                                    class="cascade-district w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none bg-white" 
-                                    required disabled>
-                                    <option value="">-- Pilih Kecamatan --</option>
-                                </select>
-                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- Kelurahan/Desa -->
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                Kelurahan/Desa <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-home text-gray-400 text-xs"></i>
+                                <!-- Kelurahan/Desa -->
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                        Kelurahan/Desa <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-home text-gray-400 text-xs"></i>
+                                        </div>
+                                        <select id="create-village" name="village_id" 
+                                            class="cascade-village w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none bg-white"
+                                            onchange="checkCustomerAddressCompletion()"
+                                            required disabled>
+                                            <option value="">-- Pilih Kelurahan/Desa --</option>
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                                        </div>
+                                    </div>
                                 </div>
-                                <select id="create-village" name="village_id" 
-                                    class="cascade-village w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none bg-white" 
-                                    required disabled>
-                                    <option value="">-- Pilih Kelurahan/Desa --</option>
-                                </select>
-                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- Detail Alamat - Full Width -->
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                Detail Alamat
-                            </label>
-                            <div class="relative">
-                                <div class="absolute top-2 left-3 pointer-events-none">
-                                    <i class="fas fa-map-marked-alt text-gray-400 text-xs"></i>
+                                <!-- Detail Alamat - Full Width -->
+                                <div class="md:col-span-2">
+                                    <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                        Detail Alamat
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute top-2 left-3 pointer-events-none">
+                                            <i class="fas fa-map-marked-alt text-gray-400 text-xs"></i>
+                                        </div>
+                                        <textarea id="customerAddress" name="address" rows="2" 
+                                            class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none" 
+                                            placeholder="Contoh: Jl. Merdeka No. 123, RT 01/RW 02"
+                                            oninput="checkCustomerAddressCompletion()"></textarea>
+                                    </div>
                                 </div>
-                                <textarea id="customerAddress" name="address" rows="2" 
-                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none" 
-                                    placeholder="Contoh: Jl. Merdeka No. 123, RT 01/RW 02"></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Company Fields -->
-                <div id="companyFields" class="hidden bg-purple-50 rounded-lg p-3 border border-purple-200">
-                    <h4 class="text-sm font-semibold text-gray-800 mb-3 flex items-center">
-                        <i class="fas fa-user-tie text-purple-600 mr-2"></i>
-                        Informasi Contact Person
-                    </h4>
+                <!-- Company Fields with Collapsible -->
+                <div id="companyFields" class="hidden bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200 overflow-hidden">
+                    <!-- Header - Always Visible -->
+                    <div class="p-3 cursor-pointer hover:bg-purple-100 transition-colors" onclick="toggleCompanySection()">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-sm font-semibold text-gray-800 flex items-center">
+                                <i class="fas fa-user-tie text-purple-600 mr-2"></i>
+                                Informasi Contact Person
+                            </h4>
+                            <div class="flex items-center gap-2">
+                                <span id="company-status" class="text-xs text-gray-500">Belum diisi</span>
+                                <i id="company-toggle-icon" class="fas fa-chevron-down text-gray-600 transition-transform duration-300"></i>
+                            </div>
+                        </div>
+                    </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">Nama Contact Person</label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-user-circle text-gray-400 text-xs"></i>
+                    <!-- Collapsible Content -->
+                    <div id="company-content" class="hidden">
+                        <div class="px-3 pb-3 space-y-3">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div class="md:col-span-2">
+                                    <label class="block text-xs font-medium text-gray-700 mb-1.5">Nama Contact Person</label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-user-circle text-gray-400 text-xs"></i>
+                                        </div>
+                                        <input type="text" id="contactPersonName" name="contact_person_name" 
+                                            class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                                            placeholder="Nama contact person"
+                                            oninput="checkCompanyCompletion()">
+                                    </div>
                                 </div>
-                                <input type="text" id="contactPersonName" name="contact_person_name" 
-                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                                    placeholder="Nama contact person">
-                            </div>
-                        </div>
 
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">Email Contact Person</label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-envelope text-gray-400 text-xs"></i>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1.5">Email Contact Person</label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-envelope text-gray-400 text-xs"></i>
+                                        </div>
+                                        <input type="email" id="contactPersonEmail" name="contact_person_email" 
+                                            class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                                            placeholder="email@example.com"
+                                            oninput="checkCompanyCompletion()">
+                                    </div>
                                 </div>
-                                <input type="email" id="contactPersonEmail" name="contact_person_email" 
-                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                                    placeholder="email@example.com">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">Telepon Contact Person</label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-phone text-gray-400 text-xs"></i>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1.5">Telepon Contact Person</label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-phone text-gray-400 text-xs"></i>
+                                        </div>
+                                        <input type="tel" id="contactPersonPhone" name="contact_person_phone" 
+                                            class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                                            placeholder="08xxxxxxxxxx"
+                                            oninput="checkCompanyCompletion()">
+                                    </div>
                                 </div>
-                                <input type="tel" id="contactPersonPhone" name="contact_person_phone" 
-                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                                    placeholder="08xxxxxxxxxx">
                             </div>
                         </div>
                     </div>
@@ -358,9 +395,9 @@
     </div>
 </div>
 
-<!-- Modal Import - WARNA BARU PURPLE BLUE -->
+<!-- Modal Import -->
 <div id="importModal"
-    class="modal hidden fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 p-4">
+    class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-md animate-fadeIn">
         <div class="px-6 py-4 border-b border-gray-200" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #3b82f6 100%);">
             <div class="flex justify-between items-center">
@@ -412,35 +449,258 @@
 
 <!-- Styles -->
 <style>
-@keyframes fadeIn { 
-    from { 
-        opacity: 0; 
-        transform: scale(0.95) translateY(-10px); 
-    } 
-    to { 
-        opacity: 1; 
-        transform: scale(1) translateY(0); 
-    } 
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95) translateY(-20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
 }
+.animate-fadeIn { animation: fadeIn 0.3s ease-out; }
 
-.animate-fadeIn { 
-    animation: fadeIn 0.3s ease-out; 
-}
-
-/* Custom select dropdown arrow hide default */
-select::-ms-expand {
-    display: none;
-}
-
-/* Smooth transitions for all inputs */
-input:focus, select:focus, textarea:focus {
-    outline: none;
-}
-
-/* Disabled state styling */
+select::-ms-expand { display: none; }
+input:focus, select:focus, textarea:focus { outline: none; }
 select:disabled {
     background-color: #f3f4f6;
     cursor: not-allowed;
     opacity: 0.6;
 }
 </style>
+
+<script>
+// ========== CUSTOMER ADDRESS SECTION TOGGLE ==========
+function toggleCustomerAddressSection() {
+    const content = document.getElementById('customer-address-content');
+    const icon = document.getElementById('customer-address-toggle-icon');
+    
+    if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        icon.style.transform = 'rotate(180deg)';
+    } else {
+        content.classList.add('hidden');
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
+
+function checkCustomerAddressCompletion() {
+    const province = document.getElementById('create-province').value;
+    const address = document.getElementById('customerAddress').value.trim();
+    const statusText = document.getElementById('customer-address-status');
+    const content = document.getElementById('customer-address-content');
+    const icon = document.getElementById('customer-address-toggle-icon');
+    
+    if (province && address) {
+        statusText.textContent = 'Sudah diisi';
+        statusText.classList.remove('text-gray-500');
+        statusText.classList.add('text-green-600', 'font-medium');
+        
+        // Auto collapse setelah 800ms
+        setTimeout(() => {
+            if (!content.classList.contains('hidden')) {
+                content.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }, 800);
+    } else {
+        statusText.textContent = 'Belum diisi';
+        statusText.classList.remove('text-green-600', 'font-medium');
+        statusText.classList.add('text-gray-500');
+    }
+}
+
+// ========== COMPANY SECTION TOGGLE ==========
+function toggleCompanySection() {
+    const content = document.getElementById('company-content');
+    const icon = document.getElementById('company-toggle-icon');
+    
+    if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        icon.style.transform = 'rotate(180deg)';
+    } else {
+        content.classList.add('hidden');
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
+
+function checkCompanyCompletion() {
+    const name = document.getElementById('contactPersonName').value.trim();
+    const email = document.getElementById('contactPersonEmail').value.trim();
+    const phone = document.getElementById('contactPersonPhone').value.trim();
+    const statusText = document.getElementById('company-status');
+    const content = document.getElementById('company-content');
+    const icon = document.getElementById('company-toggle-icon');
+    
+    if (name || email || phone) {
+        statusText.textContent = 'Sudah diisi';
+        statusText.classList.remove('text-gray-500');
+        statusText.classList.add('text-green-600', 'font-medium');
+        
+        // Auto collapse setelah 800ms jika semua terisi
+        if (name && email && phone) {
+            setTimeout(() => {
+                if (!content.classList.contains('hidden')) {
+                    content.classList.add('hidden');
+                    icon.style.transform = 'rotate(0deg)';
+                }
+            }, 800);
+        }
+    } else {
+        statusText.textContent = 'Belum diisi';
+        statusText.classList.remove('text-green-600', 'font-medium');
+        statusText.classList.add('text-gray-500');
+    }
+}
+
+// ========== CUSTOMER TYPE HANDLING ==========
+document.querySelectorAll('input[name="customerType"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const companyFields = document.getElementById('companyFields');
+        const nameLabel = document.getElementById('nameLabel');
+        
+        if (this.value === 'Company') {
+            companyFields.classList.remove('hidden');
+            nameLabel.textContent = 'Nama Perusahaan';
+        } else {
+            companyFields.classList.add('hidden');
+            nameLabel.textContent = 'Nama Lengkap';
+            
+            // Reset company section state
+            const content = document.getElementById('company-content');
+            const icon = document.getElementById('company-toggle-icon');
+            const statusText = document.getElementById('company-status');
+            
+            content.classList.add('hidden');
+            icon.style.transform = 'rotate(0deg)';
+            statusText.textContent = 'Belum diisi';
+            statusText.classList.remove('text-green-600', 'font-medium');
+            statusText.classList.add('text-gray-500');
+            
+            // Clear company fields
+            document.getElementById('contactPersonName').value = '';
+            document.getElementById('contactPersonEmail').value = '';
+            document.getElementById('contactPersonPhone').value = '';
+        }
+    });
+});
+
+// ========== MODAL FUNCTIONS ==========
+function resetCustomerModal() {
+    // Reset form
+    document.getElementById('customerForm').reset();
+    
+    // Reset address collapse state
+    const addressContent = document.getElementById('customer-address-content');
+    const addressIcon = document.getElementById('customer-address-toggle-icon');
+    const addressStatus = document.getElementById('customer-address-status');
+    
+    addressContent.classList.add('hidden');
+    addressIcon.style.transform = 'rotate(0deg)';
+    addressStatus.textContent = 'Belum diisi';
+    addressStatus.classList.remove('text-green-600', 'font-medium');
+    addressStatus.classList.add('text-gray-500');
+    
+    // Reset company collapse state
+    const companyContent = document.getElementById('company-content');
+    const companyIcon = document.getElementById('company-toggle-icon');
+    const companyStatus = document.getElementById('company-status');
+    
+    companyContent.classList.add('hidden');
+    companyIcon.style.transform = 'rotate(0deg)';
+    companyStatus.textContent = 'Belum diisi';
+    companyStatus.classList.remove('text-green-600', 'font-medium');
+    companyStatus.classList.add('text-gray-500');
+    
+    // Hide company fields
+    document.getElementById('companyFields').classList.add('hidden');
+    
+    // Reset customer type to Personal
+    document.querySelector('input[name="customerType"][value="Personal"]').checked = true;
+    document.getElementById('nameLabel').textContent = 'Nama Lengkap';
+}
+
+// Close Modal Buttons
+document.getElementById('closeModalBtn').addEventListener('click', function() {
+    document.getElementById('customerModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    resetCustomerModal();
+});
+
+document.getElementById('cancelModalBtn').addEventListener('click', function() {
+    document.getElementById('customerModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    resetCustomerModal();
+});
+
+// Close Import Modal
+document.getElementById('closeImportModalBtn').addEventListener('click', function() {
+    document.getElementById('importModal').classList.add('hidden');
+    document.getElementById('importForm').reset();
+    document.body.style.overflow = 'auto';
+});
+
+document.getElementById('cancelImportBtn').addEventListener('click', function() {
+    document.getElementById('importModal').classList.add('hidden');
+    document.getElementById('importForm').reset();
+    document.body.style.overflow = 'auto';
+});
+
+// Escape key to close modals
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const customerModal = document.getElementById('customerModal');
+        const importModal = document.getElementById('importModal');
+        
+        if (!customerModal.classList.contains('hidden')) {
+            customerModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            resetCustomerModal();
+        }
+        
+        if (!importModal.classList.contains('hidden')) {
+            importModal.classList.add('hidden');
+            document.getElementById('importForm').reset();
+            document.body.style.overflow = 'auto';
+        }
+    }
+});
+
+// Click outside to close
+document.getElementById('customerModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        resetCustomerModal();
+    }
+});
+
+document.getElementById('importModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.classList.add('hidden');
+        document.getElementById('importForm').reset();
+        document.body.style.overflow = 'auto';
+    }
+});
+
+// ========== FORM SUBMIT (Keep your existing submit logic) ==========
+document.getElementById('customerForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Your existing form submit logic here
+    // This is just a placeholder - replace with your actual implementation
+    console.log('Form submitted');
+    
+    // Example: Close modal after successful submit
+    // document.getElementById('customerModal').classList.add('hidden');
+    // document.body.style.overflow = 'auto';
+    // resetCustomerModal();
+});
+
+document.getElementById('importForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Your existing import logic here
+    console.log('Import form submitted');
+    
+    // Example: Close modal after successful import
+    // document.getElementById('importModal').classList.add('hidden');
+    // document.body.style.overflow = 'auto';
+    // this.reset();
+});
+</script>
