@@ -15,11 +15,31 @@ use App\Http\Controllers\PicController;
 
 
 // ==========================
-// Public Routes (Login / Logout)
+// Public Routes (Login / Logout / Password Reset)
 // ==========================
-Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.process');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::middleware('guest')->group(function () {
+    // Login
+    Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.process');
+    
+    // Password Reset
+    Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])
+        ->name('password.request');
+    
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])
+        ->name('password.email');
+    
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])
+        ->name('password.reset');
+    
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])
+        ->name('password.update');
+});
+
+// Logout (requires authentication)
+Route::post('/logout', [AuthController::class, 'logout'])
+    ->middleware('auth')
+    ->name('logout');
 
 // ==========================
 // CASCADE DROPDOWN ROUTES
@@ -48,14 +68,13 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::put('/company/{id}', [CompanyController::class, 'update'])->name('company.update');
     Route::delete('/company/{id}', [CompanyController::class, 'destroy'])->name('company.destroy');
     Route::get('/company/search', [CompanyController::class, 'search'])->name('company.search');
-// Company routes untuk SalesVisit dropdown
-Route::get('/company/get-companies-dropdown', [CompanyController::class, 'getCompaniesForDropdown']);
-Route::post('/company/store-company-ajax', [CompanyController::class, 'storeCompanyAjax']);
+    // Company routes untuk SalesVisit dropdown
+    Route::get('/company/get-companies-dropdown', [CompanyController::class, 'getCompaniesForDropdown']);
+    Route::post('/company/store-company-ajax', [CompanyController::class, 'storeCompanyAjax']);
     
     // ==========================
-    // ✅ Customer Management (FIXED)
+    // Customer Management
     // ==========================
-    
     Route::get('/customers', [CustomerController::class, 'index'])->name('customers');
     Route::get('/customers/list', [CustomerController::class, 'customers'])->name('customers.list');
     Route::get('/customers/export/csv', [CustomerController::class, 'export'])->name('customers.export');
@@ -70,54 +89,35 @@ Route::post('/company/store-company-ajax', [CompanyController::class, 'storeComp
     Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('customers.destroy');
     Route::get('/customers/search', [CustomerController::class, 'search'])->name('customers.search');
 
-
-
-// ==================== 
-// SALES VISIT ROUTES 
-// ====================
-
-Route::middleware(['auth'])->group(function () {
-    
+    // ==========================
+    // SALES VISIT ROUTES 
+    // ==========================
     Route::get('/salesvisit', [SalesVisitController::class, 'index'])->name('salesvisit');
     Route::get('/salesvisit/get-sales', [SalesVisitController::class, 'getSalesUsers'])->name('salesvisit.sales');
-
-
     Route::post('/salesvisit', [SalesVisitController::class, 'store'])->name('salesvisit.store');
     Route::get('/salesvisit/{id}/edit', [SalesVisitController::class, 'edit'])->name('salesvisit.edit');
     Route::put('/salesvisit/{id}', [SalesVisitController::class, 'update'])->name('salesvisit.update');
     Route::delete('/salesvisit/{id}', [SalesVisitController::class, 'destroy'])->name('salesvisit.destroy');
-    
     Route::get('/salesvisit/search', [SalesVisitController::class, 'search'])->name('salesvisit.search');
-    
     Route::get('/salesvisit/get-provinces', [SalesVisitController::class, 'getProvinces'])->name('salesvisit.provinces.list');
     Route::get('/salesvisit/regencies/{provinceId}', [SalesVisitController::class, 'getRegencies'])->name('salesvisit.regencies');
     Route::get('/salesvisit/districts/{regencyId}', [SalesVisitController::class, 'getDistricts'])->name('salesvisit.districts');
     Route::get('/salesvisit/villages/{districtId}', [SalesVisitController::class, 'getVillages'])->name('salesvisit.villages');
-
     Route::get('/salesvisit/export', [SalesVisitController::class, 'export'])->name('salesvisit.export');
     Route::post('/salesvisit/import', [SalesVisitController::class, 'import'])->name('salesvisit.import');
-
     // Company routes untuk SalesVisit dropdown
     Route::get('/salesvisit/get-companies', [CompanyController::class, 'getCompaniesForDropdown']);
     Route::post('/salesvisit/store-company', [CompanyController::class, 'storeCompanyAjax']);
-});
-
 
     // ==========================
-    // Pic
+    // PIC Management
     // ==========================
-    Route::middleware(['auth'])->group(function () {
     Route::get('/pic', [PicController::class, 'index'])->name('pic');
     Route::post('/pic', [PicController::class, 'store'])->name('pics.store');
     Route::put('/pic/{id}', [PicController::class, 'update'])->name('pics.update');
     Route::delete('/pic/{id}', [PicController::class, 'destroy'])->name('pics.destroy');
     Route::get('/pic/search', [PicController::class, 'search'])->name('pics.search');
-});
 
-
-
-
-    
     // ==========================
     // Calendar Page (React)
     // ==========================
@@ -146,8 +146,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user', [UserController::class, 'index'])->name('user');
     Route::get('/role', [RoleController::class, 'index'])->name('role'); 
     Route::get('/menu', [MenuController::class, 'index'])->name('menu');
-    
-   
 
     // ==========================
     // CRUD - Users

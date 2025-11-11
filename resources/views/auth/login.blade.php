@@ -7,7 +7,6 @@
     <title>Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* ==== semua CSS kamu tetap ==== */
         @keyframes slideInRight { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }
         @keyframes shake { 0%,100% { transform: translateX(0); } 10%,30%,50%,70%,90% { transform: translateX(-10px);} 20%,40%,60%,80% { transform: translateX(10px);} }
@@ -36,10 +35,8 @@
     <div class="hidden md:flex w-1/2 items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-100">
         <div id="imageSlider" class="relative w-96 h-[520px] rounded-2xl shadow-2xl overflow-hidden bg-white/50 cursor-pointer" style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 0, 0, 0.05);">
             
-            <!-- 🔥 electric border mount -->
             <div id="electric-image" class="absolute inset-0 pointer-events-none z-20"></div>
 
-            <!-- Slideshow Images -->
             <div class="image-slider active" data-slide="0">
                 <img class="w-full h-full object-cover" src="/img/login1.jpeg" alt="Image 1">
             </div>
@@ -50,16 +47,13 @@
                 <img class="w-full h-full object-cover" src="/img/login4.jpg" alt="Image 3">
             </div>
             
-            <!-- Overlay dengan opacity untuk keterbacaan teks -->
             <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/90 z-[1]"></div>
             
-            <!-- Text overlay simple -->
             <div class="absolute bottom-0 left-0 p-8 text-white z-10">
                 <h3 class="text-4xl font-bold tracking-tight" style="text-shadow: 0 4px 12px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.6);">Welcome !</h3>
                 <p class="text-white mt-3 font-normal text-base" style="text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9), 0 1px 3px rgba(0, 0, 0, 0.7);">Visualize your growth with our dashboard.</p>
             </div>
             
-            <!-- Slide Indicators (clickable) -->
             <div class="absolute bottom-6 right-6 flex gap-2 z-10">
                 <div class="slide-dot w-2 h-2 rounded-full bg-white active" data-index="0"></div>
                 <div class="slide-dot w-2 h-2 rounded-full bg-white/40" data-index="1"></div>
@@ -71,7 +65,6 @@
     <!-- Form Card -->
     <div class="w-full md:w-1/2 flex items-center justify-center">
         <div class="relative w-full max-w-md">
-            <!-- 🔥 electric border mount -->
             <div id="electric-login" class="absolute inset-0 pointer-events-none z-10 rounded-2xl"></div>
 
             <form method="POST" action="{{ route('login.process') }}" id="loginForm"
@@ -114,7 +107,7 @@
                         <input class="h-5 w-5 rounded border-gray-300 focus:ring-indigo-400" type="checkbox" id="remember" name="remember">
                         <label class="text-sm" for="remember">Remember me</label>
                     </div>
-                    <a class="text-sm underline hover:text-indigo-600 transition-colors" href="#">Forgot password?</a>
+                    <a class="text-sm underline hover:text-indigo-600 transition-colors" href="{{ route('password.request') }}">Forgot password?</a>
                 </div>
 
                 <button type="submit" id="loginBtn"
@@ -128,7 +121,7 @@
 </div>
 
 <script>
-    // Image Slider dengan kontrol manual dan klik foto
+    // Image Slider
     let currentSlide = 0;
     let slideInterval;
     const slides = document.querySelectorAll('.image-slider');
@@ -137,11 +130,8 @@
     const totalSlides = slides.length;
 
     function showSlide(index) {
-        // Reset semua slide dan dot
         slides.forEach(slide => slide.classList.remove('active'));
         dots.forEach(dot => dot.classList.remove('active'));
-
-        // Tampilkan slide dan dot yang aktif
         slides[index].classList.add('active');
         dots[index].classList.add('active');
         currentSlide = index;
@@ -161,47 +151,36 @@
         startSlideshow();
     }
 
-    // Event listener untuk dots
     dots.forEach((dot, index) => {
         dot.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent image click
+            e.stopPropagation();
             showSlide(index);
             resetSlideshow();
         });
     });
 
-    // Event listener untuk klik di foto/layar
     imageSlider.addEventListener('click', (e) => {
-        // Jangan trigger kalau klik dot
         if (!e.target.classList.contains('slide-dot')) {
             nextSlide();
             resetSlideshow();
         }
     });
 
-    // Mulai slideshow otomatis
     startSlideshow();
 
-    // ============ Toast & Form Handling ============
-    
-    // Toast util: sama gaya dan posisi dengan dashboard (pojok kanan atas)
+    // Toast
     function showToast(message, type = 'success') {
         const toastContainer = document.getElementById('toastContainer');
         const toast = document.createElement('div');
         const isError = type === 'error';
 
-        const bgClass = isError
-            ? 'bg-red-500'
-            : 'bg-green-500';
-
+        const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
         const icon = isError
             ? `<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M6 18L18 6M6 6l12 12"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                </svg>`
             : `<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M5 13l4 4L19 7"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                </svg>`;
 
         toast.className = `toast-enter min-w-[320px] max-w-[400px] rounded-xl shadow-2xl overflow-hidden ${bgClass}`;
@@ -214,8 +193,7 @@
                 </div>
                 <button onclick="this.parentElement.parentElement.remove()" class="text-white/80 hover:text-white transition flex-shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M6 18L18 6M6 6l12 12"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
@@ -226,7 +204,6 @@
 
         toastContainer.appendChild(toast);
 
-        // auto close
         setTimeout(() => {
             toast.classList.remove('toast-enter');
             toast.classList.add('toast-exit');
@@ -239,29 +216,20 @@
     const btnText = document.getElementById('btnText');
     const btnSpinner = document.getElementById('btnSpinner');
 
-    // Tampilkan toast berdasarkan session/error (sama seperti dashboard)
     @if (session('login_success'))
-        document.addEventListener('DOMContentLoaded', function() {
-            showToast('{{ session('login_success') }}', 'success');
-        });
+        showToast('{{ session('login_success') }}', 'success');
     @endif
 
     @if (session('success'))
-        document.addEventListener('DOMContentLoaded', function() {
-            showToast('{{ session('success') }}', 'success');
-        });
+        showToast('{{ session('success') }}', 'success');
     @endif
 
     @if ($errors->has('loginError'))
-        document.addEventListener('DOMContentLoaded', function() {
-            // shake form untuk feedback visual
-            form.classList.add('shake');
-            setTimeout(() => form.classList.remove('shake'), 500);
-            showToast('{{ $errors->first('loginError') }}', 'error');
-        });
+        form.classList.add('shake');
+        setTimeout(() => form.classList.remove('shake'), 500);
+        showToast('{{ $errors->first('loginError') }}', 'error');
     @endif
 
-    // Animasi tombol saat submit
     form.addEventListener('submit', function() {
         loginBtn.disabled = true;
         btnText.textContent = 'Logging in...';
@@ -269,7 +237,6 @@
         loginBtn.classList.add('opacity-90', 'cursor-not-allowed');
     });
 
-    // Validasi ringan input
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
 
@@ -288,7 +255,6 @@
     });
 </script>
 
-{{-- 🔥 React mount Electric Border (tambahan) --}}
 @viteReactRefresh
 <script type="module">
     import React from "react";
