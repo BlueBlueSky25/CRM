@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PasswordResetController; 
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController; 
 use App\Http\Controllers\MenuController;
@@ -22,17 +23,17 @@ Route::middleware('guest')->group(function () {
     Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.process');
     
-    // Password Reset
-    Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])
+    // Password Reset - Pakai PasswordResetController
+    Route::get('/forgot-password', [PasswordResetController::class, 'showForgotPasswordForm'])
         ->name('password.request');
     
-    Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])
+    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail'])
         ->name('password.email');
     
-    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetPasswordForm'])
         ->name('password.reset');
     
-    Route::post('/reset-password', [AuthController::class, 'resetPassword'])
+    Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])
         ->name('password.update');
 });
 
@@ -68,7 +69,6 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::put('/company/{id}', [CompanyController::class, 'update'])->name('company.update');
     Route::delete('/company/{id}', [CompanyController::class, 'destroy'])->name('company.destroy');
     Route::get('/company/search', [CompanyController::class, 'search'])->name('company.search');
-    // Company routes untuk SalesVisit dropdown
     Route::get('/company/get-companies-dropdown', [CompanyController::class, 'getCompaniesForDropdown']);
     Route::post('/company/store-company-ajax', [CompanyController::class, 'storeCompanyAjax']);
     
@@ -105,7 +105,6 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/salesvisit/villages/{districtId}', [SalesVisitController::class, 'getVillages'])->name('salesvisit.villages');
     Route::get('/salesvisit/export', [SalesVisitController::class, 'export'])->name('salesvisit.export');
     Route::post('/salesvisit/import', [SalesVisitController::class, 'import'])->name('salesvisit.import');
-    // Company routes untuk SalesVisit dropdown
     Route::get('/salesvisit/get-companies', [CompanyController::class, 'getCompaniesForDropdown']);
     Route::post('/salesvisit/store-company', [CompanyController::class, 'storeCompanyAjax']);
 
