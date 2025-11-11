@@ -1,13 +1,25 @@
-// ==================== ADD MODAL ====================
+// ==================== GLOBAL VARIABLES ====================
 let createVisitCascade = null;
+let editVisitCascade = null;
+let currentEditData = null;
 
+// Company & PIC Dropdown Variables
+let companyDropdownTimeout = null;
+let currentCompanies = [];
+let picDropdownTimeout = null;
+let currentPICs = [];
+let selectedCompanyId = null;
+let editSelectedCompanyId = null;
+
+// ==================== ADD MODAL ====================
 function openVisitModal() {
     const modal = document.getElementById('visitModal');
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     
-    // Initialize address cascade untuk CREATE modal
     initCreateVisitCascade();
+    initCompanyDropdown();
+    initPICDropdown();
     
     setTimeout(() => {
         const firstInput = modal.querySelector('select[name="sales_id"]');
@@ -42,15 +54,417 @@ function closeVisitModal() {
     const form = modal.querySelector('form');
     if (form) form.reset();
     
+    // Reset dropdowns
     document.getElementById('create-regency').innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
     document.getElementById('create-district').innerHTML = '<option value="">Pilih Kecamatan</option>';
     document.getElementById('create-village').innerHTML = '<option value="">Pilih Kelurahan/Desa</option>';
+    
+    // Reset company & PIC
+    document.getElementById('create-company-id').value = '';
+    document.getElementById('create-company-search').value = '';
+    document.getElementById('create-company-dropdown').classList.add('hidden');
+    selectedCompanyId = null;
+    hidePICInput();
+    
+    // Reset address state
+    const content = document.getElementById('address-content');
+    const icon = document.getElementById('address-toggle-icon');
+    const statusText = document.getElementById('address-status');
+    
+    if (content) content.classList.add('hidden');
+    if (icon) icon.style.transform = 'rotate(0deg)';
+    if (statusText) {
+        statusText.textContent = 'Belum diisi';
+        statusText.classList.remove('text-green-600', 'font-medium');
+        statusText.classList.add('text-gray-500');
+    }
 }
 
-// ==================== EDIT MODAL ====================
-let editVisitCascade = null;
-let currentEditData = null;
+// ==================== COMPANY DROPDOWN (CREATE) ====================
+async function loadCompanies(search = '') {
+    try {
+        const response = await fetch('/company/get-companies-dropdown');
+        const data = await response.json();
+        if (data.success) {
+            currentCompanies = data.companies;
+            updateCompanyDropdown(search);
+        }
+    } catch (error) {
+        console.error('Error loading companies:', error);
+    }
+}
 
+function updateCompanyDropdown(search = '') {
+    const dropdown = document.getElementById('create-company-options');
+    const searchTerm = search.toLowerCase();
+    const filteredCompanies = currentCompanies.filter(company => 
+        company.name.toLowerCase().includes(searchTerm)
+    );
+    
+    dropdown.innerHTML = '';
+    
+    if (filteredCompanies.length === 0 && search.trim() !== '') {
+        const addOption = document.createElement('div');
+        addOption.className = 'px-3 py-2 text-sm text-green-600 hover:bg-green-50 cursor-pointer flex items-center gap-2';
+        addOption.innerHTML = `<i class="fas fa-plus text-xs"></i><span>Tambah "${search}" sebagai company baru</span>`;
+        addOption.onclick = () => {
+            document.querySelector('#addCompanyModal input[name="company_name"]').value = search;
+            showAddCompanyModal();
+        };
+        dropdown.appendChild(addOption);
+    } else {
+        filteredCompanies.forEach(company => {
+            const option = document.createElement('div');
+            option.className = 'px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer';
+            option.textContent = company.name;
+            option.onclick = () => selectCompany(company.id, company.name);
+            dropdown.appendChild(option);
+        });
+    }
+    
+    const dropdownContainer = document.getElementById('create-company-dropdown');
+    if (filteredCompanies.length > 0 || search.trim() !== '') {
+        dropdownContainer.classList.remove('hidden');
+    } else {
+        dropdownContainer.classList.add('hidden');
+    }
+}
+
+function selectCompany(companyId, companyName) {
+    console.log('✅ Company selected:', { companyId, companyName });
+    
+    document.getElementById('create-company-id').value = companyId;
+    document.getElementById('create-company-search').value = companyName;
+    document.getElementById('create-company-dropdown').classList.add('hidden');
+    
+    selectedCompanyId = companyId;
+    
+    // Show PIC input dan load PICs
+    showPICInput();
+    loadPICsByCompany(companyId);
+}
+
+function initCompanyDropdown() {
+    const searchInput = document.getElementById('create-company-search');
+    const dropdown = document.getElementById('create-company-dropdown');
+    
+    if (!searchInput || !dropdown) return;
+    
+    searchInput.addEventListener('focus', () => loadCompanies(searchInput.value));
+    
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(companyDropdownTimeout);
+        companyDropdownTimeout = setTimeout(() => updateCompanyDropdown(e.target.value), 300);
+    });
+    
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const searchValue = searchInput.value.trim();
+            if (searchValue) {
+                const matchedCompany = currentCompanies.find(company => 
+                    company.name.toLowerCase() === searchValue.toLowerCase()
+                );
+                if (!matchedCompany) {
+                    document.querySelector('#addCompanyModal input[name="company_name"]').value = searchValue;
+                    showAddCompanyModal();
+                }
+            }
+        }
+    });
+    
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
+    
+    loadCompanies();
+}
+
+// ==================== PIC DROPDOWN (CREATE) ====================
+function showPICInput() {
+    const picContainer = document.getElementById('pic-input-container');
+    if (picContainer) {
+        picContainer.classList.remove('hidden');
+        
+        // Reset PIC input
+        document.getElementById('create-pic-id').value = '';
+        document.getElementById('create-pic-name-hidden').value = '';
+        document.getElementById('create-pic-search').value = '';
+    }
+}
+
+function hidePICInput() {
+    const picContainer = document.getElementById('pic-input-container');
+    if (picContainer) {
+        picContainer.classList.add('hidden');
+        
+        document.getElementById('create-pic-id').value = '';
+        document.getElementById('create-pic-name-hidden').value = '';
+        document.getElementById('create-pic-search').value = '';
+    }
+}
+
+async function loadPICsByCompany(companyId, search = '') {
+    try {
+        console.log('🔄 Loading PICs for company:', companyId);
+        
+        const response = await fetch(`/pics/by-company/${companyId}`);
+        const data = await response.json();
+        
+        console.log('📋 PICs response:', data);
+        
+        if (data.success) {
+            currentPICs = data.pics;
+            updatePICDropdown(search);
+        }
+    } catch (error) {
+        console.error('Error loading PICs:', error);
+    }
+}
+
+function updatePICDropdown(search = '') {
+    const dropdown = document.getElementById('create-pic-options');
+    const searchTerm = search.toLowerCase();
+    const filteredPICs = currentPICs.filter(pic => 
+        pic.name.toLowerCase().includes(searchTerm)
+    );
+    
+    dropdown.innerHTML = '';
+    
+    if (filteredPICs.length === 0 && search.trim() !== '') {
+        const addOption = document.createElement('div');
+        addOption.className = 'px-3 py-2 text-sm text-green-600 hover:bg-green-50 cursor-pointer flex items-center gap-2';
+        addOption.innerHTML = `<i class="fas fa-plus text-xs"></i><span>Tambah "${search}" sebagai PIC baru</span>`;
+        addOption.onclick = () => {
+            document.querySelector('#addPICModal input[name="pic_name"]').value = search;
+            showAddPICModal();
+        };
+        dropdown.appendChild(addOption);
+    } else {
+        filteredPICs.forEach(pic => {
+            const option = document.createElement('div');
+            option.className = 'px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer';
+            
+            let displayText = pic.name;
+            if (pic.position) {
+                displayText += ` - ${pic.position}`;
+            }
+            
+            option.textContent = displayText;
+            option.onclick = () => selectPIC(pic.id, pic.name);
+            dropdown.appendChild(option);
+        });
+    }
+    
+    const dropdownContainer = document.getElementById('create-pic-dropdown');
+    if (filteredPICs.length > 0 || search.trim() !== '') {
+        dropdownContainer.classList.remove('hidden');
+    } else {
+        dropdownContainer.classList.add('hidden');
+    }
+}
+
+function selectPIC(picId, picName) {
+    console.log('✅ PIC selected:', { picId, picName });
+    
+    document.getElementById('create-pic-id').value = picId;
+    document.getElementById('create-pic-name-hidden').value = picName;
+    document.getElementById('create-pic-search').value = picName;
+    document.getElementById('create-pic-dropdown').classList.add('hidden');
+}
+
+function initPICDropdown() {
+    const searchInput = document.getElementById('create-pic-search');
+    const dropdown = document.getElementById('create-pic-dropdown');
+    
+    if (!searchInput || !dropdown) return;
+    
+    searchInput.addEventListener('focus', () => {
+        if (selectedCompanyId) {
+            loadPICsByCompany(selectedCompanyId, searchInput.value);
+        }
+    });
+    
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(picDropdownTimeout);
+        picDropdownTimeout = setTimeout(() => updatePICDropdown(e.target.value), 300);
+    });
+    
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const searchValue = searchInput.value.trim();
+            if (searchValue && selectedCompanyId) {
+                const matchedPIC = currentPICs.find(pic => 
+                    pic.name.toLowerCase() === searchValue.toLowerCase()
+                );
+                if (!matchedPIC) {
+                    document.querySelector('#addPICModal input[name="pic_name"]').value = searchValue;
+                    showAddPICModal();
+                }
+            }
+        }
+    });
+    
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
+}
+
+// ==================== COMPANY & PIC MODALS ====================
+function showAddCompanyModal() {
+    document.getElementById('addCompanyForm').reset();
+    document.getElementById('addCompanyModal').classList.remove('hidden');
+    setTimeout(() => {
+        document.querySelector('#addCompanyModal input[name="company_name"]').focus();
+    }, 300);
+}
+
+function closeAddCompanyModal() {
+    document.getElementById('addCompanyModal').classList.add('hidden');
+    document.getElementById('addCompanyForm').reset();
+}
+
+function showAddPICModal() {
+    if (!selectedCompanyId && !editSelectedCompanyId) {
+        alert('Silakan pilih company terlebih dahulu!');
+        return;
+    }
+    
+    const companyId = selectedCompanyId || editSelectedCompanyId;
+    document.getElementById('pic-form-company-id').value = companyId;
+    document.getElementById('addPICForm').reset();
+    document.getElementById('addPICModal').classList.remove('hidden');
+    setTimeout(() => {
+        document.querySelector('#addPICModal input[name="pic_name"]').focus();
+    }, 300);
+}
+
+function closeAddPICModal() {
+    document.getElementById('addPICModal').classList.add('hidden');
+    document.getElementById('addPICForm').reset();
+}
+
+// Company Form Submit
+document.getElementById('addCompanyForm')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    
+    try {
+        const response = await fetch('/company/store-company-ajax', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: formData
+        });
+        
+        if (response.status === 422) {
+            const errorData = await response.json();
+            let errorMessages = [];
+            if (errorData.errors) {
+                for (const field in errorData.errors) {
+                    errorMessages.push(`${field}: ${errorData.errors[field].join(', ')}`);
+                }
+            }
+            alert('Validasi gagal:\n' + errorMessages.join('\n'));
+            return;
+        }
+        
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const newCompany = data.company;
+            
+            // Check if in edit or create mode
+            if (document.getElementById('editVisitModal').classList.contains('hidden')) {
+                // CREATE mode
+                selectCompany(newCompany.id, newCompany.name);
+            } else {
+                // EDIT mode
+                selectEditCompany(newCompany.id, newCompany.name);
+            }
+            
+            loadCompanies();
+            closeAddCompanyModal();
+            alert('Company berhasil ditambahkan!');
+        } else {
+            throw new Error(data.message || 'Gagal menambahkan company');
+        }
+    } catch (error) {
+        console.error('Error adding company:', error);
+        alert('Gagal menambahkan company: ' + error.message);
+    }
+});
+
+// PIC Form Submit
+document.getElementById('addPICForm')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    
+    try {
+        const response = await fetch('/pics/store-pic-ajax', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: formData
+        });
+        
+        if (response.status === 422) {
+            const errorData = await response.json();
+            let errorMessages = [];
+            if (errorData.errors) {
+                for (const field in errorData.errors) {
+                    errorMessages.push(`${field}: ${errorData.errors[field].join(', ')}`);
+                }
+            }
+            alert('Validasi gagal:\n' + errorMessages.join('\n'));
+            return;
+        }
+        
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const newPIC = data.pic;
+            
+            // Check if in edit or create mode
+            if (document.getElementById('editVisitModal').classList.contains('hidden')) {
+                // CREATE mode
+                selectPIC(newPIC.id, newPIC.name);
+                if (selectedCompanyId) {
+                    loadPICsByCompany(selectedCompanyId);
+                }
+            } else {
+                // EDIT mode
+                selectEditPIC(newPIC.id, newPIC.name);
+                if (editSelectedCompanyId) {
+                    loadEditPICsByCompany(editSelectedCompanyId);
+                }
+            }
+            
+            closeAddPICModal();
+            alert('PIC berhasil ditambahkan!');
+        } else {
+            throw new Error(data.message || 'Gagal menambahkan PIC');
+        }
+    } catch (error) {
+        console.error('Error adding PIC:', error);
+        alert('Gagal menambahkan PIC: ' + error.message);
+    }
+});
+
+// ==================== EDIT MODAL ====================
 function openEditVisitModal(visitData) {
     console.log('🚀 Opening Edit Visit Modal with data:', visitData);
 
@@ -61,13 +475,10 @@ function openEditVisitModal(visitData) {
     }
 
     try {
-        // Parse IDs - HANYA untuk visit_id dan sales_id
-        // Province/Regency/District/Village tetap STRING karena DB nya VARCHAR
         visitData.id = parseInt(visitData.id);
         visitData.salesId = parseInt(visitData.salesId);
         visitData.followUp = parseInt(visitData.followUp);
         
-        // Keep address IDs as string (karena VARCHAR di database)
         visitData.provinceId = visitData.provinceId ? String(visitData.provinceId) : null;
         visitData.regencyId = visitData.regencyId ? String(visitData.regencyId) : null;
         visitData.districtId = visitData.districtId ? String(visitData.districtId) : null;
@@ -87,27 +498,28 @@ function openEditVisitModal(visitData) {
         const form = document.getElementById('editVisitForm');
         if (form) {
             form.action = `/salesvisit/${visitData.id}`;
-            console.log('✅ Form action set to:', form.action);
         }
 
         // Fill form fields
         document.getElementById('editVisitId').value = visitData.id || '';
-        document.getElementById('editCustomerName').value = visitData.customerName || '';
-        document.getElementById('editCompany').value = visitData.company || '';
-        document.getElementById('editAddress').value = visitData.address || '';
         document.getElementById('editVisitDate').value = visitData.visitDate || '';
+        document.getElementById('editAddress').value = visitData.address || '';
         document.getElementById('editPurpose').value = visitData.purpose || '';
         
-        // Set follow up radio buttons
+        // Set follow up
         if (visitData.followUp == 1) {
             document.getElementById('editFollowUpYes').checked = true;
         } else {
             document.getElementById('editFollowUpNo').checked = true;
         }
 
-        // Store edit data globally
+        // Store edit data
         currentEditData = {
             salesId: visitData.salesId || '',
+            companyId: visitData.companyId || null,
+            companyName: visitData.companyName || '',
+            picId: visitData.picId || null,
+            picName: visitData.picName || '',
             provinceId: visitData.provinceId || '',
             regencyId: visitData.regencyId || null,
             districtId: visitData.districtId || null,
@@ -126,7 +538,7 @@ function openEditVisitModal(visitData) {
 }
 
 function loadEditVisitData(visitId) {
-    console.log('📥 Loading edit data for visit:', visitId);
+    console.log('🔥 Loading edit data for visit:', visitId);
     
     const salesSelect = document.getElementById('editSalesId');
     const provinceSelect = document.getElementById('edit-province');
@@ -141,121 +553,61 @@ function loadEditVisitData(visitId) {
     provinceSelect.innerHTML = '<option value="">Loading...</option>';
     provinceSelect.disabled = true;
 
-    // Fetch sales users dan provinces
     Promise.all([
-        fetch('/salesvisit/get-sales')
-            .then(r => {
-                console.log('📡 Sales fetch status:', r.status);
-                if (!r.ok) throw new Error('Failed to fetch sales users');
-                return r.json();
-            })
-            .then(data => {
-                console.log('🔍 Raw sales response:', data);
-                return data;
-            }),
-        fetch('/salesvisit/get-provinces')
-            .then(r => {
-                console.log('📡 Provinces fetch status:', r.status);
-                if (!r.ok) throw new Error('Failed to fetch provinces');
-                return r.json();
-            })
-            .then(data => {
-                console.log('🔍 Raw provinces response:', data);
-                return data;
-            })
+        fetch('/salesvisit/get-sales').then(r => r.json()),
+        fetch('/salesvisit/get-provinces').then(r => r.json())
     ]).then(([salesData, provincesResponse]) => {
-        console.log('✅ Processing sales data...');
-
-        // Populate Sales Dropdown - handle multiple response formats
+        // Populate Sales
         salesSelect.innerHTML = '<option value="">Pilih Sales</option>';
         
-        // Try different possible data structures
-        let salesList = null;
-        if (Array.isArray(salesData)) {
-            salesList = salesData;
-        } else if (salesData.users && Array.isArray(salesData.users)) {
-            salesList = salesData.users;
-        } else if (salesData.data && Array.isArray(salesData.data)) {
-            salesList = salesData.data;
-        }
-        
-        console.log('📋 Sales list to populate:', salesList);
-        
-        if (salesList && salesList.length > 0) {
-            let foundSelected = false;
+        let salesList = salesData.users || salesData.data || salesData;
+        if (Array.isArray(salesList)) {
             salesList.forEach(sales => {
                 const option = document.createElement('option');
                 option.value = sales.user_id;
                 option.textContent = `${sales.username} - ${sales.email}`;
                 if (sales.user_id == currentEditData.salesId) {
                     option.selected = true;
-                    foundSelected = true;
-                    console.log('✅ Selected sales:', sales.username);
                 }
                 salesSelect.appendChild(option);
             });
-            
-            if (!foundSelected && currentEditData.salesId) {
-                console.warn('⚠️ Sales ID', currentEditData.salesId, 'not found in list');
-            }
-            
-            console.log(`✅ Loaded ${salesList.length} sales users`);
-        } else {
-            console.error('❌ No sales users found in response!');
-            salesSelect.innerHTML = '<option value="">Tidak ada sales tersedia</option>';
         }
-
         salesSelect.disabled = false;
 
-        // Populate Provinces Dropdown - handle multiple response formats
-        console.log('✅ Processing provinces data...');
+        // Populate Provinces
         provinceSelect.innerHTML = '<option value="">Pilih Provinsi</option>';
         
-        // Try different possible data structures
-        let provincesList = null;
-        if (Array.isArray(provincesResponse)) {
-            provincesList = provincesResponse;
-        } else if (provincesResponse.provinces && Array.isArray(provincesResponse.provinces)) {
-            provincesList = provincesResponse.provinces;
-        } else if (provincesResponse.data && Array.isArray(provincesResponse.data)) {
-            provincesList = provincesResponse.data;
-        }
-        
-        console.log('📋 Provinces list to populate:', provincesList);
-        
-        if (provincesList && provincesList.length > 0) {
-            let foundSelected = false;
+        let provincesList = provincesResponse.provinces || provincesResponse.data || provincesResponse;
+        if (Array.isArray(provincesList)) {
             provincesList.forEach(province => {
                 const option = document.createElement('option');
                 option.value = province.id;
                 option.textContent = province.name;
-                // Compare as string karena VARCHAR
                 if (String(province.id) == String(currentEditData.provinceId)) {
                     option.selected = true;
-                    foundSelected = true;
-                    console.log('✅ Selected province:', province.name, '(ID:', province.id, ')');
                 }
                 provinceSelect.appendChild(option);
             });
-            
-            if (!foundSelected && currentEditData.provinceId) {
-                console.warn('⚠️ Province ID', currentEditData.provinceId, 'not found in list');
-            }
-            
-            console.log(`✅ Loaded ${provincesList.length} provinces`);
-        } else {
-            console.error('❌ No provinces found in response!');
-            provinceSelect.innerHTML = '<option value="">Tidak ada provinsi tersedia</option>';
         }
-
         provinceSelect.disabled = false;
         
-        // Initialize cascade setelah dropdown ter-populate
-        console.log('🔄 Initializing cascade...');
-        
-        // Delay sedikit untuk memastikan DOM sudah siap
+        // Initialize edit dropdowns
         setTimeout(() => {
+            initEditCompanyDropdown();
+            initEditPICDropdown();
             initEditVisitCascade();
+            
+            // Set company if exists
+            if (currentEditData.companyId && currentEditData.companyName) {
+                selectEditCompany(currentEditData.companyId, currentEditData.companyName);
+                
+                // Set PIC if exists
+                if (currentEditData.picId && currentEditData.picName) {
+                    setTimeout(() => {
+                        selectEditPIC(currentEditData.picId, currentEditData.picName);
+                    }, 500);
+                }
+            }
         }, 500);
         
     }).catch(error => {
@@ -269,6 +621,193 @@ function loadEditVisitData(visitId) {
     });
 }
 
+// ==================== EDIT COMPANY DROPDOWN ====================
+let editCompanyDropdownTimeout = null;
+let editCurrentCompanies = [];
+
+async function loadEditCompanies(search = '') {
+    try {
+        const response = await fetch('/company/get-companies-dropdown');
+        const data = await response.json();
+        if (data.success) {
+            editCurrentCompanies = data.companies;
+            updateEditCompanyDropdown(search);
+        }
+    } catch (error) {
+        console.error('Error loading edit companies:', error);
+    }
+}
+
+function updateEditCompanyDropdown(search = '') {
+    const dropdown = document.getElementById('edit-company-options');
+    const searchTerm = search.toLowerCase();
+    const filteredCompanies = editCurrentCompanies.filter(company => 
+        company.name.toLowerCase().includes(searchTerm)
+    );
+    
+    dropdown.innerHTML = '';
+    
+    filteredCompanies.forEach(company => {
+        const option = document.createElement('div');
+        option.className = 'px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer';
+        option.textContent = company.name;
+        option.onclick = () => selectEditCompany(company.id, company.name);
+        dropdown.appendChild(option);
+    });
+    
+    const dropdownContainer = document.getElementById('edit-company-dropdown');
+    if (filteredCompanies.length > 0) {
+        dropdownContainer.classList.remove('hidden');
+    } else {
+        dropdownContainer.classList.add('hidden');
+    }
+}
+
+function selectEditCompany(companyId, companyName) {
+    console.log('✅ Edit company selected:', { companyId, companyName });
+    
+    document.getElementById('edit-company-id').value = companyId;
+    document.getElementById('edit-company-search').value = companyName;
+    document.getElementById('edit-company-dropdown').classList.add('hidden');
+    
+    editSelectedCompanyId = companyId;
+    
+    // Show PIC input dan load PICs
+    showEditPICInput();
+    loadEditPICsByCompany(companyId);
+}
+
+function initEditCompanyDropdown() {
+    const searchInput = document.getElementById('edit-company-search');
+    const dropdown = document.getElementById('edit-company-dropdown');
+    
+    if (!searchInput || !dropdown) return;
+    
+    searchInput.addEventListener('focus', () => loadEditCompanies(searchInput.value));
+    
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(editCompanyDropdownTimeout);
+        editCompanyDropdownTimeout = setTimeout(() => updateEditCompanyDropdown(e.target.value), 300);
+    });
+    
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
+    
+    loadEditCompanies();
+}
+
+// ==================== EDIT PIC DROPDOWN ====================
+let editPICDropdownTimeout = null;
+let editCurrentPICs = [];
+
+function showEditPICInput() {
+    const picContainer = document.getElementById('edit-pic-input-container');
+    if (picContainer) {
+        picContainer.classList.remove('hidden');
+        
+        document.getElementById('edit-pic-id').value = '';
+        document.getElementById('edit-pic-name-hidden').value = '';
+        document.getElementById('edit-pic-search').value = '';
+    }
+}
+
+function hideEditPICInput() {
+    const picContainer = document.getElementById('edit-pic-input-container');
+    if (picContainer) {
+        picContainer.classList.add('hidden');
+        
+        document.getElementById('edit-pic-id').value = '';
+        document.getElementById('edit-pic-name-hidden').value = '';
+        document.getElementById('edit-pic-search').value = '';
+    }
+}
+
+async function loadEditPICsByCompany(companyId, search = '') {
+    try {
+        console.log('🔄 Loading edit PICs for company:', companyId);
+        
+        const response = await fetch(`/pics/by-company/${companyId}`);
+        const data = await response.json();
+        
+        console.log('📋 Edit PICs response:', data);
+        
+        if (data.success) {
+            editCurrentPICs = data.pics;
+            updateEditPICDropdown(search);
+        }
+    } catch (error) {
+        console.error('Error loading edit PICs:', error);
+    }
+}
+
+function updateEditPICDropdown(search = '') {
+    const dropdown = document.getElementById('edit-pic-options');
+    const searchTerm = search.toLowerCase();
+    const filteredPICs = editCurrentPICs.filter(pic => 
+        pic.name.toLowerCase().includes(searchTerm)
+    );
+    
+    dropdown.innerHTML = '';
+    
+    filteredPICs.forEach(pic => {
+        const option = document.createElement('div');
+        option.className = 'px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer';
+        
+        let displayText = pic.name;
+        if (pic.position) {
+            displayText += ` - ${pic.position}`;
+        }
+        
+        option.textContent = displayText;
+        option.onclick = () => selectEditPIC(pic.id, pic.name);
+        dropdown.appendChild(option);
+    });
+    
+    const dropdownContainer = document.getElementById('edit-pic-dropdown');
+    if (filteredPICs.length > 0) {
+        dropdownContainer.classList.remove('hidden');
+    } else {
+        dropdownContainer.classList.add('hidden');
+    }
+}
+
+function selectEditPIC(picId, picName) {
+    console.log('✅ Edit PIC selected:', { picId, picName });
+    
+    document.getElementById('edit-pic-id').value = picId;
+    document.getElementById('edit-pic-name-hidden').value = picName;
+    document.getElementById('edit-pic-search').value = picName;
+    document.getElementById('edit-pic-dropdown').classList.add('hidden');
+}
+
+function initEditPICDropdown() {
+    const searchInput = document.getElementById('edit-pic-search');
+    const dropdown = document.getElementById('edit-pic-dropdown');
+    
+    if (!searchInput || !dropdown) return;
+    
+    searchInput.addEventListener('focus', () => {
+        if (editSelectedCompanyId) {
+            loadEditPICsByCompany(editSelectedCompanyId, searchInput.value);
+        }
+    });
+    
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(editPICDropdownTimeout);
+        editPICDropdownTimeout = setTimeout(() => updateEditPICDropdown(e.target.value), 300);
+    });
+    
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
+}
+
+// ==================== EDIT CASCADE ====================
 function initEditVisitCascade() {
     console.log('🔄 Initializing edit cascade with data:', currentEditData);
     
@@ -289,12 +828,8 @@ function initEditVisitCascade() {
         console.log('🔄 Loading regencies for province:', currentEditData.provinceId);
         
         const provinceSelect = document.getElementById('edit-province');
-        // Set value as string karena VARCHAR
         provinceSelect.value = String(currentEditData.provinceId);
         
-        console.log('Province select value after set:', provinceSelect.value);
-        
-        // Trigger change untuk load regencies
         const changeEvent = new Event('change', { bubbles: true });
         provinceSelect.dispatchEvent(changeEvent);
         
@@ -303,29 +838,21 @@ function initEditVisitCascade() {
             console.log('⏳ Waiting for regencies to load...');
             
             let regencyWaitCount = 0;
-            const maxRegencyWait = 50; // 50 x 200ms = 10 detik
+            const maxRegencyWait = 50;
             
             const waitForRegencies = setInterval(() => {
                 const regencySelect = document.getElementById('edit-regency');
                 regencyWaitCount++;
                 
-                console.log(`⏳ Regency wait count: ${regencyWaitCount}, options: ${regencySelect.options.length}`);
-                
-                if (regencySelect.options.length > 1) { // Ada options selain placeholder
+                if (regencySelect.options.length > 1) {
                     clearInterval(waitForRegencies);
                     console.log('✅ Regencies loaded, setting value:', currentEditData.regencyId);
                     
-                    // Set value (compare as string karena VARCHAR)
                     regencySelect.value = String(currentEditData.regencyId);
                     
-                    // Cek apakah value berhasil di-set
                     if (regencySelect.value == currentEditData.regencyId) {
-                        console.log('✅ Regency value set successfully:', regencySelect.value);
+                        console.log('✅ Regency value set successfully');
                         regencySelect.dispatchEvent(new Event('change', { bubbles: true }));
-                    } else {
-                        console.warn('⚠️ Regency value not found. Looking for:', currentEditData.regencyId);
-                        console.warn('⚠️ Available regencies:', 
-                            Array.from(regencySelect.options).map(o => ({value: o.value, text: o.text})));
                     }
                     
                     // Load district jika ada
@@ -333,24 +860,20 @@ function initEditVisitCascade() {
                         console.log('⏳ Waiting for districts to load...');
                         
                         let districtWaitCount = 0;
-                        const maxDistrictWait = 50; // 50 x 200ms = 10 detik
+                        const maxDistrictWait = 50;
                         
                         const waitForDistricts = setInterval(() => {
                             const districtSelect = document.getElementById('edit-district');
                             districtWaitCount++;
                             
-                            console.log(`⏳ District wait count: ${districtWaitCount}, options: ${districtSelect.options.length}`);
-                            
                             if (districtSelect.options.length > 1) {
                                 clearInterval(waitForDistricts);
                                 console.log('✅ Districts loaded, setting value:', currentEditData.districtId);
                                 
-                                // Set value (compare as string karena VARCHAR)
                                 districtSelect.value = String(currentEditData.districtId);
                                 
-                                // Cek apakah value berhasil di-set
                                 if (districtSelect.value == currentEditData.districtId) {
-                                    console.log('✅ District value set successfully:', districtSelect.value);
+                                    console.log('✅ District value set successfully');
                                     districtSelect.dispatchEvent(new Event('change', { bubbles: true }));
                                     
                                     // Load village jika ada
@@ -364,51 +887,40 @@ function initEditVisitCascade() {
                                             const villageSelect = document.getElementById('edit-village');
                                             villageWaitCount++;
                                             
-                                            console.log(`⏳ Village wait count: ${villageWaitCount}, options: ${villageSelect.options.length}`);
-                                            
                                             if (villageSelect.options.length > 1) {
                                                 clearInterval(waitForVillages);
                                                 console.log('✅ Villages loaded, setting value:', currentEditData.villageId);
                                                 
-                                                // Set value (compare as string karena VARCHAR)
                                                 villageSelect.value = String(currentEditData.villageId);
                                                 
                                                 if (villageSelect.value == currentEditData.villageId) {
-                                                    console.log('✅ Village value set successfully:', villageSelect.value);
-                                                } else {
-                                                    console.warn('⚠️ Village value not found in options');
+                                                    console.log('✅ Village value set successfully');
                                                 }
                                             }
                                             
                                             if (villageWaitCount >= maxVillageWait) {
                                                 clearInterval(waitForVillages);
-                                                console.warn('⚠️ Timeout waiting for villages - no data received');
+                                                console.warn('⚠️ Timeout waiting for villages');
                                             }
                                         }, 200);
                                     }
-                                } else {
-                                    console.warn('⚠️ District value not found in options');
                                 }
                             }
                             
                             if (districtWaitCount >= maxDistrictWait) {
                                 clearInterval(waitForDistricts);
-                                console.warn('⚠️ Timeout waiting for districts - no data received');
-                                console.warn('⚠️ Possible issue: regency might not have districts or API error');
+                                console.warn('⚠️ Timeout waiting for districts');
                             }
                         }, 200);
                     }
                 }
-            }, 200); // Check every 200ms
-            
-            // Timeout setelah 10 detik
-            setTimeout(() => {
-                clearInterval(waitForRegencies);
-                console.warn('⚠️ Timeout waiting for regencies');
-            }, 10000);
+                
+                if (regencyWaitCount >= maxRegencyWait) {
+                    clearInterval(waitForRegencies);
+                    console.warn('⚠️ Timeout waiting for regencies');
+                }
+            }, 200);
         }
-    } else {
-        console.log('ℹ️ No province ID to load cascade');
     }
 }
 
@@ -423,19 +935,39 @@ function closeEditVisitModal() {
     }
 
     currentEditData = null;
+    editSelectedCompanyId = null;
 
     const form = document.getElementById('editVisitForm');
     if (form) form.reset();
 
     const salesSelect = document.getElementById('editSalesId');
     salesSelect.disabled = false;
-    salesSelect.classList.remove('bg-gray-100', 'cursor-not-allowed');
     salesSelect.innerHTML = '<option value="">Pilih Sales</option>';
 
+    // Reset dropdowns
     document.getElementById('edit-province').innerHTML = '<option value="">Pilih Provinsi</option>';
     document.getElementById('edit-regency').innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
     document.getElementById('edit-district').innerHTML = '<option value="">Pilih Kecamatan</option>';
     document.getElementById('edit-village').innerHTML = '<option value="">Pilih Kelurahan/Desa</option>';
+    
+    // Reset company & PIC
+    document.getElementById('edit-company-id').value = '';
+    document.getElementById('edit-company-search').value = '';
+    document.getElementById('edit-company-dropdown').classList.add('hidden');
+    hideEditPICInput();
+    
+    // Reset address state
+    const content = document.getElementById('edit-address-content');
+    const icon = document.getElementById('edit-address-toggle-icon');
+    const statusText = document.getElementById('edit-address-status');
+    
+    if (content) content.classList.add('hidden');
+    if (icon) icon.style.transform = 'rotate(0deg)';
+    if (statusText) {
+        statusText.textContent = 'Belum diisi';
+        statusText.classList.remove('text-green-600', 'font-medium');
+        statusText.classList.add('text-gray-500');
+    }
 }
 
 // ==================== DELETE ====================
@@ -465,7 +997,6 @@ function deleteVisit(visitId, deleteRoute, csrfToken) {
             if (data.success) {
                 showNotification(data.message, 'success');
                 
-                // Full reload setelah 1 detik
                 setTimeout(() => {
                     window.location.reload();
                 }, 1000);
@@ -477,6 +1008,83 @@ function deleteVisit(visitId, deleteRoute, csrfToken) {
             console.error('❌ Error:', error);
             showNotification('Gagal menghapus data: ' + error.message, 'error');
         });
+    }
+}
+
+// ==================== ADDRESS SECTION TOGGLE ====================
+function toggleAddressSection() {
+    const content = document.getElementById('address-content');
+    const icon = document.getElementById('address-toggle-icon');
+    
+    if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        icon.style.transform = 'rotate(180deg)';
+    } else {
+        content.classList.add('hidden');
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
+
+function checkAddressCompletion() {
+    const province = document.getElementById('create-province').value;
+    const address = document.getElementById('create-address').value.trim();
+    const statusText = document.getElementById('address-status');
+    const content = document.getElementById('address-content');
+    const icon = document.getElementById('address-toggle-icon');
+    
+    if (province && address) {
+        statusText.textContent = 'Sudah diisi';
+        statusText.classList.remove('text-gray-500');
+        statusText.classList.add('text-green-600', 'font-medium');
+        
+        setTimeout(() => {
+            if (!content.classList.contains('hidden')) {
+                content.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }, 800);
+    } else {
+        statusText.textContent = 'Belum diisi';
+        statusText.classList.remove('text-green-600', 'font-medium');
+        statusText.classList.add('text-gray-500');
+    }
+}
+
+function toggleEditAddressSection() {
+    const content = document.getElementById('edit-address-content');
+    const icon = document.getElementById('edit-address-toggle-icon');
+    
+    if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        icon.style.transform = 'rotate(180deg)';
+    } else {
+        content.classList.add('hidden');
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
+
+function checkEditAddressCompletion() {
+    const province = document.getElementById('edit-province').value;
+    const address = document.getElementById('editAddress').value.trim();
+    const statusText = document.getElementById('edit-address-status');
+    const content = document.getElementById('edit-address-content');
+    const icon = document.getElementById('edit-address-toggle-icon');
+    
+    if (province && address) {
+        statusText.textContent = 'Sudah diisi';
+        statusText.classList.remove('text-gray-500');
+        statusText.classList.add('text-green-600', 'font-medium');
+        
+        setTimeout(() => {
+            if (!content.classList.contains('hidden')) {
+                content.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }, 800);
+    } else {
+        statusText.textContent = 'Belum diisi';
+        statusText.classList.remove('text-green-600', 'font-medium');
+        statusText.classList.add('text-gray-500');
     }
 }
 
@@ -503,13 +1111,11 @@ function showNotification(message, type = 'info') {
         </div>
     `;
     
-    // Show notification
     notification.style.opacity = '0';
     setTimeout(() => {
         notification.style.opacity = '1';
     }, 100);
     
-    // Hide after 3 seconds
     setTimeout(() => {
         notification.style.opacity = '0';
         setTimeout(() => {
@@ -523,10 +1129,13 @@ function showNotification(message, type = 'info') {
 // ==================== EVENT LISTENERS ====================
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-        if (!document.getElementById('visitModal').classList.contains('hidden')) {
+        if (!document.getElementById('addPICModal').classList.contains('hidden')) {
+            closeAddPICModal();
+        } else if (!document.getElementById('addCompanyModal').classList.contains('hidden')) {
+            closeAddCompanyModal();
+        } else if (!document.getElementById('visitModal').classList.contains('hidden')) {
             closeVisitModal();
-        }
-        if (!document.getElementById('editVisitModal').classList.contains('hidden')) {
+        } else if (!document.getElementById('editVisitModal').classList.contains('hidden')) {
             closeEditVisitModal();
         }
     }
@@ -538,6 +1147,12 @@ document.addEventListener('click', (e) => {
     }
     if (e.target.id === 'editVisitModal') {
         closeEditVisitModal();
+    }
+    if (e.target.id === 'addCompanyModal') {
+        closeAddCompanyModal();
+    }
+    if (e.target.id === 'addPICModal') {
+        closeAddPICModal();
     }
 });
 

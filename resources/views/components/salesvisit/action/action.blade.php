@@ -68,18 +68,18 @@
                             </div>
                         </div>
 
-                        <!-- Customer Name -->
+                        <!-- Visit Date -->
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                Customer Name <span class="text-red-500">*</span>
+                                Visit Date <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-user text-gray-400 text-xs"></i>
+                                    <i class="fas fa-calendar text-gray-400 text-xs"></i>
                                 </div>
-                                <input type="text" name="customer_name"
+                                <input type="date" name="visit_date"
                                     class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                    placeholder="Masukkan nama customer" required>
+                                    required>
                             </div>
                         </div>
 
@@ -111,18 +111,32 @@
                             </div>
                         </div>
 
-                        <!-- Visit Date -->
-                        <div>
+                        <!-- PIC Name with Dropdown (Muncul setelah Company dipilih) -->
+                        <div id="pic-input-container" class="hidden">
                             <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                Visit Date <span class="text-red-500">*</span>
+                                PIC Name <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-calendar text-gray-400 text-xs"></i>
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                                    <i class="fas fa-user text-gray-400 text-xs"></i>
                                 </div>
-                                <input type="date" name="visit_date"
-                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                    required>
+                                
+                                <!-- Hidden inputs -->
+                                <input type="hidden" name="pic_id" id="create-pic-id">
+                                <input type="hidden" name="pic_name" id="create-pic-name-hidden">
+                                
+                                <!-- Input search untuk dropdown -->
+                                <input type="text" 
+                                    id="create-pic-search" 
+                                    placeholder="Ketik atau pilih PIC..."
+                                    autocomplete="off"
+                                    class="w-full pl-9 pr-20 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                                
+                                <!-- Dropdown list -->
+                                <div id="create-pic-dropdown" 
+                                    class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                    <div id="create-pic-options" class="py-1"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -263,7 +277,7 @@
                             <div class="flex gap-2">
                                 <label class="relative flex-1 cursor-pointer group">
                                     <input type="radio" name="is_follow_up" value="1" class="peer sr-only">
-                                    <div class="w-full px-2 py-2 text-xs font-medium text-gray-600 bg-white border border-gray-300 rounded-lg transition-all peer-checked:bg-green-500 peer-checked:border-green-500 peer-checked:text-white group-hover:border-green-400 flex items-center justify-center gap-1">
+                                    <div class="w-full px-2 py-2 text-xs font-medium text-gray-600 bg-white border border-gray-300 rounded-lg transition-all peer-checked:bg-blue-500 peer-checked:border-blue-500 peer-checked:text-white group-hover:border-blue-400 flex items-center justify-center gap-1">
                                         <i class="fas fa-check text-[10px]"></i>
                                         <span>Ya</span>
                                     </div>
@@ -317,7 +331,6 @@
         <div class="overflow-y-auto max-h-[calc(90vh-120px)]" style="background-color: #f3f4f6; padding: 1rem;">
             <form id="addCompanyForm" class="space-y-4">
                 @csrf
-                <input type="hidden" id="company-form-type" value="create">
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -388,6 +401,74 @@
     </div>
 </div>
 
+<!-- Add PIC Modal -->
+<div id="addPICModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70] p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-modal-in">
+        <div style="background: linear-gradient(to right, #4f46e5, #7c3aed); padding: 1rem 1.25rem;">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg font-semibold text-white">Tambah PIC Baru</h3>
+                    <p class="text-xs text-indigo-100 mt-0.5">Lengkapi formulir berikut untuk menambahkan PIC</p>
+                </div>
+                <button onclick="closeAddPICModal()" 
+                    class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="overflow-y-auto max-h-[calc(90vh-120px)]" style="background-color: #f3f4f6; padding: 1rem;">
+            <form id="addPICForm" class="space-y-4">
+                @csrf
+                <input type="hidden" name="company_id" id="pic-form-company-id">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-medium text-gray-700 mb-2">
+                            Nama PIC <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="pic_name" 
+                            class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                            placeholder="Masukkan nama PIC" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">Posisi PIC</label>
+                        <input type="text" id="pic_position" name="pic_position" 
+                            class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                            placeholder="Contoh: Manager">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">Telepon</label>
+                        <input type="text" id="pic_phone" name="pic_phone" 
+                            class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                            placeholder="Contoh: 08123456789">
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="pic_email" name="pic_email" 
+                            class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                            placeholder="Contoh: pic@company.com">
+                    </div>
+                </div>
+                
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                    <button type="button" onclick="closeAddPICModal()" 
+                            class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit" 
+                            class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-lg shadow-blue-500/30">
+                        <i class="fas fa-save"></i>
+                        Simpan PIC
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 <style>
 @keyframes fadeIn {
     from { opacity: 0; transform: scale(0.95) translateY(-20px); }
@@ -401,244 +482,97 @@
 }
 .animate-modal-in { animation: modal-in 0.3s ease-out; }
 </style>
-
 <script>
-let companyDropdownTimeout = null;
-let currentCompanies = [];
-
-// ========== ADDRESS SECTION TOGGLE ==========
-function toggleAddressSection() {
-    const content = document.getElementById('address-content');
-    const icon = document.getElementById('address-toggle-icon');
-    
-    if (content.classList.contains('hidden')) {
-        content.classList.remove('hidden');
-        icon.style.transform = 'rotate(180deg)';
-    } else {
-        content.classList.add('hidden');
-        icon.style.transform = 'rotate(0deg)';
-    }
-}
-
-function checkAddressCompletion() {
-    const province = document.getElementById('create-province').value;
-    const address = document.getElementById('create-address').value.trim();
-    const statusText = document.getElementById('address-status');
-    const content = document.getElementById('address-content');
-    const icon = document.getElementById('address-toggle-icon');
-    
-    // Cek apakah province dan address sudah diisi
-    if (province && address) {
-        statusText.textContent = 'Sudah diisi';
-        statusText.classList.remove('text-gray-500');
-        statusText.classList.add('text-green-600', 'font-medium');
-        
-        // Auto collapse setelah 800ms
-        setTimeout(() => {
-            if (!content.classList.contains('hidden')) {
-                content.classList.add('hidden');
-                icon.style.transform = 'rotate(0deg)';
-            }
-        }, 800);
-    } else {
-        statusText.textContent = 'Belum diisi';
-        statusText.classList.remove('text-green-600', 'font-medium');
-        statusText.classList.add('text-gray-500');
-    }
-}
-
-// ========== COMPANY DROPDOWN ==========
-async function loadCompanies(search = '') {
-    try {
-        const response = await fetch('/company/get-companies-dropdown');
-        const data = await response.json();
-        if (data.success) {
-            currentCompanies = data.companies;
-            updateCompanyDropdown(search);
-        }
-    } catch (error) {
-        console.error('Error loading companies:', error);
-    }
-}
-
-function updateCompanyDropdown(search = '') {
-    const dropdown = document.getElementById('create-company-options');
-    const searchTerm = search.toLowerCase();
-    const filteredCompanies = currentCompanies.filter(company => 
-        company.name.toLowerCase().includes(searchTerm)
-    );
-    
-    dropdown.innerHTML = '';
-    
-    if (filteredCompanies.length === 0 && search.trim() !== '') {
-        const addOption = document.createElement('div');
-        addOption.className = 'px-3 py-2 text-sm text-green-600 hover:bg-green-50 cursor-pointer flex items-center gap-2';
-        addOption.innerHTML = `<i class="fas fa-plus text-xs"></i><span>Tambah "${search}" sebagai company baru</span>`;
-        addOption.onclick = () => {
-            document.querySelector('#addCompanyModal input[name="company_name"]').value = search;
-            showAddCompanyModal('create');
-        };
-        dropdown.appendChild(addOption);
-    } else {
-        filteredCompanies.forEach(company => {
-            const option = document.createElement('div');
-            option.className = 'px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer';
-            option.textContent = company.name;
-            option.onclick = () => selectCompany(company.id, company.name);
-            dropdown.appendChild(option);
-        });
+    // Fungsi buka modal tambah PIC
+function openAddPICModal(companyId, companyName = '') {
+    if (!companyId) {
+        alert('Pilih perusahaan terlebih dahulu!');
+        return;
     }
     
-    const dropdownContainer = document.getElementById('create-company-dropdown');
-    if (filteredCompanies.length > 0 || search.trim() !== '') {
-        dropdownContainer.classList.remove('hidden');
-    } else {
-        dropdownContainer.classList.add('hidden');
-    }
+    // Set company_id di form
+    document.getElementById('pic-form-company-id').value = companyId;
+    
+    // Reset form
+    document.getElementById('addPICForm').reset();
+    
+    // Tampilkan modal
+    document.getElementById('addPICModal').classList.remove('hidden');
+    
+    console.log('Membuka modal tambah PIC untuk company:', companyId, companyName);
 }
 
-function selectCompany(companyId, companyName) {
-    document.getElementById('create-company-id').value = companyId;
-    document.getElementById('create-company-search').value = companyName;
-    document.getElementById('create-company-dropdown').classList.add('hidden');
+// Fungsi tutup modal tambah PIC
+function closeAddPICModal() {
+    document.getElementById('addPICModal').classList.add('hidden');
+    document.getElementById('addPICForm').reset();
 }
 
-function showAddCompanyModal(type = 'create') {
-    document.getElementById('company-form-type').value = type;
-    document.getElementById('addCompanyForm').reset();
-    document.getElementById('addCompanyModal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    setTimeout(() => {
-        document.querySelector('#addCompanyModal input[name="company_name"]').focus();
-    }, 300);
-}
-
-function closeAddCompanyModal() {
-    document.getElementById('addCompanyModal').classList.add('hidden');
-    document.getElementById('addCompanyForm').reset();
-    document.body.style.overflow = 'auto';
-}
-
-document.getElementById('addCompanyForm').addEventListener('submit', async function(e) {
+// Handle submit form PIC
+document.getElementById('addPICForm').addEventListener('submit', function(e) {
     e.preventDefault();
+    
     const formData = new FormData(this);
+    const submitButton = this.querySelector('button[type="submit"]');
+    const originalText = submitButton.innerHTML;
     
-    try {
-        const response = await fetch('/company/store-company-ajax', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Accept': 'application/json'
-            },
-            body: formData
-        });
-        
-        if (response.status === 422) {
-            const errorData = await response.json();
-            let errorMessages = [];
-            if (errorData.errors) {
-                for (const field in errorData.errors) {
-                    errorMessages.push(`${field}: ${errorData.errors[field].join(', ')}`);
-                }
-            }
-            alert('Validasi gagal:\n' + errorMessages.join('\n'));
-            return;
+    // Tampilkan loading
+    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+    submitButton.disabled = true;
+    
+    fetch('{{ route("salesvisit.pic.store") }}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
         }
-        
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        
-        const data = await response.json();
-        
+    })
+    .then(response => response.json())
+    .then(data => {
         if (data.success) {
-            const newCompany = data.company;
-            selectCompany(newCompany.id, newCompany.name);
-            loadCompanies();
-            closeAddCompanyModal();
-            alert('Company berhasil ditambahkan!');
-        } else {
-            throw new Error(data.message || 'Gagal menambahkan company');
-        }
-    } catch (error) {
-        console.error('Error adding company:', error);
-        alert('Gagal menambahkan company: ' + error.message);
-    }
-});
-
-function initCompanyDropdown() {
-    const searchInput = document.getElementById('create-company-search');
-    const dropdown = document.getElementById('create-company-dropdown');
-    
-    searchInput.addEventListener('focus', () => loadCompanies(searchInput.value));
-    
-    searchInput.addEventListener('input', (e) => {
-        clearTimeout(companyDropdownTimeout);
-        companyDropdownTimeout = setTimeout(() => updateCompanyDropdown(e.target.value), 300);
-    });
-    
-    searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            const searchValue = searchInput.value.trim();
-            if (searchValue) {
-                const matchedCompany = currentCompanies.find(company => 
-                    company.name.toLowerCase() === searchValue.toLowerCase()
-                );
-                if (!matchedCompany) {
-                    document.querySelector('#addCompanyModal input[name="company_name"]').value = searchValue;
-                    showAddCompanyModal('create');
-                }
+            // Tampilkan pesan sukses
+            showNotification('success', data.message);
+            
+            // Tutup modal
+            closeAddPICModal();
+            
+            // Jika ada callback untuk refresh data PIC, panggil di sini
+            if (typeof refreshPICList === 'function') {
+                refreshPICList(data.pic.pic_id);
             }
+            
+            // Reset form visit jika perlu
+            if (typeof onPICAdded === 'function') {
+                onPICAdded(data.pic);
+            }
+            
+        } else {
+            showNotification('error', data.message || 'Gagal menyimpan PIC');
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('error', 'Terjadi kesalahan saat menyimpan data');
+    })
+    .finally(() => {
+        // Kembalikan tombol ke keadaan semula
+        submitButton.innerHTML = originalText;
+        submitButton.disabled = false;
     });
+});
+
+// Fungsi notifikasi
+function showNotification(type, message) {
+    // Anda bisa menggunakan notifikasi library atau custom
+    // Contoh sederhana dengan alert
+    if (type === 'success') {
+        alert('✅ ' + message);
+    } else {
+        alert('❌ ' + message);
+    }
     
-    document.addEventListener('click', (e) => {
-        if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
-            dropdown.classList.add('hidden');
-        }
-    });
-    
-    loadCompanies();
+    // Atau jika menggunakan Toast/Alert library:
+    // Toastify({ text: message, className: type }).showToast();
 }
-
-const originalOpenVisitModal = window.openVisitModal;
-window.openVisitModal = function() {
-    if (originalOpenVisitModal) originalOpenVisitModal();
-    setTimeout(() => initCompanyDropdown(), 100);
-};
-
-window.closeVisitModal = function() {
-    document.getElementById('visitModal').classList.add('hidden');
-    document.getElementById('visitForm').reset();
-    document.body.style.overflow = 'auto';
-    
-    // Reset company dropdown
-    document.getElementById('create-company-id').value = '';
-    document.getElementById('create-company-search').value = '';
-    document.getElementById('create-company-dropdown').classList.add('hidden');
-    
-    // Reset address collapse state
-    const content = document.getElementById('address-content');
-    const icon = document.getElementById('address-toggle-icon');
-    const statusText = document.getElementById('address-status');
-    
-    content.classList.add('hidden');
-    icon.style.transform = 'rotate(0deg)';
-    statusText.textContent = 'Belum diisi';
-    statusText.classList.remove('text-green-600', 'font-medium');
-    statusText.classList.add('text-gray-500');
-};
-
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        if (!document.getElementById('addCompanyModal').classList.contains('hidden')) {
-            closeAddCompanyModal();
-        }
-    }
-});
-
-document.addEventListener('click', (e) => {
-    if (e.target.id === 'addCompanyModal') {
-        closeAddCompanyModal();
-    }
-});
 </script>

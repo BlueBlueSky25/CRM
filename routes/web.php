@@ -108,6 +108,8 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/salesvisit/get-companies', [CompanyController::class, 'getCompaniesForDropdown']);
     Route::post('/salesvisit/store-company', [CompanyController::class, 'storeCompanyAjax']);
 
+    Route::post('/sales-visit/pic', [SalesVisitController::class, 'storePic'])->name('salesvisit.pic.store');
+
     // ==========================
     // PIC Management
     // ==========================
@@ -116,6 +118,8 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::put('/pic/{id}', [PicController::class, 'update'])->name('pics.update');
     Route::delete('/pic/{id}', [PicController::class, 'destroy'])->name('pics.destroy');
     Route::get('/pic/search', [PicController::class, 'search'])->name('pics.search');
+    Route::get('/pics/by-company/{companyId}', [PicController::class, 'getPICsByCompany']);
+    Route::post('/pics/store-pic-ajax', [PicController::class, 'storePICAjax']);
 
     // ==========================
     // Calendar Page (React)

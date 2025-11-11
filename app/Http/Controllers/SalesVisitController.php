@@ -67,7 +67,7 @@ public function index(Request $request)
     // KPI
     $totalVisits = (clone $visitsQuery)->count();
     $followUpVisits = (clone $visitsQuery)->where('is_follow_up', true)->count();
-    $uniqueCustomers = (clone $visitsQuery)->distinct('customer_name')->count('customer_name');
+    $uniqueCustomers = (clone $visitsQuery)->distinct('pic_name')->count('pic_name');
     $uniqueSales = (clone $visitsQuery)->distinct('sales_id')->count('sales_id');
 
     return view('pages.salesvisit', compact(
@@ -145,7 +145,7 @@ public function search(Request $request)
             $searchPattern = "%{$search}%";
             
             $query->where(function($q) use ($searchPattern) {
-                $q->where('customer_name', 'ILIKE', $searchPattern)
+                $q->where('pic_name', 'ILIKE', $searchPattern)
                   ->orWhere('address', 'ILIKE', $searchPattern)
                   ->orWhere('visit_purpose', 'ILIKE', $searchPattern)
                   
@@ -212,7 +212,7 @@ public function search(Request $request)
                     'username' => optional($visit->sales)->username ?? '-',
                     'email' => optional($visit->sales)->email ?? 'No email'
                 ],
-                'customer' => $visit->customer_name ?? '-',
+                'customer' => $visit->pic_name ?? '-',
                 'company' => optional($visit->company)->company_name ?? '-',
                 'location' => $locationDisplay,
                 'visit_date' => $visit->visit_date 
@@ -256,7 +256,9 @@ public function store(Request $request)
     
     $request->validate([
         'sales_id' => 'required|exists:users,user_id',
-        'customer_name' => 'required|string|max:255',
+        'pic_name' => 'required|string|max:255',
+        'pic_id' => 'nullable|exists:company_pics,pic_id',
+        'company_name' => 'nullable|string|max:255',
         'company_id' => 'nullable|exists:company,company_id',
         'province_id' => 'required|exists:provinces,id',
         'regency_id' => 'nullable|exists:regencies,id',
@@ -266,6 +268,10 @@ public function store(Request $request)
         'visit_date' => 'required|date',
         'visit_purpose' => 'required|string',
         'is_follow_up' => 'nullable|boolean',
+        // Tambahan field untuk PIC baru
+        'pic_position' => 'nullable|string|max:255',
+        'pic_phone' => 'nullable|string|max:20',
+        'pic_email' => 'nullable|email|max:255',
     ]);
 
     $user = Auth::user();
@@ -286,10 +292,28 @@ public function store(Request $request)
     try {
         DB::beginTransaction();
 
+        $picId = $request->pic_id;
+
+        // Jika ada company_id tapi tidak ada pic_id, buat PIC baru
+        if ($request->company_id && !$request->pic_id) {
+            $companyPic = \App\Models\CompanyPic::create([
+                'company_id' => $request->company_id,
+                'pic_name' => $request->pic_name,
+                'position' => $request->pic_position,
+                'phone' => $request->pic_phone,
+                'email' => $request->pic_email,
+            ]);
+            
+            $picId = $companyPic->pic_id;
+            \Log::info('✅ PIC baru dibuat:', $companyPic->toArray());
+        }
+
         $salesVisit = SalesVisit::create([
             'sales_id' => $request->sales_id,
             'user_id' => $user->user_id,
-            'customer_name' => $request->customer_name,
+            'pic_name' => $request->pic_name,
+            'pic_id' => $picId, // Gunakan pic_id yang baru dibuat
+            'company_name' => $request->company_name ?? null,
             'company_id' => $request->company_id ?? null,
             'province_id' => $request->province_id,
             'regency_id' => $request->regency_id ?? null,
@@ -321,7 +345,9 @@ public function update(Request $request, $id)
 {
     $request->validate([
         'sales_id' => 'required|exists:users,user_id',
-        'customer_name' => 'required|string|max:255',
+        'pic_name' => 'required|string|max:255',
+        'pic_id' => 'nullable|exists:company_pics,pic_id',
+        'company_name' => 'nullable|string|max:255',
         'company_id' => 'nullable|exists:company,company_id',
         'province_id' => 'required|exists:provinces,id',
         'regency_id' => 'nullable|exists:regencies,id',
@@ -331,6 +357,10 @@ public function update(Request $request, $id)
         'visit_date' => 'required|date',
         'visit_purpose' => 'required|string',
         'is_follow_up' => 'nullable|boolean',
+        // Tambahan field untuk PIC baru
+        'pic_position' => 'nullable|string|max:255',
+        'pic_phone' => 'nullable|string|max:20',
+        'pic_email' => 'nullable|email|max:255',
     ]);
 
     $user = Auth::user();
@@ -344,10 +374,30 @@ public function update(Request $request, $id)
     }
 
     try {
+        DB::beginTransaction();
+
+        $picId = $request->pic_id;
+
+        // Jika ada company_id tapi tidak ada pic_id, buat PIC baru
+        if ($request->company_id && !$request->pic_id) {
+            $companyPic = \App\Models\CompanyPic::create([
+                'company_id' => $request->company_id,
+                'pic_name' => $request->pic_name,
+                'position' => $request->pic_position,
+                'phone' => $request->pic_phone,
+                'email' => $request->pic_email,
+            ]);
+            
+            $picId = $companyPic->pic_id;
+            \Log::info('✅ PIC baru dibuat saat update:', $companyPic->toArray());
+        }
+
         $visit->update([
             'sales_id' => $request->sales_id,
             'user_id' => $user->user_id,
-            'customer_name' => $request->customer_name,
+            'pic_name' => $request->pic_name,
+            'pic_id' => $picId, // Gunakan pic_id yang baru dibuat
+            'company_name' => $request->company_name ?? null,
             'company_id' => $request->company_id ?? null,
             'province_id' => $request->province_id,
             'regency_id' => $request->regency_id ?? null,
@@ -359,9 +409,12 @@ public function update(Request $request, $id)
             'is_follow_up' => $request->boolean('is_follow_up') ?? false,
         ]);
 
+        DB::commit();
+
         return redirect()->route('salesvisit')
             ->with('success', 'Data kunjungan sales berhasil diupdate!');
     } catch (\Exception $e) {
+        DB::rollBack();
         \Log::error('Error updating sales visit: ' . $e->getMessage());
         return redirect()->back()
             ->with('error', 'Gagal mengupdate data: ' . $e->getMessage())
@@ -588,7 +641,9 @@ public function import(Request $request)
                 SalesVisit::create([
                     'sales_id' => $sales->user_id,
                     'user_id' => auth()->id(),
-                    'customer_name' => trim($row[2]),
+                    'pic_name' => trim($row[2]),
+                    'pic_id' => null,
+                    'company_name' => null,
                     'company_id' => null,
                     'province_id' => $province->id,
                     'regency_id' => $regency?->id,
@@ -649,9 +704,10 @@ private function getVisitActions($visit)
             'onclick' => "openEditVisitModal(" . json_encode([
                 'id' => $visit->id,
                 'salesId' => $visit->sales_id,
-                'customerName' => $visit->customer_name,
+                'picName' => $visit->pic_name,
+                'picId' => $visit->pic_id,
+                'companyName' => $visit->company_name ?? '',
                 'companyId' => $visit->company_id,
-                'companyName' => optional($visit->company)->company_name ?? '',
                 'provinceId' => $visit->province_id,
                 'regencyId' => $visit->regency_id,
                 'districtId' => $visit->district_id,
@@ -678,4 +734,87 @@ private function getVisitActions($visit)
 
     return $actions;
 }
+public function searchPics(Request $request)
+{
+    try {
+        $search = $request->get('q');
+        $companyId = $request->get('company_id');
+
+        $query = \App\Models\CompanyPic::query();
+
+        if ($companyId) {
+            $query->where('company_id', $companyId);
+        }
+
+        if ($search) {
+            $query->where('pic_name', 'ILIKE', "%{$search}%")
+                  ->orWhere('email', 'ILIKE', "%{$search}%");
+        }
+
+        $pics = $query->select('pic_id', 'pic_name', 'position', 'phone', 'email')
+                     ->limit(10)
+                     ->get();
+
+        return response()->json([
+            'success' => true,
+            'pics' => $pics
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Error searching PICs: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'error' => 'Server error'
+        ], 500);
+    }
+}
+public function storePic(Request $request)
+{
+    $request->validate([
+        'company_id' => 'required|exists:company,company_id',
+        'pic_name' => 'required|string|max:255',
+        'pic_position' => 'nullable|string|max:255',
+        'pic_phone' => 'nullable|string|max:20',
+        'pic_email' => 'nullable|email|max:255',
+    ]);
+
+    try {
+        DB::beginTransaction();
+
+        $pic = \App\Models\CompanyPic::create([
+            'company_id' => $request->company_id,
+            'pic_name' => $request->pic_name,
+            'position' => $request->pic_position,
+            'phone' => $request->pic_phone,
+            'email' => $request->pic_email,
+        ]);
+
+        DB::commit();
+
+        \Log::info('PIC baru berhasil dibuat:', $pic->toArray());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'PIC berhasil ditambahkan!',
+            'pic' => [
+                'pic_id' => $pic->pic_id,
+                'pic_name' => $pic->pic_name,
+                'position' => $pic->position,
+                'phone' => $pic->phone,
+                'email' => $pic->email,
+                'company_id' => $pic->company_id
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('Error storing PIC: ' . $e->getMessage());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal menambahkan PIC: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
 }

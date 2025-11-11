@@ -17,7 +17,8 @@ class SalesVisit extends Model
     protected $fillable = [
         'sales_id',
         'user_id',
-        'customer_name',
+        'pic_name',  
+        'pic_id',  
         'company_name',
         'company_id',
         'province_id',
@@ -42,41 +43,54 @@ class SalesVisit extends Model
     return $this->belongsTo(Company::class, 'company_id', 'company_id');
     }   
     
+
+    public function pic()
+    {
+    return $this->belongsTo(CompanyPic::class, 'pic_id', 'pic_id');
+    }
+
+
     public function sales()
     {
         return $this->belongsTo(User::class, 'sales_id', 'user_id');
     }
 
-    /** Relasi ke User (yang input data) */
+    
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
+
 
     public function province()
     {
         return $this->belongsTo(Province::class, 'province_id', 'id');
     }
 
+
     public function regency()
     {
         return $this->belongsTo(Regency::class, 'regency_id', 'id');
     }
+
 
     public function district()
     {
         return $this->belongsTo(District::class, 'district_id', 'id');
     }
 
+
     public function village()
     {
         return $this->belongsTo(Village::class, 'village_id', 'id');
     }
 
+
     public function scopeFilterBySales($query, $salesId)
     {
         return $salesId ? $query->where('sales_id', $salesId) : $query;
     }
+
 
     public function scopeFilterByFollowUp($query, $followUp)
     {
@@ -87,16 +101,19 @@ class SalesVisit extends Model
         return $query;
     }
 
+
     public function scopeFilterByProvince($query, $provinceId)
     {
         return $provinceId ? $query->where('province_id', $provinceId) : $query;
     }
+
 
     public function scopeFilterByRegency($query, $regencyId)
     {
         return $regencyId ? $query->where('regency_id', $regencyId) : $query;
     }
 
+    
     public function scopeSearch($query, $search)
     {
         if (!$search) return $query;
