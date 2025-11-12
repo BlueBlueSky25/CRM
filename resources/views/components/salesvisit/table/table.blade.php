@@ -8,7 +8,7 @@
                 <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">No</th>
                 <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Visit Date</th>
                 <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Company</th>
-                <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Customer Name</th>
+                <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">PIC Name</th>
                 <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Location</th>
                 <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Purpose</th>
                 <th style="padding: 0.5rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Sales</th>
@@ -52,20 +52,42 @@
                     </div>
                 </td>
                 
-                <!-- Customer Name -->
+                <!-- PIC Name -->
                 <td style="padding: 0.5rem 0.75rem; white-space: nowrap;">
-                    <div style="font-size: 0.8125rem; font-weight: 500; color: #111827;">{{ $visit->customer_name ?? '-' }}</div>
+                    <div style="font-size: 0.8125rem; font-weight: 500; color: #111827;">{{ $visit->pic_name ?? '-' }}</div>
                 </td>
                 
-                <!-- Location -->
+                <!-- Location - ✅ UPDATED -->
                 <td style="padding: 0.5rem 0.75rem;">
                     <div style="font-size: 0.8125rem; color: #111827;">
-                        <div style="display: flex; align-items: center; gap: 0.25rem;">
-                            <i class="fas fa-map-marker-alt" style="color: #9ca3af; font-size: 0.6875rem;"></i>
-                            <span>{{ $visit->province->name ?? '-' }}</span>
-                        </div>
-                        @if($visit->regency)
-                        <div style="font-size: 0.6875rem; color: #6b7280; margin-top: 0.125rem;">{{ $visit->regency->name }}</div>
+                        @php
+                            // Build location dengan format yang sama kayak search
+                            $province = optional($visit->province)->name ?? '';
+                            $regency = optional($visit->regency)->name ?? '';
+                            $district = optional($visit->district)->name ?? '';
+                            $village = optional($visit->village)->name ?? '';
+                            
+                            // Main location (Province)
+                            $locationMain = $province ?: '-';
+                            
+                            // Sub location (Regency, District, Village)
+                            $locationSub = collect([$regency, $district, $village])
+                                ->filter()
+                                ->implode(', ');
+                        @endphp
+                        
+                        @if($locationMain !== '-')
+                            <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                <i class="fas fa-map-marker-alt" style="color: #9ca3af; font-size: 0.6875rem;"></i>
+                                <span>{{ $locationMain }}</span>
+                            </div>
+                            @if($locationSub)
+                                <div style="font-size: 0.6875rem; color: #6b7280; margin-top: 0.125rem;">
+                                    {{ $locationSub }}
+                                </div>
+                            @endif
+                        @else
+                            <span style="color: #9ca3af;">-</span>
                         @endif
                     </div>
                 </td>
@@ -121,7 +143,7 @@
                             onclick="openEditVisitModal({{ json_encode([
                                 'id' => $visit->id,
                                 'salesId' => $visit->sales_id,
-                                'customerName' => $visit->customer_name,
+                                'picName' => $visit->pic_name,
                                 'companyId' => $visit->company_id,
                                 'companyName' => optional($visit->company)->company_name ?? '',
                                 'provinceId' => $visit->province_id,

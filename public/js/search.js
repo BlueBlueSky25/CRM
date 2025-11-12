@@ -7,7 +7,7 @@
  *     tableId: 'userTable',
  *     ajaxUrl: '/users/search',
  *     filters: ['role', 'status'],
- *     columns: ['number', 'user', 'phone', 'date_birth', 'alamat', 'role', 'status', 'actions'],
+ *     columns: ['number', 'visit_date', 'company', 'pic', 'location', 'purpose', 'sales', 'follow_up', 'actions']
  *     searchParam: 'q' // ✅ BARU: nama parameter search (default: 'search')
  * });
  */
@@ -20,16 +20,17 @@ class TableHandler {
             tableId: null,
             ajaxUrl: null,
             filters: [],
-            columns: [],
+            columns: ['number', 'visit_date', 'company', 'pic', 'location', 'purpose', 'sales', 'follow_up', 'actions'],
+            columnMapping: {}, // ✅ NEW: Map backend keys to display keys
             debounceDelay: 400,
             pageSize: 10,
-            searchParam: 'search', // ✅ Default parameter name untuk search
+            searchParam: 'search',
             ...config
         };
 
         console.log('📋 Final config:', this.config);
 
-        // ✅ DOM elements - support multiple ID patterns for backward compatibility
+        // DOM elements
         this.searchInput = document.getElementById('searchInput') || 
                           document.getElementById(`${this.config.tableId}SearchInput`) ||
                           document.querySelector('input[type="text"][placeholder*="Cari"]');
@@ -42,7 +43,7 @@ class TableHandler {
         // State
         this.debounceTimer = null;
         this.currentPage = 1;
-        this.lastParams = {}; // ✅ Store untuk debugging
+        this.lastParams = {};
 
         console.log('📍 DOM Elements found:', {
             searchInput: !!this.searchInput,
@@ -50,12 +51,8 @@ class TableHandler {
             paginationContainer: !!this.paginationContainer
         });
 
-        // Validate setup
         if (!this.tbody || !this.config.ajaxUrl) {
-            console.error('❌ TableHandler: Missing required elements or config', {
-                tbody: !!this.tbody,
-                ajaxUrl: this.config.ajaxUrl
-            });
+            console.error('❌ TableHandler: Missing required elements or config');
             return;
         }
 
@@ -92,24 +89,19 @@ class TableHandler {
         console.log('📌 Attaching filter listeners for:', this.config.filters);
         
         this.config.filters.forEach(filterName => {
-            // ✅ Try multiple ID patterns for flexibility
-            const possibleIds = [
-                `filter${filterName.charAt(0).toUpperCase() + filterName.slice(1)}`, // filterSales
-                `${this.config.tableId}_${this.slugify(filterName)}Filter`, // salesVisitTable_salesFilter
-                filterName // sales (direct)
-            ];
-
-            let filterElement = null;
+            let filterElement = document.querySelector(`[data-filter="${filterName}"]`);
             
-            // Try to find element by data-filter attribute first (most reliable)
-            filterElement = document.querySelector(`[data-filter="${filterName}"]`);
-            
-            // If not found, try by ID
             if (!filterElement) {
+                const possibleIds = [
+                    `filter${filterName.charAt(0).toUpperCase() + filterName.slice(1)}`,
+                    `${this.config.tableId}_${this.slugify(filterName)}Filter`,
+                    filterName
+                ];
+                
                 for (const id of possibleIds) {
                     filterElement = document.getElementById(id);
                     if (filterElement) {
-                        console.log(`✅ Filter found by ID: ${id} for filter: ${filterName}`);
+                        console.log(`✅ Filter found by ID: ${id}`);
                         break;
                     }
                 }
@@ -118,11 +110,6 @@ class TableHandler {
             }
 
             if (filterElement) {
-                console.log(`✅ Attaching listener to filter: ${filterName}`, {
-                    id: filterElement.id,
-                    currentValue: filterElement.value
-                });
-                
                 filterElement.addEventListener('change', (e) => {
                     console.log(`🔄 Filter changed: ${filterName} = ${e.target.value}`);
                     this.fetchData(1);
@@ -153,22 +140,16 @@ class TableHandler {
 
     buildParams(page = 1) {
         const params = new URLSearchParams();
-        
-        // ✅ Page
         params.append('page', page);
         
-        // ✅ Search keyword - use configured parameter name
         if (this.searchInput?.value && this.searchInput.value.trim() !== '') {
             params.append(this.config.searchParam, this.searchInput.value.trim());
-            console.log(`✅ Search param added: ${this.config.searchParam} = ${this.searchInput.value.trim()}`);
+            console.log(`✅ Search param: ${this.config.searchParam} = ${this.searchInput.value.trim()}`);
         }
 
-        // ✅ Add filter parameters
         this.config.filters.forEach(filterName => {
-            // Try to find filter element by data-filter attribute first
             let filterElement = document.querySelector(`[data-filter="${filterName}"]`);
             
-            // Fallback to ID-based search
             if (!filterElement) {
                 const possibleIds = [
                     `filter${filterName.charAt(0).toUpperCase() + filterName.slice(1)}`,
@@ -184,9 +165,8 @@ class TableHandler {
 
             if (filterElement && filterElement.value && 
                 filterElement.value !== '' && filterElement.value !== 'all') {
-                // ✅ Use filter name as-is (lowercase) untuk konsistensi dengan backend
                 params.append(filterName.toLowerCase(), filterElement.value);
-                console.log(`✅ Filter param added: ${filterName.toLowerCase()} = ${filterElement.value}`);
+                console.log(`✅ Filter param: ${filterName.toLowerCase()} = ${filterElement.value}`);
             }
         });
 
@@ -200,12 +180,11 @@ class TableHandler {
         }
 
         console.log('📡 Fetching data for page:', page);
-        
         this.showLoading();
 
         try {
             const params = this.buildParams(page);
-            this.lastParams = Object.fromEntries(params); // Store for debugging
+            this.lastParams = Object.fromEntries(params);
             
             const url = `${this.config.ajaxUrl}?${params.toString()}`;
             console.log('🌐 Fetch URL:', url);
@@ -229,7 +208,8 @@ class TableHandler {
             const data = await response.json();
             console.log('✅ Data received:', {
                 items: data.items?.length || 0,
-                total: data.pagination?.total || 0
+                total: data.pagination?.total || 0,
+                sampleItem: data.items?.[0] // ✅ Log first item to see structure
             });
             
             if (data.debug) {
@@ -268,6 +248,21 @@ class TableHandler {
         this.tbody.innerHTML = items.map(item => this.renderRow(item)).join('');
     }
 
+    // ✅ FIXED: Get value with column mapping support
+    getColumnValue(item, col) {
+        // Check if there's a mapping for this column
+        const mappedKey = this.config.columnMapping[col] || col;
+        
+        let value = item[mappedKey];
+
+        // Handle nested values
+        if (value === undefined && mappedKey.includes('.')) {
+            value = this.getNestedValue(item, mappedKey);
+        }
+
+        return value;
+    }
+
     renderRow(item) {
         let row = `<tr style="border-bottom: 1px solid #e5e7eb; transition: background-color 0.15s;" 
                        onmouseover="this.style.backgroundColor='#f9fafb'" 
@@ -276,22 +271,119 @@ class TableHandler {
         this.config.columns.forEach(col => {
             if (col === 'actions') return;
 
-            let value = item[col];
-
-            // Handle nested values
-            if (value === undefined && col.includes('.')) {
-                value = this.getNestedValue(item, col);
-            }
+            // ✅ Use mapped column value
+            let value = this.getColumnValue(item, col);
 
             // Default to '-' if empty
             if (value === undefined || value === null || value === '') {
                 value = '-';
             }
 
-            // ✅ Special handling for 'sales' column (SalesVisit specific)
-            if (col === 'sales' && typeof item.sales === 'object' && item.sales !== null) {
-                const username = item.sales.username || '-';
-                const email = item.sales.email || 'No email';
+            // ✅ NUMBER column (rownum)
+            if (col === 'number') {
+                row += `
+                    <td style="padding: 0.5rem 0.75rem; font-size: 0.8125rem; color: #111827; white-space: nowrap;">
+                        <span style="font-weight: 500;">${this.escapeHTML(String(value))}</span>
+                    </td>`;
+                return;
+            }
+
+            // ✅ VISIT_DATE column
+            if (col === 'visit_date') {
+                row += `
+                    <td style="padding: 0.5rem 0.75rem; white-space: nowrap;">
+                        <div style="font-size: 0.8125rem; color: #111827;">
+                            ${value !== '-' ? `
+                                <div style="display: flex; align-items: center; gap: 0.375rem;">
+                                    <i class="fas fa-calendar" style="color: #9ca3af; font-size: 0.6875rem;"></i>
+                                    <span>${this.escapeHTML(String(value))}</span>
+                                </div>
+                            ` : '<span style="color: #9ca3af;">-</span>'}
+                        </div>
+                    </td>`;
+                return;
+            }
+
+            // ✅ COMPANY column
+            if (col === 'company') {
+                row += `
+                    <td style="padding: 0.5rem 0.75rem;">
+                        <div style="font-size: 0.8125rem; color: #111827;">
+                            ${value !== '-' ? `
+                                <span style="display: flex; align-items: center; gap: 0.25rem;">
+                                    <i class="fas fa-building" style="color: #9ca3af; font-size: 0.6875rem;"></i>
+                                    ${this.escapeHTML(String(value))}
+                                </span>
+                            ` : '<span style="color: #9ca3af;">-</span>'}
+                        </div>
+                    </td>`;
+                return;
+            }
+
+            // ✅ PIC column
+            if (col === 'pic' || col === 'pic_name') {
+                row += `
+                    <td style="padding: 0.5rem 0.75rem; white-space: nowrap;">
+                        <div style="font-size: 0.8125rem; font-weight: 500; color: #111827;">
+                            ${this.escapeHTML(String(value))}
+                        </div>
+                    </td>`;
+                return;
+            }
+
+            // ✅ LOCATION column - dengan format 2 baris
+            if (col === 'location') {
+                let mainLocation = '-';
+                let subLocation = '';
+                
+                if (value !== '-' && String(value).includes('|')) {
+                    // Format: "Province | Regency, District, Village"
+                    const parts = String(value).split('|').map(s => s.trim());
+                    mainLocation = parts[0] || '-';
+                    subLocation = parts[1] || '';
+                } else if (value !== '-') {
+                    // Fallback: jika tidak ada separator, tampilkan semua
+                    mainLocation = String(value);
+                }
+                
+                row += `
+                    <td style="padding: 0.5rem 0.75rem;">
+                        <div style="font-size: 0.8125rem; color: #111827;">
+                            <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                <i class="fas fa-map-marker-alt" style="color: #9ca3af; font-size: 0.6875rem;"></i>
+                                <span>${this.escapeHTML(mainLocation)}</span>
+                            </div>
+                            ${subLocation ? `
+                                <div style="font-size: 0.6875rem; color: #6b7280; margin-top: 0.125rem;">
+                                    ${this.escapeHTML(subLocation)}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </td>`;
+                return;
+            }
+
+            // ✅ PURPOSE column
+            if (col === 'purpose') {
+                row += `
+                    <td style="padding: 0.5rem 0.75rem;">
+                        <div style="font-size: 0.8125rem; color: #374151; max-width: 16rem;">
+                            ${value !== '-' ? `
+                                <span style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" title="${this.escapeHTML(String(value))}">
+                                    ${this.escapeHTML(String(value))}
+                                </span>
+                            ` : '<span style="color: #9ca3af;">-</span>'}
+                        </div>
+                    </td>`;
+                return;
+            }
+
+            // ✅ SALES column (object with username & email)
+            if (col === 'sales') {
+                const salesData = typeof value === 'object' && value !== null ? value : { username: value, email: '' };
+                const username = salesData.username || String(value) || '-';
+                const email = salesData.email || 'No email';
+                
                 row += `
                     <td style="padding: 0.5rem 0.75rem; white-space: nowrap;">
                         <div style="display: flex; align-items: center;">
@@ -309,83 +401,13 @@ class TableHandler {
                 return;
             }
 
-            // ✅ Special handling for 'user' column (User management specific)
-            if (col === 'user' && typeof item.user === 'object' && item.user !== null) {
-                const username = item.user.username || '-';
-                const email = item.user.email || '-';
-                row += `
-                    <td class="px-6 py-4">
-                        <div class="flex items-center">
-                            <div>
-                                <div class="text-sm font-medium text-gray-900">${this.escapeHTML(username)}</div>
-                                <div class="text-sm text-gray-500">${this.escapeHTML(email)}</div>
-                            </div>
-                        </div>
-                    </td>`;
-                return;
-            }
-
-            // ✅ Special handling for 'customer' column
-            if (col === 'customer') {
-                row += `
-                    <td style="padding: 0.5rem 0.75rem; white-space: nowrap;">
-                        <div style="font-size: 0.8125rem; font-weight: 500; color: #111827;">${this.escapeHTML(String(value))}</div>
-                    </td>`;
-                return;
-            }
-
-            // ✅ Special handling for 'company' column
-            if (col === 'company') {
-                row += `
-                    <td style="padding: 0.5rem 0.75rem;">
-                        <div style="font-size: 0.8125rem; color: #111827;">${this.escapeHTML(String(value))}</div>
-                    </td>`;
-                return;
-            }
-
-            // ✅ Special handling for 'location' column
-            if (col === 'location') {
-                row += `
-                    <td style="padding: 0.5rem 0.75rem;">
-                        <div style="font-size: 0.8125rem; color: #111827;">${this.escapeHTML(String(value))}</div>
-                    </td>`;
-                return;
-            }
-
-            // ✅ Special handling for 'visit_date' column
-            if (col === 'visit_date') {
-                row += `
-                    <td style="padding: 0.5rem 0.75rem; white-space: nowrap;">
-                        <div style="font-size: 0.8125rem; color: #111827;">
-                            ${value !== '-' ? `
-                                <div style="display: flex; align-items: center; gap: 0.375rem;">
-                                    <i class="fas fa-calendar" style="color: #9ca3af; font-size: 0.6875rem;"></i>
-                                    <span>${this.escapeHTML(String(value))}</span>
-                                </div>
-                            ` : '<span style="color: #9ca3af;">-</span>'}
-                        </div>
-                    </td>`;
-                return;
-            }
-
-            // ✅ Special handling for 'purpose' column
-            if (col === 'purpose') {
-                row += `
-                    <td style="padding: 0.5rem 0.75rem;">
-                        <div style="font-size: 0.8125rem; color: #374151; max-width: 16rem;">
-                            ${value !== '-' ? `
-                                <span style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" title="${this.escapeHTML(String(value))}">
-                                    ${this.escapeHTML(String(value))}
-                                </span>
-                            ` : '<span style="color: #9ca3af;">-</span>'}
-                        </div>
-                    </td>`;
-                return;
-            }
-
-            // ✅ Special handling for 'follow_up' column
+            // ✅ FOLLOW_UP column
             if (col === 'follow_up') {
-                const isYes = String(value).toLowerCase() === 'ya' || String(value).toLowerCase() === 'yes';
+                const isYes = String(value).toLowerCase() === 'ya' || 
+                             String(value).toLowerCase() === 'yes' ||
+                             value === true || 
+                             value === 1;
+                
                 row += `
                     <td style="padding: 0.5rem 0.75rem; white-space: nowrap;">
                         ${isYes ? `
@@ -403,57 +425,10 @@ class TableHandler {
                 return;
             }
 
-            // Role badge
-            if (col === 'role') {
-                row += `<td class="px-6 py-4">
-                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        ${this.escapeHTML(String(value))}
-                    </span>
-                </td>`;
-                return;
-            }
-
-            // Status badge
-            if (col === 'status') {
-                const isActive = String(value).toLowerCase() === 'active';
-                const bgColor = isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-                row += `<td class="px-6 py-4">
-                    <span class="px-3 py-1 rounded-full text-xs font-medium ${bgColor}">
-                        ${this.escapeHTML(String(value))}
-                    </span>
-                </td>`;
-                return;
-            }
-
-            // Address with special formatting
-            if (col === 'alamat') {
-                let alamatHtml = `<div class="text-sm text-gray-900">`;
-
-                if (String(value) !== '-' && String(value).includes(' - ')) {
-                    const [wilayah, detail] = String(value).split(' - ');
-                    alamatHtml += `
-                        <div class="font-medium">${this.escapeHTML(wilayah)}</div>
-                        <div class="text-xs text-gray-600 mt-1">${this.escapeHTML(detail)}</div>
-                    `;
-                } else {
-                    alamatHtml += this.escapeHTML(String(value));
-                }
-
-                alamatHtml += `</div>`;
-                row += `<td class="px-6 py-4">${alamatHtml}</td>`;
-                return;
-            }
-
-            // Number column
-            if (col === 'number') {
-                row += `<td style="padding: 0.5rem 0.75rem; font-size: 0.8125rem; color: #111827; white-space: nowrap;">
-                    <span style="font-weight: 500;">${this.escapeHTML(String(value))}</span>
-                </td>`;
-                return;
-            }
-
             // Default column
-            row += `<td class="px-6 py-4 text-sm text-gray-700">${this.escapeHTML(String(value))}</td>`;
+            row += `<td style="padding: 0.5rem 0.75rem; font-size: 0.8125rem; color: #111827;">
+                ${this.escapeHTML(String(value))}
+            </td>`;
         });
 
         // Actions column
@@ -500,14 +475,6 @@ class TableHandler {
                         title="${action.title || 'Delete'}">
                         <i class="fas fa-${icon}"></i>
                     </button>`;
-            } else if (action.type === 'view') {
-                html += `
-                    <button 
-                        onclick="${action.onclick || ''}"
-                        class="p-2 rounded-lg flex items-center transition-colors text-green-600 hover:text-green-900 hover:bg-green-50"
-                        title="${action.title || 'View'}">
-                        <i class="fas fa-${icon}"></i>
-                    </button>`;
             }
         });
 
@@ -523,9 +490,6 @@ class TableHandler {
 
         const { current_page = 1, last_page = 1, from = 0, to = 0, total = 0 } = pagination;
 
-        console.log('📄 Rendering pagination:', { current_page, last_page, from, to, total });
-
-        // Hide if only 1 page
         if (last_page <= 1) {
             this.paginationContainer.style.display = 'none';
             return;
@@ -619,17 +583,14 @@ class TableHandler {
         }
     }
 
-    // ✅ Public method untuk refresh data
     refresh(page = 1) {
         this.fetchData(page);
     }
 
-    // ✅ Helper untuk debugging
     getLastParams() {
         return this.lastParams;
     }
 
-    // ✅ Helper untuk manual search
     search(keyword) {
         if (this.searchInput) {
             this.searchInput.value = keyword;
@@ -638,42 +599,4 @@ class TableHandler {
     }
 }
 
-/**
- * Delete Handler Function
- * Bisa digunakan untuk semua delete operations
- */
-function deleteRecord(recordId, deleteRoute, csrfToken, onSuccess = null) {
-    if (!confirm('Are you sure you want to delete this record?')) {
-        return;
-    }
-
-    fetch(deleteRoute, {
-        method: 'DELETE',
-        headers: {
-            'X-CSRF-TOKEN': csrfToken,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        // Call callback if provided
-        if (onSuccess && typeof onSuccess === 'function') {
-            onSuccess(data);
-        } else {
-            // Default: refresh page
-            location.reload();
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error deleting record');
-    });
-}
-
-console.log('✅ TableHandler class loaded and ready');
+console.log('✅ Enhanced TableHandler loaded');

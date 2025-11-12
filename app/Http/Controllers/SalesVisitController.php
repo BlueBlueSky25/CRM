@@ -67,7 +67,7 @@ public function index(Request $request)
     // KPI
     $totalVisits = (clone $visitsQuery)->count();
     $followUpVisits = (clone $visitsQuery)->where('is_follow_up', true)->count();
-    $uniqueCustomers = (clone $visitsQuery)->distinct('pic_name')->count('pic_name');
+    $uniquePics = (clone $visitsQuery)->distinct('pic_name')->count('pic_name');
     $uniqueSales = (clone $visitsQuery)->distinct('sales_id')->count('sales_id');
 
     return view('pages.salesvisit', compact(
@@ -77,7 +77,7 @@ public function index(Request $request)
         'types',
         'totalVisits',
         'followUpVisits',
-        'uniqueCustomers',
+        'uniquePics',
         'uniqueSales'
     ));
 }
@@ -187,44 +187,49 @@ public function search(Request $request)
 
         // Format response
         $items = $salesVisits->map(function($visit, $index) use ($salesVisits) {
-            $alamatWilayah = collect([
-                optional($visit->village)->name,
-                optional($visit->district)->name,
-                optional($visit->regency)->name,
-                optional($visit->province)->name,
-            ])->filter()->implode(', ');
-            
-            $locationDisplay = $alamatWilayah ?: (optional($visit->province)->name ?? '-');
+        // ✅ BUILD LOCATION dengan format 2 baris
+        $province = optional($visit->province)->name ?? '';
+        $regency = optional($visit->regency)->name ?? '';
+        $district = optional($visit->district)->name ?? '';
+        $village = optional($visit->village)->name ?? '';
+        
+        // Format: Province (main), kemudian detail di bawahnya
+        $locationMain = $province ?: '-';
+        $locationSub = collect([$regency, $district, $village])
+            ->filter()
+            ->implode(', ');
+        
+        // Gabung jadi satu string dengan separator '|'
+        $locationDisplay = $locationMain;
+        if ($locationSub) {
+            $locationDisplay .= ' | ' . $locationSub;
+        }
 
-            $actions = [];
-            try {
-                $actions = $this->getVisitActions($visit);
-            } catch (\Exception $e) {
-                \Log::error('Error generating actions', [
-                    'visit_id' => $visit->id,
-                    'error' => $e->getMessage()
-                ]);
-            }
+        $actions = [];
+        try {
+            $actions = $this->getVisitActions($visit);
+        } catch (\Exception $e) {
+            \Log::error('Error generating actions', [
+                'visit_id' => $visit->id,
+                'error' => $e->getMessage()
+            ]);
+        }
 
-            return [
-                'number' => $salesVisits->firstItem() + $index,
-                'sales' => [
-                    'username' => optional($visit->sales)->username ?? '-',
-                    'email' => optional($visit->sales)->email ?? 'No email'
-                ],
-                'customer' => $visit->pic_name ?? '-',
-                'company' => optional($visit->company)->company_name ?? '-',
-                'location' => $locationDisplay,
-                'visit_date' => $visit->visit_date 
-                    ? $visit->visit_date->format('d M Y') 
-                    : '-',
-                'purpose' => $visit->visit_purpose 
-                    ? \Illuminate\Support\Str::limit($visit->visit_purpose, 45) 
-                    : '-',
-                'follow_up' => $visit->is_follow_up ? 'Ya' : 'Tidak',
-                'actions' => $actions
-            ];
-        })->toArray();
+        return [
+            'number' => $salesVisits->firstItem() + $index,
+            'visit_date' => $visit->visit_date ? $visit->visit_date->format('d M Y') : '-',
+            'company' => optional($visit->company)->company_name ?? '-',
+            'pic' => $visit->pic_name ?? '-',
+            'location' => $locationDisplay, // ✅ Format baru
+            'purpose' => $visit->visit_purpose ? \Illuminate\Support\Str::limit($visit->visit_purpose, 45) : '-',
+            'sales' => [
+                'username' => optional($visit->sales)->username ?? '-',
+                'email' => optional($visit->sales)->email ?? 'No email'
+            ],
+            'follow_up' => $visit->is_follow_up ? 'Ya' : 'Tidak',
+            'actions' => $actions
+        ];
+    })->toArray();
 
         return response()->json([
             'success' => true,

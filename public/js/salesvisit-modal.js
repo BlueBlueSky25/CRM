@@ -20,6 +20,7 @@ function openVisitModal() {
     initCreateVisitCascade();
     initCompanyDropdown();
     initPICDropdown();
+    initializePICInput(); 
     
     setTimeout(() => {
         const firstInput = modal.querySelector('select[name="sales_id"]');
@@ -64,7 +65,8 @@ function closeVisitModal() {
     document.getElementById('create-company-search').value = '';
     document.getElementById('create-company-dropdown').classList.add('hidden');
     selectedCompanyId = null;
-    hidePICInput();
+    
+    initializePICInput();
     
     // Reset address state
     const content = document.getElementById('address-content');
@@ -139,8 +141,7 @@ function selectCompany(companyId, companyName) {
     
     selectedCompanyId = companyId;
     
-    // Show PIC input dan load PICs
-    showPICInput();
+    enablePICInput();
     loadPICsByCompany(companyId);
 }
 
@@ -183,23 +184,42 @@ function initCompanyDropdown() {
 }
 
 // ==================== PIC DROPDOWN (CREATE) ====================
-function showPICInput() {
+function initializePICInput() {
+    const picInput = document.getElementById('create-pic-search');
     const picContainer = document.getElementById('pic-input-container');
+    
     if (picContainer) {
+        // Selalu tampilkan container
         picContainer.classList.remove('hidden');
         
-        // Reset PIC input
+        // Tapi disabled dulu
+        if (picInput) {
+            picInput.disabled = true;
+            picInput.placeholder = 'Pilih company terlebih dahulu...';
+            picInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+            picInput.classList.remove('bg-white');
+        }
+        
+        // Reset values
         document.getElementById('create-pic-id').value = '';
         document.getElementById('create-pic-name-hidden').value = '';
         document.getElementById('create-pic-search').value = '';
     }
 }
 
-function hidePICInput() {
+function enablePICInput() {
+    const picInput = document.getElementById('create-pic-search');
     const picContainer = document.getElementById('pic-input-container');
-    if (picContainer) {
-        picContainer.classList.add('hidden');
+    
+    if (picContainer && picInput) {
+        // Tampilkan dan enable
+        picContainer.classList.remove('hidden');
+        picInput.disabled = false;
+        picInput.placeholder = 'Ketik atau pilih PIC...';
+        picInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+        picInput.classList.add('bg-white');
         
+        // Reset values (biar bisa input baru)
         document.getElementById('create-pic-id').value = '';
         document.getElementById('create-pic-name-hidden').value = '';
         document.getElementById('create-pic-search').value = '';
@@ -494,6 +514,8 @@ function openEditVisitModal(visitData) {
         
         modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
+        
+        initializeEditPICInput();
 
         const form = document.getElementById('editVisitForm');
         if (form) {
@@ -505,6 +527,16 @@ function openEditVisitModal(visitData) {
         document.getElementById('editVisitDate').value = visitData.visitDate || '';
         document.getElementById('editAddress').value = visitData.address || '';
         document.getElementById('editPurpose').value = visitData.purpose || '';
+        
+        // ✅ FIX - SET PIC NAME KE FORM (INI YANG KURANG!)
+        if (visitData.picId && visitData.picName) {
+            console.log('✅ Setting PIC data:', { picId: visitData.picId, picName: visitData.picName });
+            document.getElementById('edit-pic-id').value = visitData.picId;
+            document.getElementById('edit-pic-name-hidden').value = visitData.picName;
+            document.getElementById('edit-pic-search').value = visitData.picName;
+        } else {
+            console.log('⚠️ No PIC data available');
+        }
         
         // Set follow up
         if (visitData.followUp == 1) {
@@ -672,8 +704,7 @@ function selectEditCompany(companyId, companyName) {
     
     editSelectedCompanyId = companyId;
     
-    // Show PIC input dan load PICs
-    showEditPICInput();
+    enableEditPICInput();
     loadEditPICsByCompany(companyId);
 }
 
@@ -703,22 +734,42 @@ function initEditCompanyDropdown() {
 let editPICDropdownTimeout = null;
 let editCurrentPICs = [];
 
-function showEditPICInput() {
+function initializeEditPICInput() {
+    const picInput = document.getElementById('edit-pic-search');
     const picContainer = document.getElementById('edit-pic-input-container');
+    
     if (picContainer) {
+        // Selalu tampilkan container
         picContainer.classList.remove('hidden');
         
+        // Tapi disabled dulu
+        if (picInput) {
+            picInput.disabled = true;
+            picInput.placeholder = 'Pilih company terlebih dahulu...';
+            picInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+            picInput.classList.remove('bg-white');
+        }
+        
+        // Reset values
         document.getElementById('edit-pic-id').value = '';
         document.getElementById('edit-pic-name-hidden').value = '';
         document.getElementById('edit-pic-search').value = '';
     }
 }
 
-function hideEditPICInput() {
+function enableEditPICInput() {
+    const picInput = document.getElementById('edit-pic-search');
     const picContainer = document.getElementById('edit-pic-input-container');
-    if (picContainer) {
-        picContainer.classList.add('hidden');
+    
+    if (picContainer && picInput) {
+        // Tampilkan dan enable
+        picContainer.classList.remove('hidden');
+        picInput.disabled = false;
+        picInput.placeholder = 'Ketik atau pilih PIC...';
+        picInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+        picInput.classList.add('bg-white');
         
+        // Reset values
         document.getElementById('edit-pic-id').value = '';
         document.getElementById('edit-pic-name-hidden').value = '';
         document.getElementById('edit-pic-search').value = '';
@@ -954,7 +1005,8 @@ function closeEditVisitModal() {
     document.getElementById('edit-company-id').value = '';
     document.getElementById('edit-company-search').value = '';
     document.getElementById('edit-company-dropdown').classList.add('hidden');
-    hideEditPICInput();
+    
+    initializeEditPICInput();
     
     // Reset address state
     const content = document.getElementById('edit-address-content');

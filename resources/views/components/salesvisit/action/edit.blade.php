@@ -56,18 +56,18 @@
                             </div>
                         </div>
 
-                        <!-- Customer Name -->
+                        <!-- Visit Date -->
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                Customer Name <span class="text-red-500">*</span>
+                                Visit Date <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-user text-gray-400 text-xs"></i>
+                                    <i class="fas fa-calendar text-gray-400 text-xs"></i>
                                 </div>
-                                <input type="text" name="customer_name" id="editCustomerName"
+                                <input type="date" name="visit_date" id="editVisitDate"
                                     class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                    placeholder="Masukkan nama customer" required>
+                                    required>
                             </div>
                         </div>
 
@@ -99,18 +99,32 @@
                             </div>
                         </div>
 
-                        <!-- Visit Date -->
-                        <div>
+                        <!-- PIC Name with Dropdown -->
+                        <div id="edit-pic-input-container" class="hidden">
                             <label class="block text-xs font-medium text-gray-700 mb-1.5">
-                                Visit Date <span class="text-red-500">*</span>
+                                PIC Name <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-calendar text-gray-400 text-xs"></i>
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                                    <i class="fas fa-user text-gray-400 text-xs"></i>
                                 </div>
-                                <input type="date" name="visit_date" id="editVisitDate"
-                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                    required>
+                                
+                                <!-- Hidden inputs -->
+                                <input type="hidden" name="pic_id" id="edit-pic-id">
+                                <input type="hidden" name="pic_name" id="edit-pic-name-hidden">
+                                
+                                <!-- Input search untuk dropdown -->
+                                <input type="text" 
+                                    id="edit-pic-search" 
+                                    placeholder="Ketik atau pilih PIC..."
+                                    autocomplete="off"
+                                    class="w-full pl-9 pr-20 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                                
+                                <!-- Dropdown list -->
+                                <div id="edit-pic-dropdown" 
+                                    class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                    <div id="edit-pic-options" class="py-1"></div>
+                                </div>
                             </div>
                         </div>
                     </div>

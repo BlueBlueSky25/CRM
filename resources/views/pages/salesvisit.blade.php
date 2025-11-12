@@ -11,7 +11,7 @@
         <div style="padding: 0.5rem 1.5rem; border-bottom: 1px solid #e5e7eb;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1">
                 <div>
-                    <h3 style="font-size: 1.125rem; font-weight: 600; color: #111827; margin: 0;">Sales Visit Management</h3>
+                    <h3 style="font-size: 1.125rem; font-weight: 600; color: #111827; margin: 0;">Canvassing Management</h3>
                     <p style="font-size: 0.875rem; color: #6b7280; margin: 0.25rem 0 0 0;">Kelola data kunjungan sales dan informasinya</p>
                 </div>
                 
@@ -48,7 +48,7 @@
                     :columns="[
                         'number',
                         'sales',
-                        'customer',
+                        'pic',
                         'company',
                         'location',
                         'visit_date',
@@ -61,7 +61,7 @@
                         'Province' => $provinces
                     ]"
                     ajaxUrl="{{ route('salesvisit.search') }}"
-                    placeholder="Cari customer, company, atau alamat..."
+                    placeholder="Cari pic, company, atau alamat..."
                 />
             </div>
         </div>
@@ -126,35 +126,13 @@ document.addEventListener('DOMContentLoaded', () => {
         window.salesVisitTableHandler = new TableHandler({
             tableId: 'salesVisitTable',
             ajaxUrl: '{{ route("salesvisit.search") }}',
-            filters: ['sales', 'province'], // ✅ Nama filter (lowercase)
-            columns: ['number', 'sales', 'customer', 'company', 'location', 'visit_date', 'purpose', 'follow_up', 'actions'],
-            searchParam: 'q' // ✅ PENTING: Backend pakai 'q' bukan 'search'
+            filters: ['sales', 'province'],
+            // ✅ FIXED: Urutan sesuai table header
+            columns: ['number', 'visit_date', 'company', 'pic', 'location', 'purpose', 'sales', 'follow_up', 'actions'],
+            searchParam: 'q'
         });
         
         console.log('✅ TableHandler initialized successfully');
-        
-        // ✅ Debug helpers - bisa dipanggil dari console
-        window.testSearch = function(keyword) {
-            console.log('🧪 Testing search with:', keyword);
-            window.salesVisitTableHandler.search(keyword);
-        };
-        
-        window.testFilter = function(filterName, value) {
-            console.log('🧪 Testing filter:', { filterName, value });
-            const filterElement = document.querySelector(`[data-filter="${filterName}"]`);
-            if (filterElement) {
-                filterElement.value = value;
-                filterElement.dispatchEvent(new Event('change', { bubbles: true }));
-            } else {
-                console.error('Filter element not found:', filterName);
-            }
-        };
-        
-        window.getLastParams = function() {
-            const params = window.salesVisitTableHandler.getLastParams();
-            console.log('📤 Last params sent:', params);
-            return params;
-        };
         
     } catch (error) {
         console.error('❌ Error initializing TableHandler:', error);

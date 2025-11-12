@@ -121,7 +121,7 @@ class SalesVisit extends Model
         $searchLower = strtolower($search);
 
         return $query->where(function ($q) use ($searchLower) {
-            $q->whereRaw('LOWER(customer_name) LIKE ?', ["%{$searchLower}%"])
+            $q->whereRaw('LOWER(pic_name) LIKE ?', ["%{$searchLower}%"])
               ->orWhereRaw('LOWER(company_name) LIKE ?', ["%{$searchLower}%"])
               ->orWhereRaw('LOWER(visit_purpose) LIKE ?', ["%{$searchLower}%"])
               ->orWhereRaw('LOWER(address) LIKE ?', ["%{$searchLower}%"])
