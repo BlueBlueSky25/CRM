@@ -14,8 +14,7 @@ let editSelectedCompanyId = null;
 // ==================== ADD MODAL ====================
 function openVisitModal() {
     const modal = document.getElementById('visitModal');
-    modal.style.display = 'flex';
-    modal.style.zIndex = '9999';
+    modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     
     initCreateVisitCascade();
@@ -45,7 +44,6 @@ function initCreateVisitCascade() {
 
 function closeVisitModal() {
     const modal = document.getElementById('visitModal');
-    modal.style.display = 'none';
     modal.classList.add('hidden');
     document.body.style.overflow = 'auto';
     
@@ -191,8 +189,10 @@ function initializePICInput() {
     const picContainer = document.getElementById('pic-input-container');
     
     if (picContainer) {
+        // Selalu tampilkan container
         picContainer.classList.remove('hidden');
         
+        // Tapi disabled dulu
         if (picInput) {
             picInput.disabled = true;
             picInput.placeholder = 'Pilih company terlebih dahulu...';
@@ -200,6 +200,7 @@ function initializePICInput() {
             picInput.classList.remove('bg-white');
         }
         
+        // Reset values
         document.getElementById('create-pic-id').value = '';
         document.getElementById('create-pic-name-hidden').value = '';
         document.getElementById('create-pic-search').value = '';
@@ -211,12 +212,14 @@ function enablePICInput() {
     const picContainer = document.getElementById('pic-input-container');
     
     if (picContainer && picInput) {
+        // Tampilkan dan enable
         picContainer.classList.remove('hidden');
         picInput.disabled = false;
         picInput.placeholder = 'Ketik atau pilih PIC...';
         picInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
         picInput.classList.add('bg-white');
         
+        // Reset values (biar bisa input baru)
         document.getElementById('create-pic-id').value = '';
         document.getElementById('create-pic-name-hidden').value = '';
         document.getElementById('create-pic-search').value = '';
@@ -335,18 +338,14 @@ function initPICDropdown() {
 // ==================== COMPANY & PIC MODALS ====================
 function showAddCompanyModal() {
     document.getElementById('addCompanyForm').reset();
-    const modal = document.getElementById('addCompanyModal');
-    modal.style.display = 'flex';
-    modal.classList.remove('hidden');
+    document.getElementById('addCompanyModal').classList.remove('hidden');
     setTimeout(() => {
         document.querySelector('#addCompanyModal input[name="company_name"]').focus();
     }, 300);
 }
 
 function closeAddCompanyModal() {
-    const modal = document.getElementById('addCompanyModal');
-    modal.style.display = 'none';
-    modal.classList.add('hidden');
+    document.getElementById('addCompanyModal').classList.add('hidden');
     document.getElementById('addCompanyForm').reset();
 }
 
@@ -359,18 +358,14 @@ function showAddPICModal() {
     const companyId = selectedCompanyId || editSelectedCompanyId;
     document.getElementById('pic-form-company-id').value = companyId;
     document.getElementById('addPICForm').reset();
-    const modal = document.getElementById('addPICModal');
-    modal.style.display = 'flex';
-    modal.classList.remove('hidden');
+    document.getElementById('addPICModal').classList.remove('hidden');
     setTimeout(() => {
         document.querySelector('#addPICModal input[name="pic_name"]').focus();
     }, 300);
 }
 
 function closeAddPICModal() {
-    const modal = document.getElementById('addPICModal');
-    modal.style.display = 'none';
-    modal.classList.add('hidden');
+    document.getElementById('addPICModal').classList.add('hidden');
     document.getElementById('addPICForm').reset();
 }
 
@@ -408,9 +403,12 @@ document.getElementById('addCompanyForm')?.addEventListener('submit', async func
         if (data.success) {
             const newCompany = data.company;
             
-            if (document.getElementById('editVisitModal').style.display === 'none') {
+            // Check if in edit or create mode
+            if (document.getElementById('editVisitModal').classList.contains('hidden')) {
+                // CREATE mode
                 selectCompany(newCompany.id, newCompany.name);
             } else {
+                // EDIT mode
                 selectEditCompany(newCompany.id, newCompany.name);
             }
             
@@ -460,12 +458,15 @@ document.getElementById('addPICForm')?.addEventListener('submit', async function
         if (data.success) {
             const newPIC = data.pic;
             
-            if (document.getElementById('editVisitModal').style.display === 'none') {
+            // Check if in edit or create mode
+            if (document.getElementById('editVisitModal').classList.contains('hidden')) {
+                // CREATE mode
                 selectPIC(newPIC.id, newPIC.name);
                 if (selectedCompanyId) {
                     loadPICsByCompany(selectedCompanyId);
                 }
             } else {
+                // EDIT mode
                 selectEditPIC(newPIC.id, newPIC.name);
                 if (editSelectedCompanyId) {
                     loadEditPICsByCompany(editSelectedCompanyId);
@@ -489,93 +490,131 @@ function openEditVisitModal(visitData) {
 
     if (!visitData || !visitData.id) {
         console.error('❌ Invalid visit data:', visitData);
-        showNotification('Data kunjungan tidak valid', 'error');
+        alert('Data kunjungan tidak valid');
         return;
     }
 
     try {
-        visitData.id = parseInt(visitData.id);
-        visitData.salesId = parseInt(visitData.salesId);
-        visitData.followUp = parseInt(visitData.followUp);
-        
-        visitData.provinceId = visitData.provinceId ? String(visitData.provinceId) : null;
-        visitData.regencyId = visitData.regencyId ? String(visitData.regencyId) : null;
-        visitData.districtId = visitData.districtId ? String(visitData.districtId) : null;
-        visitData.villageId = visitData.villageId ? String(visitData.villageId) : null;
+        const parsedData = {
+            id: parseInt(visitData.id),
+            salesId: parseInt(visitData.salesId),
+            companyId: visitData.companyId ? parseInt(visitData.companyId) : null,
+            picId: visitData.picId ? parseInt(visitData.picId) : null,
+            picName: visitData.picName || '',
+            companyName: visitData.companyName || '',
+            provinceId: visitData.provinceId ? String(visitData.provinceId) : '',
+            regencyId: visitData.regencyId ? String(visitData.regencyId) : '',
+            districtId: visitData.districtId ? String(visitData.districtId) : '',
+            villageId: visitData.villageId ? String(visitData.villageId) : '',
+            address: visitData.address || '',
+            visitDate: visitData.visitDate || '',
+            purpose: visitData.purpose || '',
+            followUp: parseInt(visitData.followUp) || 0
+        };
 
-        console.log('✅ Parsed visit data:', visitData);
+        console.log('✅ Parsed visit data:', parsedData);
 
         const modal = document.getElementById('editVisitModal');
         if (!modal) {
             console.error('❌ Edit modal element not found');
+            alert('Modal edit tidak ditemukan');
             return;
         }
         
-        // ✅ FIX: Pakai inline style display
-        modal.style.display = 'flex';
+        // 🔥 ROBUST FIX: Remove .hidden dan gunakan display inline-block sebagai fallback
         modal.classList.remove('hidden');
+        
+        // Force display dengan inline style sebagai fail-safe
+        modal.style.display = 'flex';
+        modal.style.opacity = '1';
+        modal.style.visibility = 'visible';
+        
         document.body.style.overflow = 'hidden';
         
-        console.log('✅ Modal displayed');
+        console.log('✅ Modal classes after remove hidden:', modal.classList);
+        console.log('✅ Modal computed style:', window.getComputedStyle(modal).display);
         
-        initializeEditPICInput();
-
+        // Set form action
         const form = document.getElementById('editVisitForm');
         if (form) {
-            form.action = `/salesvisit/${visitData.id}`;
+            form.action = `/salesvisit/${parsedData.id}`;
         }
 
-        const editVisitId = document.getElementById('editVisitId');
-        const editVisitDate = document.getElementById('editVisitDate');
-        const editAddress = document.getElementById('editAddress');
-        const editPurpose = document.getElementById('editPurpose');
+        // Isi field dasar
+        document.getElementById('editVisitId').value = parsedData.id;
+        document.getElementById('editVisitDate').value = parsedData.visitDate;
+        document.getElementById('editAddress').value = parsedData.address;
+        document.getElementById('editPurpose').value = parsedData.purpose;
         
-        if (editVisitId) editVisitId.value = visitData.id || '';
-        if (editVisitDate) editVisitDate.value = visitData.visitDate || '';
-        if (editAddress) editAddress.value = visitData.address || '';
-        if (editPurpose) editPurpose.value = visitData.purpose || '';
-        
-        if (visitData.picId && visitData.picName) {
-            console.log('✅ Setting PIC data:', { picId: visitData.picId, picName: visitData.picName });
-            const editPicId = document.getElementById('edit-pic-id');
-            const editPicNameHidden = document.getElementById('edit-pic-name-hidden');
-            const editPicSearch = document.getElementById('edit-pic-search');
-            
-            if (editPicId) editPicId.value = visitData.picId;
-            if (editPicNameHidden) editPicNameHidden.value = visitData.picName;
-            if (editPicSearch) editPicSearch.value = visitData.picName;
+        // Set follow up
+        if (parsedData.followUp === 1) {
+            document.getElementById('editFollowUpYes').checked = true;
         } else {
-            console.log('⚠️ No PIC data available');
-        }
-        
-        const editFollowUpYes = document.getElementById('editFollowUpYes');
-        const editFollowUpNo = document.getElementById('editFollowUpNo');
-        
-        if (visitData.followUp == 1 && editFollowUpYes) {
-            editFollowUpYes.checked = true;
-        } else if (editFollowUpNo) {
-            editFollowUpNo.checked = true;
+            document.getElementById('editFollowUpNo').checked = true;
         }
 
-        currentEditData = {
-            salesId: visitData.salesId || '',
-            companyId: visitData.companyId || null,
-            companyName: visitData.companyName || '',
-            picId: visitData.picId || null,
-            picName: visitData.picName || '',
-            provinceId: visitData.provinceId || '',
-            regencyId: visitData.regencyId || null,
-            districtId: visitData.districtId || null,
-            villageId: visitData.villageId || null
-        };
+        // Store data untuk nanti
+        currentEditData = parsedData;
 
-        console.log('✅ Current edit data stored:', currentEditData);
-        
-        loadEditVisitData(visitData.id);
+        // Load data dropdown (sales, provinces, dll)
+        loadEditVisitData(parsedData.id);
         
     } catch (error) {
         console.error('❌ Error opening edit modal:', error);
-        showNotification('Gagal membuka modal edit: ' + error.message, 'error');
+        alert('Gagal membuka modal edit: ' + error.message);
+    }
+}
+
+function closeEditVisitModal() {
+    const modal = document.getElementById('editVisitModal');
+    
+    // 🔥 ROBUST CLOSE: Set display none dan add back .hidden class
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+    modal.style.opacity = '0';
+    modal.style.visibility = 'hidden';
+    
+    document.body.style.overflow = 'auto';
+
+    if (editVisitCascade) {
+        editVisitCascade.destroy();
+        editVisitCascade = null;
+    }
+
+    currentEditData = null;
+    editSelectedCompanyId = null;
+
+    const form = document.getElementById('editVisitForm');
+    if (form) form.reset();
+
+    const salesSelect = document.getElementById('editSalesId');
+    salesSelect.disabled = false;
+    salesSelect.innerHTML = '<option value="">Pilih Sales</option>';
+
+    // Reset dropdowns
+    document.getElementById('edit-province').innerHTML = '<option value="">Pilih Provinsi</option>';
+    document.getElementById('edit-regency').innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
+    document.getElementById('edit-district').innerHTML = '<option value="">Pilih Kecamatan</option>';
+    document.getElementById('edit-village').innerHTML = '<option value="">Pilih Kelurahan/Desa</option>';
+    
+    // Reset company & PIC
+    document.getElementById('edit-company-id').value = '';
+    document.getElementById('edit-company-search').value = '';
+    document.getElementById('edit-company-dropdown').classList.add('hidden');
+    
+    initializeEditPICInput();
+    
+    // Reset address state
+    const content = document.getElementById('edit-address-content');
+    const icon = document.getElementById('edit-address-toggle-icon');
+    const statusText = document.getElementById('edit-address-status');
+    
+    if (content) content.classList.add('hidden');
+    if (icon) icon.style.transform = 'rotate(0deg)';
+    if (statusText) {
+        statusText.textContent = 'Belum diisi';
+        statusText.classList.remove('text-green-600', 'font-medium');
+        statusText.classList.add('text-gray-500');
     }
 }
 
@@ -583,79 +622,76 @@ function loadEditVisitData(visitId) {
     console.log('🔥 Loading edit data for visit:', visitId);
     
     const salesSelect = document.getElementById('editSalesId');
-    const provinceSelect = document.getElementById('edit-province');
     
-    if (!salesSelect || !provinceSelect) {
-        console.error('❌ Sales or Province select not found!');
+    if (!salesSelect) {
+        console.error('❌ Sales select not found!');
         return;
     }
     
-    salesSelect.innerHTML = '<option value="">Loading...</option>';
+    // Reset select options
+    salesSelect.innerHTML = '<option value="">Loading sales...</option>';
     salesSelect.disabled = true;
-    provinceSelect.innerHTML = '<option value="">Loading...</option>';
-    provinceSelect.disabled = true;
 
-    Promise.all([
-        fetch('/salesvisit/get-sales').then(r => r.json()),
-        fetch('/salesvisit/get-provinces').then(r => r.json())
-    ]).then(([salesData, provincesResponse]) => {
-        salesSelect.innerHTML = '<option value="">Pilih Sales</option>';
-        
-        let salesList = salesData.users || salesData.data || salesData;
-        if (Array.isArray(salesList)) {
-            salesList.forEach(sales => {
-                const option = document.createElement('option');
-                option.value = sales.user_id;
-                option.textContent = `${sales.username} - ${sales.email}`;
-                if (sales.user_id == currentEditData.salesId) {
-                    option.selected = true;
-                }
-                salesSelect.appendChild(option);
-            });
-        }
-        salesSelect.disabled = false;
-
-        provinceSelect.innerHTML = '<option value="">Pilih Provinsi</option>';
-        
-        let provincesList = provincesResponse.provinces || provincesResponse.data || provincesResponse;
-        if (Array.isArray(provincesList)) {
-            provincesList.forEach(province => {
-                const option = document.createElement('option');
-                option.value = province.id;
-                option.textContent = province.name;
-                if (String(province.id) == String(currentEditData.provinceId)) {
-                    option.selected = true;
-                }
-                provinceSelect.appendChild(option);
-            });
-        }
-        provinceSelect.disabled = false;
-        
-        setTimeout(() => {
-            initEditCompanyDropdown();
-            initEditPICDropdown();
-            initEditVisitCascade();
+    // Load sales data dari API
+    fetch('/salesvisit/get-sales')
+        .then(response => response.json())
+        .then(salesData => {
+            // Populate Sales dropdown
+            salesSelect.innerHTML = '<option value="">Pilih Sales</option>';
             
-            if (currentEditData.companyId && currentEditData.companyName) {
-                selectEditCompany(currentEditData.companyId, currentEditData.companyName);
-                
-                if (currentEditData.picId && currentEditData.picName) {
-                    setTimeout(() => {
-                        selectEditPIC(currentEditData.picId, currentEditData.picName);
-                    }, 500);
-                }
+            let salesList = salesData.users || salesData.data || salesData;
+            if (Array.isArray(salesList)) {
+                salesList.forEach(sales => {
+                    const option = document.createElement('option');
+                    option.value = sales.user_id;
+                    option.textContent = `${sales.username} - ${sales.email}`;
+                    if (sales.user_id == currentEditData.salesId) {
+                        option.selected = true;
+                        console.log('✅ Sales selected:', sales.user_id);
+                    }
+                    salesSelect.appendChild(option);
+                });
             }
-        }, 500);
+            salesSelect.disabled = false;
+            
+            // ✅ LANGSUNG INIT FORM (jangan tunggu province API)
+            initializeEditForm();
+        })
+        .catch(error => {
+            console.error('❌ Error loading sales:', error);
+            salesSelect.innerHTML = '<option value="">Error loading sales</option>';
+            salesSelect.disabled = false;
+            initializeEditForm();
+        });
+}
+
+function initializeEditForm() {
+    console.log('🔄 Initializing edit form...');
+    
+    // Initialize company dropdown
+    initEditCompanyDropdown();
+    
+    // Initialize PIC dropdown
+    initEditPICDropdown();
+    
+    // Initialize address cascade
+    initEditVisitCascade();
+    
+    // Set company data jika ada
+    setTimeout(() => {
+        if (currentEditData.companyId && currentEditData.companyName) {
+            console.log('✅ Setting company:', currentEditData.companyId, currentEditData.companyName);
+            selectEditCompany(currentEditData.companyId, currentEditData.companyName);
+        }
         
-    }).catch(error => {
-        console.error('❌ Error loading edit data:', error);
-        showNotification('Gagal memuat data: ' + error.message, 'error');
-        
-        salesSelect.disabled = false;
-        salesSelect.innerHTML = '<option value="">Error loading data</option>';
-        provinceSelect.disabled = false;
-        provinceSelect.innerHTML = '<option value="">Error loading data</option>';
-    });
+        // Set PIC data jika ada
+        if (currentEditData.picId && currentEditData.picName) {
+            setTimeout(() => {
+                console.log('✅ Setting PIC:', currentEditData.picId, currentEditData.picName);
+                selectEditPIC(currentEditData.picId, currentEditData.picName);
+            }, 1000);
+        }
+    }, 500);
 }
 
 // ==================== EDIT COMPANY DROPDOWN ====================
@@ -744,8 +780,10 @@ function initializeEditPICInput() {
     const picContainer = document.getElementById('edit-pic-input-container');
     
     if (picContainer) {
+        // Selalu tampilkan container
         picContainer.classList.remove('hidden');
         
+        // Tapi disabled dulu
         if (picInput) {
             picInput.disabled = true;
             picInput.placeholder = 'Pilih company terlebih dahulu...';
@@ -753,6 +791,7 @@ function initializeEditPICInput() {
             picInput.classList.remove('bg-white');
         }
         
+        // Reset values
         document.getElementById('edit-pic-id').value = '';
         document.getElementById('edit-pic-name-hidden').value = '';
         document.getElementById('edit-pic-search').value = '';
@@ -764,12 +803,14 @@ function enableEditPICInput() {
     const picContainer = document.getElementById('edit-pic-input-container');
     
     if (picContainer && picInput) {
+        // Tampilkan dan enable
         picContainer.classList.remove('hidden');
         picInput.disabled = false;
         picInput.placeholder = 'Ketik atau pilih PIC...';
         picInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
         picInput.classList.add('bg-white');
         
+        // Reset values
         document.getElementById('edit-pic-id').value = '';
         document.getElementById('edit-pic-name-hidden').value = '';
         document.getElementById('edit-pic-search').value = '';
@@ -874,6 +915,7 @@ function initEditVisitCascade() {
         baseUrl: '/salesvisit'
     });
 
+    // Load cascade data jika ada provinceId
     if (currentEditData.provinceId) {
         console.log('🔄 Loading regencies for province:', currentEditData.provinceId);
         
@@ -883,6 +925,7 @@ function initEditVisitCascade() {
         const changeEvent = new Event('change', { bubbles: true });
         provinceSelect.dispatchEvent(changeEvent);
         
+        // Load regency jika ada
         if (currentEditData.regencyId) {
             console.log('⏳ Waiting for regencies to load...');
             
@@ -904,6 +947,7 @@ function initEditVisitCascade() {
                         regencySelect.dispatchEvent(new Event('change', { bubbles: true }));
                     }
                     
+                    // Load district jika ada
                     if (currentEditData.districtId) {
                         console.log('⏳ Waiting for districts to load...');
                         
@@ -924,6 +968,7 @@ function initEditVisitCascade() {
                                     console.log('✅ District value set successfully');
                                     districtSelect.dispatchEvent(new Event('change', { bubbles: true }));
                                     
+                                    // Load village jika ada
                                     if (currentEditData.villageId) {
                                         console.log('⏳ Waiting for villages to load...');
                                         
@@ -971,56 +1016,7 @@ function initEditVisitCascade() {
     }
 }
 
-function closeEditVisitModal() {
-    const modal = document.getElementById('editVisitModal');
-    // ✅ FIX: Pakai inline style display
-    modal.style.display = 'none';
-    modal.classList.add('hidden');
-    document.body.style.overflow = 'auto';
 
-    if (editVisitCascade) {
-        editVisitCascade.destroy();
-        editVisitCascade = null;
-    }
-
-    currentEditData = null;
-    editSelectedCompanyId = null;
-
-    const form = document.getElementById('editVisitForm');
-    if (form) form.reset();
-
-    const salesSelect = document.getElementById('editSalesId');
-    salesSelect.disabled = false;
-    salesSelect.innerHTML = '<option value="">Pilih Sales</option>';
-
-    document.getElementById('edit-province').innerHTML = '<option value="">Pilih Provinsi</option>';
-    document.getElementById('edit-regency').innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
-    document.getElementById('edit-district').innerHTML = '<option value="">Pilih Kecamatan</option>';
-    document.getElementById('edit-village').innerHTML = '<option value="">Pilih Kelurahan/Desa</option>';
-    
-    document.getElementById('edit-company-id').value = '';
-    document.getElementById('edit-company-search').value = '';
-    document.getElementById('edit-company-dropdown').classList.add('hidden');
-    
-    initializeEditPICInput();
-    
-    const content = document.getElementById('edit-address-content');
-    const icon = document.getElementById('edit-address-toggle-icon');
-    const statusText = document.getElementById('edit-address-status');
-    
-    if (content) content.classList.add('hidden');
-    if (icon) icon.style.transform = 'rotate(0deg)';
-    if (statusText) {
-        statusText.textContent = 'Belum diisi';
-        statusText.classList.remove('text-green-600', 'font-medium');
-        statusText.classList.add('text-gray-500');
-    }
-}
-
-// ✅ Window function untuk close modal
-window.closeEditVisitModal = function() {
-    closeEditVisitModal();
-};
 
 // ==================== DELETE ====================
 function deleteVisit(visitId, deleteRoute, csrfToken) {
@@ -1187,7 +1183,7 @@ document.addEventListener('keydown', (e) => {
             closeAddCompanyModal();
         } else if (!document.getElementById('visitModal').classList.contains('hidden')) {
             closeVisitModal();
-        } else if (document.getElementById('editVisitModal').style.display === 'flex') {
+        } else if (!document.getElementById('editVisitModal').classList.contains('hidden')) {
             closeEditVisitModal();
         }
     }
@@ -1209,45 +1205,12 @@ document.addEventListener('click', (e) => {
 });
 
 // ==================== INIT ON PAGE LOAD ====================
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initSalesVisitModal);
-} else {
-    initSalesVisitModal();
-}
-
-function initSalesVisitModal() {
-    console.log('✅ Initializing SalesVisit Modal...');
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ SalesVisit Modal JS Loaded');
     
-    setTimeout(() => {
-        if (typeof AddressCascade === 'undefined') {
-            console.error('❌ AddressCascade class not found!');
-        } else {
-            console.log('✅ AddressCascade class found');
-        }
-        
-        attachEditButtonListeners();
-        console.log('✅ Edit button event listener attached');
-    }, 100);
-}
-
-function attachEditButtonListeners() {
-    document.body.addEventListener('click', function(e) {
-        const editBtn = e.target.closest('.edit-visit-btn') || 
-                       e.target.closest('button[data-visit]');
-        
-        if (editBtn && editBtn.hasAttribute('data-visit')) {
-            e.preventDefault();
-            console.log('🖱️ Edit button clicked');
-            
-            try {
-                const encodedData = editBtn.getAttribute('data-visit');
-                const visitData = JSON.parse(atob(encodedData));
-                console.log('✅ Visit data:', visitData);
-                openEditVisitModal(visitData);
-            } catch (error) {
-                console.error('❌ Error:', error);
-                showNotification('Gagal membuka modal edit', 'error');
-            }
-        }
-    });
-}
+    if (typeof AddressCascade === 'undefined') {
+        console.error('❌ AddressCascade class not found! Make sure address-cascade.js is loaded.');
+    } else {
+        console.log('✅ AddressCascade class found');
+    }
+});
