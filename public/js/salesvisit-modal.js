@@ -14,7 +14,8 @@ let editSelectedCompanyId = null;
 // ==================== ADD MODAL ====================
 function openVisitModal() {
     const modal = document.getElementById('visitModal');
-    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+    modal.style.zIndex = '9999';
     document.body.style.overflow = 'hidden';
     
     initCreateVisitCascade();
@@ -44,6 +45,7 @@ function initCreateVisitCascade() {
 
 function closeVisitModal() {
     const modal = document.getElementById('visitModal');
+    modal.style.display = 'none';
     modal.classList.add('hidden');
     document.body.style.overflow = 'auto';
     
@@ -189,10 +191,8 @@ function initializePICInput() {
     const picContainer = document.getElementById('pic-input-container');
     
     if (picContainer) {
-        // Selalu tampilkan container
         picContainer.classList.remove('hidden');
         
-        // Tapi disabled dulu
         if (picInput) {
             picInput.disabled = true;
             picInput.placeholder = 'Pilih company terlebih dahulu...';
@@ -200,7 +200,6 @@ function initializePICInput() {
             picInput.classList.remove('bg-white');
         }
         
-        // Reset values
         document.getElementById('create-pic-id').value = '';
         document.getElementById('create-pic-name-hidden').value = '';
         document.getElementById('create-pic-search').value = '';
@@ -212,14 +211,12 @@ function enablePICInput() {
     const picContainer = document.getElementById('pic-input-container');
     
     if (picContainer && picInput) {
-        // Tampilkan dan enable
         picContainer.classList.remove('hidden');
         picInput.disabled = false;
         picInput.placeholder = 'Ketik atau pilih PIC...';
         picInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
         picInput.classList.add('bg-white');
         
-        // Reset values (biar bisa input baru)
         document.getElementById('create-pic-id').value = '';
         document.getElementById('create-pic-name-hidden').value = '';
         document.getElementById('create-pic-search').value = '';
@@ -338,14 +335,18 @@ function initPICDropdown() {
 // ==================== COMPANY & PIC MODALS ====================
 function showAddCompanyModal() {
     document.getElementById('addCompanyForm').reset();
-    document.getElementById('addCompanyModal').classList.remove('hidden');
+    const modal = document.getElementById('addCompanyModal');
+    modal.style.display = 'flex';
+    modal.classList.remove('hidden');
     setTimeout(() => {
         document.querySelector('#addCompanyModal input[name="company_name"]').focus();
     }, 300);
 }
 
 function closeAddCompanyModal() {
-    document.getElementById('addCompanyModal').classList.add('hidden');
+    const modal = document.getElementById('addCompanyModal');
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
     document.getElementById('addCompanyForm').reset();
 }
 
@@ -358,14 +359,18 @@ function showAddPICModal() {
     const companyId = selectedCompanyId || editSelectedCompanyId;
     document.getElementById('pic-form-company-id').value = companyId;
     document.getElementById('addPICForm').reset();
-    document.getElementById('addPICModal').classList.remove('hidden');
+    const modal = document.getElementById('addPICModal');
+    modal.style.display = 'flex';
+    modal.classList.remove('hidden');
     setTimeout(() => {
         document.querySelector('#addPICModal input[name="pic_name"]').focus();
     }, 300);
 }
 
 function closeAddPICModal() {
-    document.getElementById('addPICModal').classList.add('hidden');
+    const modal = document.getElementById('addPICModal');
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
     document.getElementById('addPICForm').reset();
 }
 
@@ -403,12 +408,9 @@ document.getElementById('addCompanyForm')?.addEventListener('submit', async func
         if (data.success) {
             const newCompany = data.company;
             
-            // Check if in edit or create mode
-            if (document.getElementById('editVisitModal').classList.contains('hidden')) {
-                // CREATE mode
+            if (document.getElementById('editVisitModal').style.display === 'none') {
                 selectCompany(newCompany.id, newCompany.name);
             } else {
-                // EDIT mode
                 selectEditCompany(newCompany.id, newCompany.name);
             }
             
@@ -458,15 +460,12 @@ document.getElementById('addPICForm')?.addEventListener('submit', async function
         if (data.success) {
             const newPIC = data.pic;
             
-            // Check if in edit or create mode
-            if (document.getElementById('editVisitModal').classList.contains('hidden')) {
-                // CREATE mode
+            if (document.getElementById('editVisitModal').style.display === 'none') {
                 selectPIC(newPIC.id, newPIC.name);
                 if (selectedCompanyId) {
                     loadPICsByCompany(selectedCompanyId);
                 }
             } else {
-                // EDIT mode
                 selectEditPIC(newPIC.id, newPIC.name);
                 if (editSelectedCompanyId) {
                     loadEditPICsByCompany(editSelectedCompanyId);
@@ -512,8 +511,12 @@ function openEditVisitModal(visitData) {
             return;
         }
         
+        // ✅ FIX: Pakai inline style display
+        modal.style.display = 'flex';
         modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
+        
+        console.log('✅ Modal displayed');
         
         initializeEditPICInput();
 
@@ -522,30 +525,38 @@ function openEditVisitModal(visitData) {
             form.action = `/salesvisit/${visitData.id}`;
         }
 
-        // Fill form fields
-        document.getElementById('editVisitId').value = visitData.id || '';
-        document.getElementById('editVisitDate').value = visitData.visitDate || '';
-        document.getElementById('editAddress').value = visitData.address || '';
-        document.getElementById('editPurpose').value = visitData.purpose || '';
+        const editVisitId = document.getElementById('editVisitId');
+        const editVisitDate = document.getElementById('editVisitDate');
+        const editAddress = document.getElementById('editAddress');
+        const editPurpose = document.getElementById('editPurpose');
         
-        // ✅ FIX - SET PIC NAME KE FORM (INI YANG KURANG!)
+        if (editVisitId) editVisitId.value = visitData.id || '';
+        if (editVisitDate) editVisitDate.value = visitData.visitDate || '';
+        if (editAddress) editAddress.value = visitData.address || '';
+        if (editPurpose) editPurpose.value = visitData.purpose || '';
+        
         if (visitData.picId && visitData.picName) {
             console.log('✅ Setting PIC data:', { picId: visitData.picId, picName: visitData.picName });
-            document.getElementById('edit-pic-id').value = visitData.picId;
-            document.getElementById('edit-pic-name-hidden').value = visitData.picName;
-            document.getElementById('edit-pic-search').value = visitData.picName;
+            const editPicId = document.getElementById('edit-pic-id');
+            const editPicNameHidden = document.getElementById('edit-pic-name-hidden');
+            const editPicSearch = document.getElementById('edit-pic-search');
+            
+            if (editPicId) editPicId.value = visitData.picId;
+            if (editPicNameHidden) editPicNameHidden.value = visitData.picName;
+            if (editPicSearch) editPicSearch.value = visitData.picName;
         } else {
             console.log('⚠️ No PIC data available');
         }
         
-        // Set follow up
-        if (visitData.followUp == 1) {
-            document.getElementById('editFollowUpYes').checked = true;
-        } else {
-            document.getElementById('editFollowUpNo').checked = true;
+        const editFollowUpYes = document.getElementById('editFollowUpYes');
+        const editFollowUpNo = document.getElementById('editFollowUpNo');
+        
+        if (visitData.followUp == 1 && editFollowUpYes) {
+            editFollowUpYes.checked = true;
+        } else if (editFollowUpNo) {
+            editFollowUpNo.checked = true;
         }
 
-        // Store edit data
         currentEditData = {
             salesId: visitData.salesId || '',
             companyId: visitData.companyId || null,
@@ -560,7 +571,6 @@ function openEditVisitModal(visitData) {
 
         console.log('✅ Current edit data stored:', currentEditData);
         
-        // Load dropdowns
         loadEditVisitData(visitData.id);
         
     } catch (error) {
@@ -589,7 +599,6 @@ function loadEditVisitData(visitId) {
         fetch('/salesvisit/get-sales').then(r => r.json()),
         fetch('/salesvisit/get-provinces').then(r => r.json())
     ]).then(([salesData, provincesResponse]) => {
-        // Populate Sales
         salesSelect.innerHTML = '<option value="">Pilih Sales</option>';
         
         let salesList = salesData.users || salesData.data || salesData;
@@ -606,7 +615,6 @@ function loadEditVisitData(visitId) {
         }
         salesSelect.disabled = false;
 
-        // Populate Provinces
         provinceSelect.innerHTML = '<option value="">Pilih Provinsi</option>';
         
         let provincesList = provincesResponse.provinces || provincesResponse.data || provincesResponse;
@@ -623,17 +631,14 @@ function loadEditVisitData(visitId) {
         }
         provinceSelect.disabled = false;
         
-        // Initialize edit dropdowns
         setTimeout(() => {
             initEditCompanyDropdown();
             initEditPICDropdown();
             initEditVisitCascade();
             
-            // Set company if exists
             if (currentEditData.companyId && currentEditData.companyName) {
                 selectEditCompany(currentEditData.companyId, currentEditData.companyName);
                 
-                // Set PIC if exists
                 if (currentEditData.picId && currentEditData.picName) {
                     setTimeout(() => {
                         selectEditPIC(currentEditData.picId, currentEditData.picName);
@@ -739,10 +744,8 @@ function initializeEditPICInput() {
     const picContainer = document.getElementById('edit-pic-input-container');
     
     if (picContainer) {
-        // Selalu tampilkan container
         picContainer.classList.remove('hidden');
         
-        // Tapi disabled dulu
         if (picInput) {
             picInput.disabled = true;
             picInput.placeholder = 'Pilih company terlebih dahulu...';
@@ -750,7 +753,6 @@ function initializeEditPICInput() {
             picInput.classList.remove('bg-white');
         }
         
-        // Reset values
         document.getElementById('edit-pic-id').value = '';
         document.getElementById('edit-pic-name-hidden').value = '';
         document.getElementById('edit-pic-search').value = '';
@@ -762,14 +764,12 @@ function enableEditPICInput() {
     const picContainer = document.getElementById('edit-pic-input-container');
     
     if (picContainer && picInput) {
-        // Tampilkan dan enable
         picContainer.classList.remove('hidden');
         picInput.disabled = false;
         picInput.placeholder = 'Ketik atau pilih PIC...';
         picInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
         picInput.classList.add('bg-white');
         
-        // Reset values
         document.getElementById('edit-pic-id').value = '';
         document.getElementById('edit-pic-name-hidden').value = '';
         document.getElementById('edit-pic-search').value = '';
@@ -874,7 +874,6 @@ function initEditVisitCascade() {
         baseUrl: '/salesvisit'
     });
 
-    // Load cascade data jika ada provinceId
     if (currentEditData.provinceId) {
         console.log('🔄 Loading regencies for province:', currentEditData.provinceId);
         
@@ -884,7 +883,6 @@ function initEditVisitCascade() {
         const changeEvent = new Event('change', { bubbles: true });
         provinceSelect.dispatchEvent(changeEvent);
         
-        // Load regency jika ada
         if (currentEditData.regencyId) {
             console.log('⏳ Waiting for regencies to load...');
             
@@ -906,7 +904,6 @@ function initEditVisitCascade() {
                         regencySelect.dispatchEvent(new Event('change', { bubbles: true }));
                     }
                     
-                    // Load district jika ada
                     if (currentEditData.districtId) {
                         console.log('⏳ Waiting for districts to load...');
                         
@@ -927,7 +924,6 @@ function initEditVisitCascade() {
                                     console.log('✅ District value set successfully');
                                     districtSelect.dispatchEvent(new Event('change', { bubbles: true }));
                                     
-                                    // Load village jika ada
                                     if (currentEditData.villageId) {
                                         console.log('⏳ Waiting for villages to load...');
                                         
@@ -977,6 +973,8 @@ function initEditVisitCascade() {
 
 function closeEditVisitModal() {
     const modal = document.getElementById('editVisitModal');
+    // ✅ FIX: Pakai inline style display
+    modal.style.display = 'none';
     modal.classList.add('hidden');
     document.body.style.overflow = 'auto';
 
@@ -995,20 +993,17 @@ function closeEditVisitModal() {
     salesSelect.disabled = false;
     salesSelect.innerHTML = '<option value="">Pilih Sales</option>';
 
-    // Reset dropdowns
     document.getElementById('edit-province').innerHTML = '<option value="">Pilih Provinsi</option>';
     document.getElementById('edit-regency').innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
     document.getElementById('edit-district').innerHTML = '<option value="">Pilih Kecamatan</option>';
     document.getElementById('edit-village').innerHTML = '<option value="">Pilih Kelurahan/Desa</option>';
     
-    // Reset company & PIC
     document.getElementById('edit-company-id').value = '';
     document.getElementById('edit-company-search').value = '';
     document.getElementById('edit-company-dropdown').classList.add('hidden');
     
     initializeEditPICInput();
     
-    // Reset address state
     const content = document.getElementById('edit-address-content');
     const icon = document.getElementById('edit-address-toggle-icon');
     const statusText = document.getElementById('edit-address-status');
@@ -1021,6 +1016,11 @@ function closeEditVisitModal() {
         statusText.classList.add('text-gray-500');
     }
 }
+
+// ✅ Window function untuk close modal
+window.closeEditVisitModal = function() {
+    closeEditVisitModal();
+};
 
 // ==================== DELETE ====================
 function deleteVisit(visitId, deleteRoute, csrfToken) {
@@ -1187,7 +1187,7 @@ document.addEventListener('keydown', (e) => {
             closeAddCompanyModal();
         } else if (!document.getElementById('visitModal').classList.contains('hidden')) {
             closeVisitModal();
-        } else if (!document.getElementById('editVisitModal').classList.contains('hidden')) {
+        } else if (document.getElementById('editVisitModal').style.display === 'flex') {
             closeEditVisitModal();
         }
     }
@@ -1209,12 +1209,45 @@ document.addEventListener('click', (e) => {
 });
 
 // ==================== INIT ON PAGE LOAD ====================
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('✅ SalesVisit Modal JS Loaded');
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSalesVisitModal);
+} else {
+    initSalesVisitModal();
+}
+
+function initSalesVisitModal() {
+    console.log('✅ Initializing SalesVisit Modal...');
     
-    if (typeof AddressCascade === 'undefined') {
-        console.error('❌ AddressCascade class not found! Make sure address-cascade.js is loaded.');
-    } else {
-        console.log('✅ AddressCascade class found');
-    }
-});
+    setTimeout(() => {
+        if (typeof AddressCascade === 'undefined') {
+            console.error('❌ AddressCascade class not found!');
+        } else {
+            console.log('✅ AddressCascade class found');
+        }
+        
+        attachEditButtonListeners();
+        console.log('✅ Edit button event listener attached');
+    }, 100);
+}
+
+function attachEditButtonListeners() {
+    document.body.addEventListener('click', function(e) {
+        const editBtn = e.target.closest('.edit-visit-btn') || 
+                       e.target.closest('button[data-visit]');
+        
+        if (editBtn && editBtn.hasAttribute('data-visit')) {
+            e.preventDefault();
+            console.log('🖱️ Edit button clicked');
+            
+            try {
+                const encodedData = editBtn.getAttribute('data-visit');
+                const visitData = JSON.parse(atob(encodedData));
+                console.log('✅ Visit data:', visitData);
+                openEditVisitModal(visitData);
+            } catch (error) {
+                console.error('❌ Error:', error);
+                showNotification('Gagal membuka modal edit', 'error');
+            }
+        }
+    });
+}

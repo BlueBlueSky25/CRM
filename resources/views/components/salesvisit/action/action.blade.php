@@ -1,7 +1,7 @@
 @props(['currentMenuId', 'salesUsers', 'provinces', 'types' => []])
 
 <!-- Tambah Kunjungan Modal -->
-<div id="visitModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+<div id="visitModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto" style="height: 100vh; width: 100vw; max-height: 100vh; max-width: 100vw;">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden animate-fadeIn">
         
         <!-- Modal Header -->
@@ -313,7 +313,7 @@
 </div>
 
 <!-- Add Company Modal -->
-<div id="addCompanyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4 overflow-y-auto">
+<div id="addCompanyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4 overflow-y-auto" style="height: 100vh; width: 100vw; max-height: 100vh; max-width: 100vw;">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden animate-modal-in">
         <div style="background: linear-gradient(to right, #4f46e5, #7c3aed); padding: 1rem 1.25rem;">
             <div class="flex justify-between items-center">
@@ -402,7 +402,7 @@
 </div>
 
 <!-- Add PIC Modal -->
-<div id="addPICModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70] p-4 overflow-y-auto">
+<div id="addPICModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70] p-4 overflow-y-auto" style="height: 100vh; width: 100vw; max-height: 100vh; max-width: 100vw;">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-modal-in">
         <div style="background: linear-gradient(to right, #4f46e5, #7c3aed); padding: 1rem 1.25rem;">
             <div class="flex justify-between items-center">
@@ -468,6 +468,7 @@
             </form>
         </div>
     </div>
+</div>
 
 <style>
 @keyframes fadeIn {

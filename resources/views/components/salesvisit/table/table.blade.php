@@ -138,30 +138,36 @@
                 <!-- Aksi -->
                 <td style="padding: 0.5rem 0.75rem; font-size: 0.8125rem; font-weight: 500; text-align: right; white-space: nowrap;">
                     <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.375rem;">
-                        @if(auth()->user()->canAccess($currentMenuId, 'edit'))
-                        <button 
-                            onclick="openEditVisitModal({{ json_encode([
-                                'id' => $visit->id,
-                                'salesId' => $visit->sales_id,
-                                'picName' => $visit->pic_name,
-                                'companyId' => $visit->company_id,
-                                'companyName' => optional($visit->company)->company_name ?? '',
-                                'provinceId' => $visit->province_id,
-                                'regencyId' => $visit->regency_id,
-                                'districtId' => $visit->district_id,
-                                'villageId' => $visit->village_id,
-                                'address' => $visit->address ?? '',
-                                'visitDate' => $visit->visit_date->format('Y-m-d'),
-                                'purpose' => $visit->visit_purpose,
-                                'followUp' => $visit->is_follow_up ? 1 : 0
-                            ]) }})"
-                            style="color: #2563eb; background: transparent; border: none; padding: 0.375rem; border-radius: 0.375rem; cursor: pointer; transition: all 0.15s; font-size: 0.875rem;"
-                            onmouseover="this.style.backgroundColor='#dbeafe'; this.style.color='#1e40af';"
-                            onmouseout="this.style.backgroundColor='transparent'; this.style.color='#2563eb';"
-                            title="Edit Visit">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        @endif
+                    @if(auth()->user()->canAccess($currentMenuId, 'edit'))
+                    @php
+                        $editData = [
+                            'id' => $visit->id,
+                            'salesId' => $visit->sales_id,
+                            'picId' => $visit->pic_id,
+                            'picName' => $visit->pic_name ?? '',
+                            'companyId' => $visit->company_id,
+                            'companyName' => optional($visit->company)->company_name ?? '',
+                            'provinceId' => $visit->province_id,
+                            'regencyId' => $visit->regency_id,
+                            'districtId' => $visit->district_id,
+                            'villageId' => $visit->village_id,
+                            'address' => $visit->address ?? '',
+                            'visitDate' => $visit->visit_date ? $visit->visit_date->format('Y-m-d') : '',
+                            'purpose' => $visit->visit_purpose ?? '',
+                            'followUp' => $visit->is_follow_up ? 1 : 0
+                        ];
+                        $editDataJson = htmlspecialchars(json_encode($editData), ENT_QUOTES, 'UTF-8');
+                    @endphp
+                    <button 
+                        type="button"
+                        onclick="openEditVisitModal(JSON.parse(atob('{{ base64_encode(json_encode($editData)) }}')))"
+                        style="color: #2563eb; background: transparent; border: none; padding: 0.375rem; border-radius: 0.375rem; cursor: pointer; transition: all 0.15s; font-size: 0.875rem;"
+                        onmouseover="this.style.backgroundColor='#dbeafe'; this.style.color='#1e40af';"
+                        onmouseout="this.style.backgroundColor='transparent'; this.style.color='#2563eb';"
+                        title="Edit Visit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    @endif
                         
                         @if(auth()->user()->canAccess($currentMenuId, 'delete'))
                         <button type="button" 
