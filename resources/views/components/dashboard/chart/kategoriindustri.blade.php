@@ -25,9 +25,6 @@
         <canvas id="companyChart"></canvas>
     </div>
     
-    <!-- Custom Legend - Now Clickable -->
-    <div class="custom-legend" id="customLegend"></div>
-    
     <!-- Stats Row - Now Clickable -->
     <div class="stats-row">
         <div class="stat-item clickable-stat" onclick="showStatDetail('total')">
@@ -45,17 +42,54 @@
     </div>
 </div>
 
-<!-- Fullscreen Overlay -->
+<!-- Fullscreen Data Table Only - CENTERED -->
 <div class="fullscreen-overlay" id="fullscreenOverlay">
     <div class="fullscreen-content">
-        <i class="fas fa-times close-fullscreen" onclick="closeFullscreen()"></i>
-        <h2 class="text-2xl font-bold mb-6">Distribusi Perusahaan - Detail View</h2>
-        <div class="chart-controls mb-4">
-            <button class="control-btn active" onclick="switchChart('type')" id="fs-btn-type">Tipe Perusahaan</button>
-            <button class="control-btn" onclick="switchChart('tier')" id="fs-btn-tier">Tier</button>
-            <button class="control-btn" onclick="switchChart('status')" id="fs-btn-status">Status</button>
+        <div class="fullscreen-header">
+            <h2 class="text-2xl font-bold">Data Perusahaan</h2>
+            <i class="fas fa-times close-fullscreen" onclick="closeFullscreen()"></i>
         </div>
-        <canvas id="fullscreenChart" style="max-height: calc(100% - 120px);"></canvas>
+
+        <!-- Data Table View -->
+        <div class="data-wrapper">
+            <div class="data-controls">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Cari perusahaan..." onkeyup="filterDataTable()">
+                </div>
+                <div class="action-controls">
+                    <button class="btn-import" onclick="triggerImport()">
+                        <i class="fas fa-upload"></i> Import Data
+                    </button>
+                    <button class="btn-export" onclick="exportToCSV()">
+                        <i class="fas fa-download"></i> Export CSV
+                    </button>
+                    <input type="file" id="importFile" accept=".csv,.xlsx" style="display: none;" onchange="handleImport()">
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table id="dataTable" class="data-table-full">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable(0)">No <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(1)">Nama Perusahaan <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(2)">Tipe <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(3)">Tier <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(4)">Status <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(5)">Tanggal <i class="fas fa-sort"></i></th>
+                            <th class="action-col">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination-controls">
+                <button class="pagination-btn" onclick="previousPage()">&laquo; Sebelumnya</button>
+                <span id="pageInfo">Halaman 1</span>
+                <button class="pagination-btn" onclick="nextPage()">Berikutnya &raquo;</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -164,38 +198,7 @@
     margin-top: 4px;
 }
 
-.custom-legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
-    margin-top: 16px;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    cursor: pointer;
-    padding: 6px 10px;
-    border-radius: 4px;
-    transition: all 0.2s;
-    border: 1px solid transparent;
-}
-
-.legend-item:hover {
-    background-color: #f3f4f6;
-    border-color: #d1d5db;
-    transform: translateY(-1px);
-}
-
-.legend-color {
-    width: 12px;
-    height: 12px;
-    border-radius: 2px;
-}
-
+/* FULLSCREEN OVERLAY - CENTERED */
 .fullscreen-overlay {
     position: fixed;
     top: 0;
@@ -205,28 +208,288 @@
     background: rgba(0, 0, 0, 0.9);
     display: none;
     z-index: 1000;
+    align-items: center;
+    justify-content: center;
     padding: 20px;
+}
+
+.fullscreen-overlay.active {
+    display: flex;
 }
 
 .fullscreen-content {
     background: white;
     border-radius: 12px;
-    padding: 24px;
-    height: calc(100% - 40px);
+    padding: 0;
+    width: 90%;
+    max-width: 1200px;
+    height: 90vh;
+    max-height: 90vh;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+}
+
+.fullscreen-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid #e5e7eb;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    flex-shrink: 0;
 }
 
 .close-fullscreen {
-    position: absolute;
-    top: 16px;
-    right: 16px;
     font-size: 24px;
     cursor: pointer;
-    color: #6b7280;
+    transition: all 0.2s;
 }
 
 .close-fullscreen:hover {
+    transform: rotate(90deg);
+}
+
+/* Data Wrapper */
+.data-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    overflow: hidden;
+}
+
+/* Data Controls */
+.data-controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.search-box {
+    flex: 1;
+    min-width: 250px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+}
+
+.search-box input {
+    flex: 1;
+    border: none;
+    background: none;
+    font-size: 14px;
+    outline: none;
+}
+
+.action-controls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-import {
+    padding: 10px 16px;
+    background: #8b5cf6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+}
+
+.btn-import:hover {
+    background: #7c3aed;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.btn-export {
+    padding: 10px 16px;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+}
+
+.btn-export:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* Table Wrapper */
+.table-wrapper {
+    flex: 1;
+    overflow-x: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.data-table-full {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.data-table-full thead {
+    background: #f8fafc;
+    position: sticky;
+    top: 0;
+}
+
+.data-table-full th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
     color: #374151;
+    border-bottom: 2px solid #e5e7eb;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s;
+}
+
+.data-table-full th:hover {
+    background: #f3f4f6;
+}
+
+.data-table-full th i {
+    font-size: 11px;
+    margin-left: 6px;
+    opacity: 0.5;
+}
+
+.data-table-full td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #6b7280;
+}
+
+.data-table-full tbody tr:hover {
+    background: #f9fafb;
+}
+
+.data-table-full tbody tr:hover td {
+    color: #1f2937;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.status-active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.action-col {
+    min-width: 120px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-small {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-edit {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-edit:hover {
+    background: #2563eb;
+}
+
+.btn-delete {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #dc2626;
+}
+
+/* Pagination */
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+}
+
+.pagination-btn {
+    padding: 8px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 13px;
+}
+
+.pagination-btn:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#pageInfo {
+    padding: 8px 16px;
+    background: #f3f4f6;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    min-width: 100px;
+    text-align: center;
 }
 
 /* Data Popup Styles */
@@ -356,7 +619,7 @@
     background: #d1d5db;
 }
 
-/* Data Table Styles */
+/* Data Table Styles (untuk popup) */
 .data-table {
     width: 100%;
     border-collapse: collapse;
@@ -410,6 +673,44 @@
     from { transform: translateX(100%); opacity: 0; }
     to { transform: translateX(0); opacity: 1; }
 }
+
+@media (max-width: 768px) {
+    .fullscreen-content {
+        width: 95%;
+        height: 95vh;
+    }
+    
+    .data-controls {
+        flex-direction: column;
+    }
+    
+    .search-box {
+        min-width: 100%;
+        order: -1;
+    }
+
+    .action-controls {
+        width: 100%;
+    }
+
+    .btn-import, .btn-export {
+        flex: 1;
+    }
+    
+    .data-popup-content {
+        min-width: 90vw;
+        max-width: 90vw;
+    }
+    
+    .data-table-full {
+        font-size: 12px;
+    }
+    
+    .data-table-full th,
+    .data-table-full td {
+        padding: 8px 12px;
+    }
+}
 </style>
 
 <script>
@@ -436,6 +737,11 @@ companyData.status.colors = ['#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 let currentChart = null;
 let currentView = 'type';
 let isFullscreen = false;
+let allCompanyData = [];
+let currentPage = 1;
+let itemsPerPage = 10;
+let filteredData = [];
+let sortConfig = { column: null, direction: 'asc' };
 
 // Inisialisasi Chart
 function initChart() {
@@ -497,7 +803,6 @@ function createChart(ctx, view) {
         }
     });
 
-    createCustomLegend(data);
     updateStats(view);
 }
 
@@ -507,22 +812,6 @@ function showNoDataMessage(ctx) {
     ctx.textAlign = 'center';
     ctx.fillText('Tidak ada data perusahaan tersedia', ctx.canvas.width / 2, ctx.canvas.height / 2);
     updateStats('type');
-}
-
-function createCustomLegend(data) {
-    const legendContainer = document.getElementById('customLegend');
-    if (!legendContainer) return;
-    
-    legendContainer.innerHTML = '';
-    
-    data.labels.forEach(function(label, index) {
-        const legendItem = document.createElement('div');
-        legendItem.className = 'legend-item';
-        legendItem.onclick = function() { showChartDetail(label, currentView); };
-        
-        legendItem.innerHTML = '<div class="legend-color" style="background-color: ' + data.colors[index] + '"></div><span>' + label + ' (' + data.data[index] + ')</span>';
-        legendContainer.appendChild(legendItem);
-    });
 }
 
 function showChartDetail(label, view) {
@@ -607,21 +896,8 @@ function switchChart(view) {
     });
     document.getElementById('btn-' + view).classList.add('active');
     
-    if (isFullscreen) {
-        document.querySelectorAll('#fullscreenOverlay .control-btn').forEach(function(btn) {
-            btn.classList.remove('active');
-        });
-        document.getElementById('fs-btn-' + view).classList.add('active');
-        
-        const canvas = document.getElementById('fullscreenChart');
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            createFullscreenChart(ctx, view);
-        }
-    } else {
-        const ctx = document.getElementById('companyChart').getContext('2d');
-        createChart(ctx, view);
-    }
+    const ctx = document.getElementById('companyChart').getContext('2d');
+    createChart(ctx, view);
 }
 
 function updateStats(view) {
@@ -653,84 +929,233 @@ function refreshChart() {
 function openFullscreen() {
     isFullscreen = true;
     const overlay = document.getElementById('fullscreenOverlay');
-    overlay.style.display = 'block';
+    overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
     
-    setTimeout(function() {
-        const canvas = document.getElementById('fullscreenChart');
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            createFullscreenChart(ctx, currentView);
-        }
-    }, 200);
-}
-
-function createFullscreenChart(ctx, view) {
-    if (window.fullscreenChart) {
-        window.fullscreenChart.destroy();
-    }
-
-    const data = companyData[view];
-    
-    window.fullscreenChart = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: data.labels,
-            datasets: [{
-                data: data.data,
-                backgroundColor: data.colors,
-                borderWidth: 3,
-                borderColor: '#ffffff',
-                hoverBorderWidth: 4,
-                hoverOffset: 12
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'bottom',
-                    labels: {
-                        padding: 20,
-                        usePointStyle: true,
-                        font: { size: 16 }
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const total = context.dataset.data.reduce(function(a, b) { return a + b; }, 0);
-                            const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
-                            return context.label + ': ' + context.parsed + ' Perusahaan (' + percentage + '%)';
-                        }
-                    }
-                }
-            },
-            onClick: function(event, elements) {
-                if (elements.length > 0) {
-                    const elementIndex = elements[0].index;
-                    const label = data.labels[elementIndex];
-                    showChartDetail(label, view);
-                }
-            }
-        }
-    });
+    loadDataTable();
 }
 
 function closeFullscreen() {
     isFullscreen = false;
     const overlay = document.getElementById('fullscreenOverlay');
     if (overlay) {
-        overlay.style.display = 'none';
+        overlay.classList.remove('active');
         document.body.style.overflow = 'auto';
-        
-        if (window.fullscreenChart) {
-            window.fullscreenChart.destroy();
-            window.fullscreenChart = null;
-        }
     }
+}
+
+// ===== DATA TABLE FUNCTIONS =====
+function loadDataTable() {
+    // Flatten all company data dari companyData object
+    allCompanyData = [];
+    let counter = 1;
+    
+    // Ambil dari details yang ada di setiap tipe
+    Object.keys(companyData.type.details || {}).forEach(function(type) {
+        const companies = companyData.type.details[type];
+        if (Array.isArray(companies)) {
+            companies.forEach(function(company) {
+                allCompanyData.push({
+                    no: counter++,
+                    name: company,
+                    type: type,
+                    tier: 'Standard', // Default, bisa disesuaikan
+                    status: 'Active',
+                    date: new Date().toLocaleDateString('id-ID')
+                });
+            });
+        }
+    });
+    
+    filteredData = [...allCompanyData];
+    currentPage = 1;
+    renderDataTable();
+}
+
+function renderDataTable() {
+    const tbody = document.getElementById('tableBody');
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const paginatedData = filteredData.slice(start, end);
+    
+    tbody.innerHTML = '';
+    
+    if (paginatedData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #9ca3af;">Tidak ada data</td></tr>';
+        return;
+    }
+    
+    paginatedData.forEach(function(item) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${item.no}</td>
+            <td>${item.name}</td>
+            <td>${item.type}</td>
+            <td>${item.tier}</td>
+            <td><span class="status-badge status-active">${item.status}</span></td>
+            <td>${item.date}</td>
+            <td>
+                <div class="action-buttons">
+                    <button class="btn-small btn-edit" onclick="editCompany(${item.no})">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="btn-small btn-delete" onclick="deleteCompany(${item.no})">
+                        <i class="fas fa-trash"></i> Hapus
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+    
+    updatePaginationInfo();
+}
+
+function filterDataTable() {
+    const searchValue = document.getElementById('searchInput').value.toLowerCase();
+    
+    filteredData = allCompanyData.filter(function(item) {
+        return item.name.toLowerCase().includes(searchValue) || 
+               item.type.toLowerCase().includes(searchValue);
+    });
+    
+    currentPage = 1;
+    renderDataTable();
+}
+
+function sortTable(columnIndex) {
+    const columns = ['no', 'name', 'type', 'tier', 'status', 'date'];
+    const column = columns[columnIndex];
+    
+    if (sortConfig.column === column) {
+        sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+        sortConfig.column = column;
+        sortConfig.direction = 'asc';
+    }
+    
+    filteredData.sort(function(a, b) {
+        const aValue = a[column];
+        const bValue = b[column];
+        
+        if (typeof aValue === 'string') {
+            return sortConfig.direction === 'asc' 
+                ? aValue.localeCompare(bValue)
+                : bValue.localeCompare(aValue);
+        } else {
+            return sortConfig.direction === 'asc'
+                ? aValue - bValue
+                : bValue - aValue;
+        }
+    });
+    
+    currentPage = 1;
+    renderDataTable();
+}
+
+function previousPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        renderDataTable();
+    }
+}
+
+function nextPage() {
+    const maxPage = Math.ceil(filteredData.length / itemsPerPage);
+    if (currentPage < maxPage) {
+        currentPage++;
+        renderDataTable();
+    }
+}
+
+function updatePaginationInfo() {
+    const maxPage = Math.ceil(filteredData.length / itemsPerPage);
+    document.getElementById('pageInfo').textContent = `Halaman ${currentPage} dari ${maxPage}`;
+    
+    document.querySelector('.pagination-btn:first-of-type').disabled = currentPage === 1;
+    document.querySelector('.pagination-btn:last-of-type').disabled = currentPage === maxPage;
+}
+
+function editCompany(no) {
+    alert(`Edit company dengan nomor ${no}`);
+    // Integrate dengan edit modal jika ada
+}
+
+function deleteCompany(no) {
+    if (confirm('Yakin ingin menghapus perusahaan ini?')) {
+        allCompanyData = allCompanyData.filter(item => item.no !== no);
+        filteredData = filteredData.filter(item => item.no !== no);
+        currentPage = 1;
+        renderDataTable();
+        alert('Perusahaan berhasil dihapus');
+    }
+}
+
+// ===== IMPORT FUNCTIONS =====
+function triggerImport() {
+    document.getElementById('importFile').click();
+}
+
+function handleImport() {
+    const file = document.getElementById('importFile').files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const text = e.target.result;
+            const rows = text.split('\n');
+            let importedCount = 0;
+            
+            // Skip header
+            for (let i = 1; i < rows.length; i++) {
+                if (rows[i].trim() === '') continue;
+                
+                const cols = rows[i].split(',');
+                if (cols.length >= 3) {
+                    const newItem = {
+                        no: allCompanyData.length + importedCount + 1,
+                        name: cols[1].replace(/"/g, '').trim(),
+                        type: cols[2].replace(/"/g, '').trim(),
+                        tier: cols[3] ? cols[3].replace(/"/g, '').trim() : 'Standard',
+                        status: cols[4] ? cols[4].replace(/"/g, '').trim() : 'Active',
+                        date: new Date().toLocaleDateString('id-ID')
+                    };
+                    allCompanyData.push(newItem);
+                    importedCount++;
+                }
+            }
+            
+            filteredData = [...allCompanyData];
+            currentPage = 1;
+            renderDataTable();
+            
+            alert(`${importedCount} data berhasil diimport!`);
+            document.getElementById('importFile').value = '';
+        } catch (error) {
+            alert('Error importing file: ' + error.message);
+        }
+    };
+    
+    reader.readAsText(file);
+}
+
+function exportToCSV() {
+    let csv = 'No,Nama Perusahaan,Tipe,Tier,Status,Tanggal\n';
+    
+    filteredData.forEach(function(item) {
+        csv += `${item.no},"${item.name}","${item.type}","${item.tier}","${item.status}","${item.date}"\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'company_data_' + new Date().getTime() + '.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 // Initialize

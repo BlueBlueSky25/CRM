@@ -34,6 +34,29 @@
     </div>
 </div>
 
+<style>
+    /* Hover effects for buttons */
+    button:hover, a[href]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Focus styles for inputs */
+    #searchInput:focus,
+    #filterFollowUp:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        button span, a span {
+            display: none;
+        }
+    }
+</style>
+
 @push('head')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 @endpush

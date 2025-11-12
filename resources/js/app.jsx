@@ -50,7 +50,7 @@ if (rootElement) {
     );
 }
 
-// 
+//
 
 // Chart 2: Proposal
 const proposal = document.getElementById("proposal");
