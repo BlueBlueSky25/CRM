@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use App\Models\CompanyType;
+use App\Models\CompanyPic;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -121,11 +122,50 @@ class CompanyController extends Controller
         ]);
     }
 
+    // NEW: Show company detail with PICs
+    public function show($id)
+    {
+        try {
+            $company = Company::with(['companyType', 'user'])->findOrFail($id);
+            $pics = CompanyPic::where('company_id', $id)
+                ->orderBy('pic_name')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'company' => [
+                    'company_id' => $company->company_id,
+                    'company_name' => $company->company_name,
+                    'company_type' => $company->companyType->type_name ?? '-',
+                    'tier' => $company->tier ?? '-',
+                    'description' => $company->description ?? '-',
+                    'status' => ucfirst($company->status),
+                    'created_by' => $company->user->name ?? '-'
+                ],
+                'pics' => $pics->map(function($pic) {
+                    return [
+                        'pic_id' => $pic->pic_id,
+                        'pic_name' => $pic->pic_name,
+                        'position' => $pic->position ?? '-',
+                        'phone' => $pic->phone ?? '-',
+                        'email' => $pic->email ?? '-'
+                    ];
+                })
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error fetching company detail: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memuat detail perusahaan'
+            ], 500);
+        }
+    }
+
     public function store(Request $request)
     {
-        // 🔥 FIX: Change 'companies' to 'company' in validation
         $request->validate([
-            'company_name'     => 'required|string|max:255|unique:company,company_name', // ← FIXED
+            'company_name'     => 'required|string|max:255|unique:company,company_name',
             'company_type_id'  => 'required|exists:company_type,company_type_id',
             'tier'             => 'nullable|string|in:A,B,C,D',
             'description'      => 'nullable|string',
@@ -157,9 +197,8 @@ class CompanyController extends Controller
     {
         $company = Company::findOrFail($id);
         
-        // 🔥 FIX: Change 'companies' to 'company' and ignore current record
         $request->validate([
-            'company_name'     => 'required|string|max:255|unique:company,company_name,' . $id . ',company_id', // ← FIXED
+            'company_name'     => 'required|string|max:255|unique:company,company_name,' . $id . ',company_id',
             'company_type_id'  => 'required|exists:company_type,company_type_id',
             'tier'             => 'nullable|string|in:A,B,C,D',
             'description'      => 'nullable|string',
@@ -200,9 +239,6 @@ class CompanyController extends Controller
         return redirect()->route('company')->with('success', 'Perusahaan berhasil dihapus');
     }
 
-    /**
-     * Get all companies for dropdown (digunakan di SalesVisit)
-     */
     public function getCompaniesForDropdown()
     {
         try {
@@ -210,16 +246,13 @@ class CompanyController extends Controller
             
             $companiesQuery = Company::query();
             
-            // Role-based filtering
             if ($user->role_id == 1) {
                 // superadmin - all data
             } elseif (in_array($user->role_id, [7, 11])) {
-                // admin & marketing - only sales companies
                 $companiesQuery->whereHas('user', function ($q) {
                     $q->where('role_id', 12);
                 });
             } elseif ($user->role_id == 12) {
-                // sales - own data only
                 $companiesQuery->where('user_id', $user->user_id);
             } else {
                 $companiesQuery->whereNull('company_id');
@@ -230,8 +263,6 @@ class CompanyController extends Controller
                 ->select('company_id as id', 'company_name as name')
                 ->orderBy('company_name', 'asc')
                 ->get();
-            
-            \Log::info("Fetched companies for dropdown: " . $companies->count());
             
             return response()->json([
                 'success' => true,
@@ -247,33 +278,19 @@ class CompanyController extends Controller
         }
     }
 
-    /**
-     * Store new company via AJAX (used in SalesVisit modal)
-     * 🔥 FIXED: Validation table name corrected
-     */
     public function storeCompanyAjax(Request $request)
     {
         try {
-            \Log::info('🔵 Store Company AJAX Request', [
-                'content_type' => $request->header('Content-Type'),
-                'all_data' => $request->all(),
-                'method' => $request->method()
-            ]);
-            
-            // 🔥 CRITICAL FIX: Change 'companies' to 'company'
             $validated = $request->validate([
-                'company_name' => 'required|string|max:255|unique:company,company_name', // ← FIXED
+                'company_name' => 'required|string|max:255|unique:company,company_name',
                 'company_type_id' => 'required|exists:company_type,company_type_id',
                 'tier' => 'nullable|string|in:A,B,C,D',
                 'description' => 'nullable|string',
                 'status' => 'nullable|in:active,inactive'
             ]);
             
-            \Log::info('✅ Validation passed', $validated);
-            
             $user = Auth::user();
             
-            // Check permission
             $allowedRoles = ['superadmin', 'admin', 'marketing', 'sales'];
             $userRoleName = strtolower($user->role->role_name ?? '');
             
@@ -284,7 +301,6 @@ class CompanyController extends Controller
                 ], 403);
             }
             
-            // Create company
             $company = Company::create([
                 'company_name' => trim($validated['company_name']),
                 'company_type_id' => $validated['company_type_id'],
@@ -292,11 +308,6 @@ class CompanyController extends Controller
                 'description' => $validated['description'] ?? null,
                 'status' => $validated['status'] ?? 'active',
                 'user_id' => $user->user_id
-            ]);
-            
-            \Log::info('✅ Company created successfully', [
-                'company_id' => $company->company_id,
-                'company_name' => $company->company_name
             ]);
             
             return response()->json([
@@ -309,10 +320,6 @@ class CompanyController extends Controller
             ], 201);
             
         } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::warning('⚠️ Validation failed', [
-                'errors' => $e->errors()
-            ]);
-            
             return response()->json([
                 'success' => false,
                 'message' => 'Validasi gagal',
@@ -320,12 +327,7 @@ class CompanyController extends Controller
             ], 422);
             
         } catch (\Exception $e) {
-            \Log::error('❌ Error storing company via AJAX', [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
-            ]);
+            \Log::error('Error storing company via AJAX: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
@@ -341,8 +343,18 @@ class CompanyController extends Controller
         
         $canEdit = auth()->check() && auth()->user()->canAccess($currentMenuId ?? 1, 'edit');
         $canDelete = auth()->check() && auth()->user()->canAccess($currentMenuId ?? 1, 'delete');
+        $canView = auth()->check() && auth()->user()->canAccess($currentMenuId ?? 1, 'view');
 
         $actions = [];
+
+        // Show detail action
+        if ($canView) {
+            $actions[] = [
+                'type' => 'view',
+                'onclick' => "showCompanyDetail('{$company->company_id}')",
+                'title' => 'Show Detail'
+            ];
+        }
 
         if ($canEdit) {
             $actions[] = [

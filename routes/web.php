@@ -71,6 +71,8 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/company/search', [CompanyController::class, 'search'])->name('company.search');
     Route::get('/company/get-companies-dropdown', [CompanyController::class, 'getCompaniesForDropdown']);
     Route::post('/company/store-company-ajax', [CompanyController::class, 'storeCompanyAjax']);
+    // 🔥 NEW: Show company detail with PICs
+    Route::get('/company/{id}', [CompanyController::class, 'show'])->name('company.show');
     
     // ==========================
     // Customer Management

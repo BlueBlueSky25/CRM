@@ -28,4 +28,10 @@ class Company extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
+
+    // Relasi ke CompanyPic
+    public function pics()
+    {
+        return $this->hasMany(CompanyPic::class, 'company_id', 'company_id');
+    }
 }

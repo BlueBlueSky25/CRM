@@ -74,6 +74,28 @@
                             </div>
                         </div>
 
+                        <!-- Parent Menu -->
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">
+                                Parent Menu
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-sitemap text-gray-400 text-xs"></i>
+                                </div>
+                                <select name="parent_id" id="editMenuParent"
+                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none">                         
+                                    <option value="">-- No Parent (Main Menu) --</option>
+                                    @foreach(App\Models\Menu::whereNull('parent_id')->get() as $menu)
+                                        <option value="{{ $menu->menu_id }}">{{ $menu->nama_menu }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Icon -->
                         <div class="md:col-span-2">
                             <label class="block text-xs font-medium text-gray-700 mb-1.5">
