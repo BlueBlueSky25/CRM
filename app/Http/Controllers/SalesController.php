@@ -42,7 +42,7 @@ class SalesController extends Controller
             $user = User::with(['role', 'province', 'regency', 'district', 'village'])
                 ->findOrFail($id);
             
-            // Get visit history for this sales user
+            // Get visit history for this sales user - FIXED
             $visits = \App\Models\SalesVisit::with(['company', 'province', 'regency', 'district', 'village'])
                 ->where('sales_id', $id)
                 ->orderBy('visit_date', 'desc')
@@ -63,7 +63,7 @@ class SalesController extends Controller
                         'pic_name' => $visit->pic_name ?? '-',
                         'location' => implode(', ', $locationParts) ?: '-',
                         'visit_purpose' => $visit->visit_purpose ?? '-',
-                        'is_follow_up' => $visit->is_follow_up
+                        'is_follow_up' => $visit->is_follow_up ? 'Ya' : 'Tidak'
                     ];
                 });
             
@@ -335,7 +335,7 @@ class SalesController extends Controller
                     ],
                     'phone' => $user->phone ?? '-',
                     'date_birth' => $user->birth_date 
-                        ? \Carbon\Carbon::parse($user->birth_date)->format('d M Y') 
+                        ? \Carbon\Carbon::parse($user->birth_date)->format('d M M Y') 
                         : '-',
                     'alamat' => $alamatDisplay,
                     'role' => optional($user->role)->role_name ?? 'No Role',

@@ -187,7 +187,7 @@
                     <span id="visitCount" style="font-size: 0.8125rem; color: #6b7280; background-color: #f3f4f6; padding: 0.25rem 0.625rem; border-radius: 9999px; font-weight: 500;">0 Visits</span>
                 </div>
 
-                <div id="visitsContainer">
+                <div id="visitsContainer" style="background-color: #f9fafb; border-radius: 0.375rem; overflow: hidden;">
                     {{-- Visits will be loaded here --}}
                 </div>
             </div>
@@ -208,11 +208,9 @@ function showSalesDetail(userId) {
     const modal = document.getElementById('salesDetailModal');
     modal.style.display = 'flex';
     
-    // Show loading in companies section (if you have related data)
-    const companiesSection = document.getElementById('companiesSection');
-    const companiesContainer = document.getElementById('companiesContainer');
-    
-    companiesContainer.innerHTML = `
+    // Show loading state
+    const visitsContainer = document.getElementById('visitsContainer');
+    visitsContainer.innerHTML = `
         <div style="text-align: center; padding: 2rem; color: #6b7280;">
             <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
             <p style="margin: 0;">Loading...</p>
@@ -221,7 +219,12 @@ function showSalesDetail(userId) {
     
     // Fetch sales user detail
     fetch(`/marketing/sales/${userId}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 // Fill personal info
@@ -238,16 +241,78 @@ function showSalesDetail(userId) {
                 document.getElementById('detailVillage').textContent = data.user.village || '-';
                 document.getElementById('detailAddress').textContent = data.user.address || '-';
                 
-                // Hide companies section (optional, uncomment if you add companies relation)
-                companiesSection.style.display = 'none';
+                // Fill visit history
+                const visits = data.visits || [];
+                document.getElementById('visitCount').textContent = visits.length + ' Visits';
+                
+                if (visits.length === 0) {
+                    visitsContainer.innerHTML = `
+                        <div style="text-align: center; padding: 2rem; color: #9ca3af;">
+                            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                            <p style="margin: 0;">Tidak ada riwayat kunjungan</p>
+                        </div>
+                    `;
+                } else {
+                    let visitsHTML = '<div style="overflow-x: auto;">';
+                    visitsHTML += `
+                        <table style="width: 100%; font-size: 0.75rem;">
+                            <thead>
+                                <tr style="background-color: #f3f4f6; border-bottom: 1px solid #e5e7eb;">
+                                    <th style="padding: 0.625rem; text-align: left; font-weight: 600; color: #374151;">Tanggal</th>
+                                    <th style="padding: 0.625rem; text-align: left; font-weight: 600; color: #374151;">Perusahaan</th>
+                                    <th style="padding: 0.625rem; text-align: left; font-weight: 600; color: #374151;">PIC</th>
+                                    <th style="padding: 0.625rem; text-align: left; font-weight: 600; color: #374151;">Lokasi</th>
+                                    <th style="padding: 0.625rem; text-align: left; font-weight: 600; color: #374151;">Tujuan</th>
+                                    <th style="padding: 0.625rem; text-align: center; font-weight: 600; color: #374151;">Follow Up</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    visits.forEach((visit, index) => {
+                        const rowBg = index % 2 === 0 ? '#ffffff' : '#f9fafb';
+                        const followUpBg = visit.is_follow_up === 'Ya' ? '#dcfce7' : '#fee2e2';
+                        const followUpColor = visit.is_follow_up === 'Ya' ? '#166534' : '#991b1b';
+                        
+                        visitsHTML += `
+                            <tr style="background-color: ${rowBg}; border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 0.625rem; color: #374151;">${visit.visit_date}</td>
+                                <td style="padding: 0.625rem; color: #374151;">${visit.company_name}</td>
+                                <td style="padding: 0.625rem; color: #374151;">${visit.pic_name}</td>
+                                <td style="padding: 0.625rem; color: #374151; font-size: 0.7rem;">${visit.location}</td>
+                                <td style="padding: 0.625rem; color: #374151; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${visit.visit_purpose}">${visit.visit_purpose}</td>
+                                <td style="padding: 0.625rem; text-align: center;">
+                                    <span style="background-color: ${followUpBg}; color: ${followUpColor}; padding: 0.25rem 0.625rem; border-radius: 9999px; font-weight: 500; font-size: 0.7rem;">
+                                        ${visit.is_follow_up}
+                                    </span>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    
+                    visitsHTML += `
+                            </tbody>
+                        </table>
+                    </div>
+                    `;
+                    
+                    visitsContainer.innerHTML = visitsHTML;
+                }
+            } else {
+                visitsContainer.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #dc2626; background-color: #fee2e2; border-radius: 0.5rem;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                        <p style="margin: 0;">Error: ${data.error || 'Gagal memuat data'}</p>
+                    </div>
+                `;
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            companiesContainer.innerHTML = `
+            visitsContainer.innerHTML = `
                 <div style="text-align: center; padding: 2rem; color: #dc2626; background-color: #fee2e2; border-radius: 0.5rem;">
                     <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <p style="margin: 0;">Gagal memuat data</p>
+                    <p style="margin: 0;">Gagal memuat data: ${error.message}</p>
                 </div>
             `;
         });
