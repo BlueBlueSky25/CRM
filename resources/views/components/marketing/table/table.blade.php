@@ -64,6 +64,16 @@
                     </td>
                     <td class="px-3 py-2 text-xs font-medium">
                         <div class="flex items-center space-x-1">
+                            {{-- Show Detail Button --}}
+                            @if(auth()->user()->canAccess($currentMenuId, 'view'))
+                            <button 
+                                onclick="showSalesDetail('{{ $user->user_id }}')" 
+                                class="text-green-600 hover:text-green-900 p-1.5 rounded-lg hover:bg-green-50 flex items-center"
+                                title="Show Detail">
+                                <i class="fas fa-eye text-xs"></i>
+                            </button>
+                            @endif
+
                             @if(auth()->user()->canAccess($currentMenuId, 'edit'))
                             <button onclick="openEditSalesModal('{{ $user->user_id }}', '{{ $user->username }}', '{{ $user->email }}', '{{ $user->phone }}', '{{ $user->birth_date }}', '{{ $user->address }}', '{{ $user->province_id }}', '{{ $user->regency_id }}', '{{ $user->district_id }}', '{{ $user->village_id }}')" 
                                 class="text-blue-600 hover:text-blue-900 p-1.5 rounded-lg hover:bg-blue-50 flex items-center" 
@@ -91,6 +101,171 @@
     <x-globals.pagination :paginator="$salesUsers" />
 </div>
 
+{{-- Sales User Detail Modal --}}
+<div id="salesDetailModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background-color: white; border-radius: 0.5rem; width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+        {{-- Modal Header --}}
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; background: linear-gradient(to right, #2563eb, #3b82f6);">
+            <h3 style="font-size: 1.125rem; font-weight: 600; color: white; margin: 0;">
+                <i class="fas fa-user-tie" style="margin-right: 0.5rem;"></i>
+                Detail Sales User
+            </h3>
+            <button onclick="closeSalesDetailModal()" style="color: white; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 0; line-height: 1; opacity: 0.9; transition: opacity 0.15s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        {{-- Modal Body --}}
+        <div style="padding: 1rem;">
+            {{-- Personal Info --}}
+            <div style="background-color: #f9fafb; padding: 0.875rem; border-radius: 0.375rem; margin-bottom: 1rem;">
+                <h4 style="font-size: 0.9375rem; font-weight: 600; color: #111827; margin: 0 0 0.75rem 0; display: flex; align-items: center; gap: 0.375rem;">
+                    <i class="fas fa-id-card" style="color: #2563eb;"></i>
+                    Personal Information
+                </h4>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+                    <div>
+                        <label style="display: block; font-size: 0.6875rem; font-weight: 500; color: #6b7280; text-transform: uppercase; margin-bottom: 0.125rem;">Username</label>
+                        <p id="detailUsername" style="font-size: 0.8125rem; font-weight: 600; color: #111827; margin: 0;">-</p>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.6875rem; font-weight: 500; color: #6b7280; text-transform: uppercase; margin-bottom: 0.125rem;">Email</label>
+                        <p id="detailEmail" style="font-size: 0.8125rem; color: #111827; margin: 0;">-</p>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.6875rem; font-weight: 500; color: #6b7280; text-transform: uppercase; margin-bottom: 0.125rem;">Phone</label>
+                        <p id="detailPhone" style="font-size: 0.8125rem; color: #111827; margin: 0;">-</p>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.6875rem; font-weight: 500; color: #6b7280; text-transform: uppercase; margin-bottom: 0.125rem;">Birth Date</label>
+                        <p id="detailBirthDate" style="font-size: 0.8125rem; color: #111827; margin: 0;">-</p>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.6875rem; font-weight: 500; color: #6b7280; text-transform: uppercase; margin-bottom: 0.125rem;">Role</label>
+                        <span id="detailRole" style="display: inline-flex; align-items: center; padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.6875rem; font-weight: 500; background-color: #dbeafe; color: #1e40af;">-</span>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Address Info --}}
+            <div style="background-color: #f9fafb; padding: 0.875rem; border-radius: 0.375rem; margin-bottom: 1rem;">
+                <h4 style="font-size: 0.9375rem; font-weight: 600; color: #111827; margin: 0 0 0.75rem 0; display: flex; align-items: center; gap: 0.375rem;">
+                    <i class="fas fa-map-marker-alt" style="color: #059669;"></i>
+                    Address Information
+                </h4>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+                    <div>
+                        <label style="display: block; font-size: 0.6875rem; font-weight: 500; color: #6b7280; text-transform: uppercase; margin-bottom: 0.125rem;">Province</label>
+                        <p id="detailProvince" style="font-size: 0.8125rem; color: #111827; margin: 0;">-</p>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.6875rem; font-weight: 500; color: #6b7280; text-transform: uppercase; margin-bottom: 0.125rem;">Regency</label>
+                        <p id="detailRegency" style="font-size: 0.8125rem; color: #111827; margin: 0;">-</p>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.6875rem; font-weight: 500; color: #6b7280; text-transform: uppercase; margin-bottom: 0.125rem;">District</label>
+                        <p id="detailDistrict" style="font-size: 0.8125rem; color: #111827; margin: 0;">-</p>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.6875rem; font-weight: 500; color: #6b7280; text-transform: uppercase; margin-bottom: 0.125rem;">Village</label>
+                        <p id="detailVillage" style="font-size: 0.8125rem; color: #111827; margin: 0;">-</p>
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                        <label style="display: block; font-size: 0.6875rem; font-weight: 500; color: #6b7280; text-transform: uppercase; margin-bottom: 0.125rem;">Full Address</label>
+                        <p id="detailAddress" style="font-size: 0.8125rem; color: #111827; margin: 0;">-</p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Visit History Section --}}
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <h4 style="font-size: 0.9375rem; font-weight: 600; color: #111827; margin: 0;">
+                        <i class="fas fa-map-marked-alt" style="margin-right: 0.375rem; color: #7c3aed;"></i>
+                        Riwayat Kunjungan
+                    </h4>
+                    <span id="visitCount" style="font-size: 0.8125rem; color: #6b7280; background-color: #f3f4f6; padding: 0.25rem 0.625rem; border-radius: 9999px; font-weight: 500;">0 Visits</span>
+                </div>
+
+                <div id="visitsContainer">
+                    {{-- Visits will be loaded here --}}
+                </div>
+            </div>
+        </div>
+
+        {{-- Modal Footer --}}
+        <div style="display: flex; justify-content: flex-end; padding: 0.75rem 1rem; border-top: 1px solid #e5e7eb; background-color: #f9fafb;">
+            <button onclick="closeSalesDetailModal()" style="padding: 0.5rem 1.25rem; background-color: #6b7280; color: white; border: none; border-radius: 0.375rem; font-size: 0.8125rem; font-weight: 500; cursor: pointer; transition: all 0.15s;">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Show Sales User Detail Modal
+function showSalesDetail(userId) {
+    const modal = document.getElementById('salesDetailModal');
+    modal.style.display = 'flex';
+    
+    // Show loading in companies section (if you have related data)
+    const companiesSection = document.getElementById('companiesSection');
+    const companiesContainer = document.getElementById('companiesContainer');
+    
+    companiesContainer.innerHTML = `
+        <div style="text-align: center; padding: 2rem; color: #6b7280;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+            <p style="margin: 0;">Loading...</p>
+        </div>
+    `;
+    
+    // Fetch sales user detail
+    fetch(`/marketing/sales/${userId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Fill personal info
+                document.getElementById('detailUsername').textContent = data.user.username || '-';
+                document.getElementById('detailEmail').textContent = data.user.email || '-';
+                document.getElementById('detailPhone').textContent = data.user.phone || '-';
+                document.getElementById('detailBirthDate').textContent = data.user.birth_date || '-';
+                document.getElementById('detailRole').textContent = data.user.role || '-';
+                
+                // Fill address info
+                document.getElementById('detailProvince').textContent = data.user.province || '-';
+                document.getElementById('detailRegency').textContent = data.user.regency || '-';
+                document.getElementById('detailDistrict').textContent = data.user.district || '-';
+                document.getElementById('detailVillage').textContent = data.user.village || '-';
+                document.getElementById('detailAddress').textContent = data.user.address || '-';
+                
+                // Hide companies section (optional, uncomment if you add companies relation)
+                companiesSection.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            companiesContainer.innerHTML = `
+                <div style="text-align: center; padding: 2rem; color: #dc2626; background-color: #fee2e2; border-radius: 0.5rem;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <p style="margin: 0;">Gagal memuat data</p>
+                </div>
+            `;
+        });
+}
+
+// Close Modal
+function closeSalesDetailModal() {
+    document.getElementById('salesDetailModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+document.getElementById('salesDetailModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeSalesDetailModal();
+    }
+});
+</script>
+
 <style>
 @keyframes modalSlideIn {
     from { 
@@ -114,5 +289,27 @@
 @keyframes fadeIn { 
     from { opacity: 0; } 
     to { opacity: 1; } 
+}
+
+/* Responsive improvements */
+@media (max-width: 1024px) {
+    #salesTable {
+        font-size: 0.8125rem;
+    }
+}
+
+@media (max-width: 768px) {
+    #salesTable {
+        font-size: 0.75rem;
+    }
+    
+    #salesDetailModal > div {
+        width: 95%;
+        margin: 1rem;
+    }
+    
+    #salesDetailModal > div > div:nth-child(2) > div > div {
+        grid-template-columns: 1fr !important;
+    }
 }
 </style>

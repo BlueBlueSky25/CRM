@@ -71,7 +71,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/company/search', [CompanyController::class, 'search'])->name('company.search');
     Route::get('/company/get-companies-dropdown', [CompanyController::class, 'getCompaniesForDropdown']);
     Route::post('/company/store-company-ajax', [CompanyController::class, 'storeCompanyAjax']);
-    // 🔥 NEW: Show company detail with PICs
+    // 🔥 Show company detail with PICs
     Route::get('/company/{id}', [CompanyController::class, 'show'])->name('company.show');
     
     // ==========================
@@ -98,6 +98,8 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/salesvisit/get-sales', [SalesVisitController::class, 'getSalesUsers'])->name('salesvisit.sales');
     Route::post('/salesvisit', [SalesVisitController::class, 'store'])->name('salesvisit.store');
     Route::get('/salesvisit/{id}/edit', [SalesVisitController::class, 'edit'])->name('salesvisit.edit');
+    // 🔥 NEW: Show visit detail with PIC
+    Route::get('/salesvisit/{id}', [SalesVisitController::class, 'show'])->name('salesvisit.show');
     Route::put('/salesvisit/{id}', [SalesVisitController::class, 'update'])->name('salesvisit.update');
     Route::delete('/salesvisit/{id}', [SalesVisitController::class, 'destroy'])->name('salesvisit.destroy');
     Route::get('/salesvisit/search', [SalesVisitController::class, 'search'])->name('salesvisit.search');
@@ -109,7 +111,6 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::post('/salesvisit/import', [SalesVisitController::class, 'import'])->name('salesvisit.import');
     Route::get('/salesvisit/get-companies', [CompanyController::class, 'getCompaniesForDropdown']);
     Route::post('/salesvisit/store-company', [CompanyController::class, 'storeCompanyAjax']);
-
     Route::post('/sales-visit/pic', [SalesVisitController::class, 'storePic'])->name('salesvisit.pic.store');
 
     // ==========================
@@ -182,6 +183,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::post('/marketing/sales', [SalesController::class, 'store'])->name('marketing.sales.store');
     Route::put('/marketing/sales/{id}', [SalesController::class, 'update'])->name('marketing.sales.update');
     Route::delete('/marketing/sales/{id}', [SalesController::class, 'destroy'])->name('marketing.sales.destroy');
+    Route::get('/marketing/sales/{id}', [SalesController::class, 'show'])->name('marketing.sales.show');
 
     // ==========================
     // BAR CHART ROUTES

@@ -7,6 +7,9 @@ use App\Models\CompanyType;
 use App\Models\CompanyPic;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+
 
 class CompanyController extends Controller
 {
@@ -162,82 +165,177 @@ class CompanyController extends Controller
         }
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'company_name'     => 'required|string|max:255|unique:company,company_name',
-            'company_type_id'  => 'required|exists:company_type,company_type_id',
-            'tier'             => 'nullable|string|in:A,B,C,D',
-            'description'      => 'nullable|string',
-            'status'           => 'nullable|in:active,inactive'
+   public function store(Request $request)
+{
+    \Log::info('📥 Store Request Data:', $request->all());
+    
+    $validated = $request->validate([
+        'company_name' => 'required|string|max:255',
+        'company_type_id' => 'required|exists:company_type,company_type_id',
+        'tier' => 'nullable|string|in:A,B,C,D',
+        'description' => 'nullable|string',
+        'status' => 'required|in:active,inactive',
+        'pics' => 'nullable|array',
+        'pics.*.pic_name' => 'required_with:pics|string|max:255',
+        'pics.*.position' => 'nullable|string|max:255',
+        'pics.*.phone' => 'nullable|string|max:20',
+        'pics.*.email' => 'nullable|email|max:255',
+    ]);
+
+    try {
+        DB::beginTransaction();
+
+        // Create company
+        $company = Company::create([
+            'company_name' => $validated['company_name'],
+            'company_type_id' => $validated['company_type_id'],
+            'tier' => $validated['tier'] ?? null,
+            'description' => $validated['description'] ?? null,
+            'status' => $validated['status'],
+            'user_id' => auth()->id(),
         ]);
-
-        $user = Auth::user();
-
-        $allowedRoles = ['superadmin', 'admin', 'marketing', 'sales'];
-        $userRoleName = strtolower($user->role->role_name ?? '');
         
-        if (!in_array($userRoleName, $allowedRoles)) {
-            return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk menambah perusahaan.');
+        \Log::info('✅ Company created:', ['company_id' => $company->company_id]);
+        
+        // ✅ Create PICs if any
+        if ($request->has('pics') && is_array($request->pics)) {
+            foreach ($request->pics as $index => $picData) {
+                // Skip empty PIC entries
+                if (empty($picData['pic_name'])) {
+                    \Log::warning("⚠️ Skipping empty PIC at index {$index}");
+                    continue;
+                }
+                
+                $pic = CompanyPic::create([
+                    'company_id' => $company->company_id,
+                    'pic_name' => $picData['pic_name'],
+                    'position' => $picData['position'] ?? null,
+                    'phone' => $picData['phone'] ?? null,
+                    'email' => $picData['email'] ?? null,
+                ]);
+                
+                \Log::info('✅ PIC created:', [
+                    'pic_id' => $pic->pic_id,
+                    'pic_name' => $pic->pic_name
+                ]);
+            }
         }
 
-        Company::create([
-            'company_name'    => $request->company_name,
-            'company_type_id' => $request->company_type_id,
-            'tier'            => $request->tier,
-            'description'     => $request->description,
-            'status'          => $request->status ?? 'active',
-            'user_id'         => $user->user_id,
-        ]);
+        DB::commit();
+        
+        \Log::info('✅ Transaction committed successfully');
 
-        return redirect()->route('company')->with('success', 'Perusahaan berhasil ditambahkan');
+        return redirect()->back()->with('success', 'Company dan PIC berhasil ditambahkan');
+        
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('❌ Error storing company: ' . $e->getMessage());
+        \Log::error('Stack trace: ' . $e->getTraceAsString());
+        
+        return redirect()->back()
+            ->with('error', 'Gagal menambahkan company: ' . $e->getMessage())
+            ->withInput();
     }
+}
 
-    public function update(Request $request, $id)
-    {
-        $company = Company::findOrFail($id);
-        
-        $request->validate([
-            'company_name'     => 'required|string|max:255|unique:company,company_name,' . $id . ',company_id',
-            'company_type_id'  => 'required|exists:company_type,company_type_id',
-            'tier'             => 'nullable|string|in:A,B,C,D',
-            'description'      => 'nullable|string',
-            'status'           => 'nullable|in:active,inactive'
-        ]);
+  public function update(Request $request, $id)
+{
+    \Log::info('📝 Update Request Data:', $request->all());
+    
+    $company = Company::findOrFail($id);
+    
+    $validated = $request->validate([
+        'company_name' => 'required|string|max:255',
+        'company_type_id' => 'required|exists:company_type,company_type_id',
+        'tier' => 'nullable|string|in:A,B,C,D',
+        'description' => 'nullable|string',
+        'status' => 'required|in:active,inactive',
+        'pics' => 'nullable|array',
+        'pics.*.pic_name' => 'required_with:pics|string|max:255',
+        'pics.*.position' => 'nullable|string|max:255',
+        'pics.*.phone' => 'nullable|string|max:20',
+        'pics.*.email' => 'nullable|email|max:255',
+    ]);
 
-        $user = Auth::user();
-        $userRoleName = strtolower($user->role->role_name ?? '');
-        
-        if ($userRoleName === 'sales' && $company->user_id !== $user->user_id) {
-            return redirect()->back()->with('error', 'Anda tidak boleh mengedit data milik sales lain.');
-        }
+    try {
+        DB::beginTransaction();
 
+        // Update company data
         $company->update([
-            'company_name'    => $request->company_name,
-            'company_type_id' => $request->company_type_id,
-            'tier'            => $request->tier,
-            'description'     => $request->description,
-            'status'          => $request->status ?? 'active',
+            'company_name' => $validated['company_name'],
+            'company_type_id' => $validated['company_type_id'],
+            'tier' => $validated['tier'] ?? null,
+            'description' => $validated['description'] ?? null,
+            'status' => $validated['status'],
         ]);
-
-        return redirect()->route('company')->with('success', 'Data perusahaan berhasil diperbarui');
-    }
-
-    public function destroy($id)
-    {
-        $user = Auth::user();
-        $company = Company::findOrFail($id);
-
-        $userRoleName = strtolower($user->role->role_name ?? '');
         
-        if ($userRoleName === 'sales' && $company->user_id !== $user->user_id) {
-            return redirect()->route('company')->with('error', 'Anda tidak boleh menghapus data milik sales lain.');
+        \Log::info('✅ Company updated:', ['company_id' => $company->company_id]);
+        
+        // ✅ Delete old PICs and create new ones
+        CompanyPic::where('company_id', $company->company_id)->delete();
+        \Log::info('🗑️ Old PICs deleted');
+        
+        if ($request->has('pics') && is_array($request->pics)) {
+            foreach ($request->pics as $index => $picData) {
+                // Skip empty PIC entries
+                if (empty($picData['pic_name'])) {
+                    \Log::warning("⚠️ Skipping empty PIC at index {$index}");
+                    continue;
+                }
+                
+                $pic = CompanyPic::create([
+                    'company_id' => $company->company_id,
+                    'pic_name' => $picData['pic_name'],
+                    'position' => $picData['position'] ?? null,
+                    'phone' => $picData['phone'] ?? null,
+                    'email' => $picData['email'] ?? null,
+                ]);
+                
+                \Log::info('✅ New PIC created:', [
+                    'pic_id' => $pic->pic_id,
+                    'pic_name' => $pic->pic_name
+                ]);
+            }
         }
 
-        $company->delete();
+        DB::commit();
+        
+        \Log::info('✅ Update transaction committed successfully');
 
-        return redirect()->route('company')->with('success', 'Perusahaan berhasil dihapus');
+        return redirect()->back()->with('success', 'Company dan PIC berhasil diupdate');
+        
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('❌ Error updating company: ' . $e->getMessage());
+        \Log::error('Stack trace: ' . $e->getTraceAsString());
+        
+        return redirect()->back()
+            ->with('error', 'Gagal mengupdate company: ' . $e->getMessage())
+            ->withInput();
     }
+}
+
+public function getPICsByCompany($companyId)
+{
+    try {
+        $pics = CompanyPic::where('company_id', $companyId)
+            ->select('pic_id as id', 'pic_name as name', 'position', 'phone', 'email')
+            ->orderBy('pic_name', 'asc')
+            ->get();
+        
+        return response()->json([
+            'success' => true,
+            'pics' => $pics
+        ]);
+        
+    } catch (\Exception $e) {
+        \Log::error("Error fetching PICs for company {$companyId}: " . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'error' => 'Failed to load PICs'
+        ], 500);
+    }
+}
 
     public function getCompaniesForDropdown()
     {

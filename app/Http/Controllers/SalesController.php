@@ -33,6 +33,68 @@ class SalesController extends Controller
         ]);
     }
 
+    /**
+     * Show sales user detail (AJAX)
+     */
+    public function show($id)
+    {
+        try {
+            $user = User::with(['role', 'province', 'regency', 'district', 'village'])
+                ->findOrFail($id);
+            
+            // Get visit history for this sales user
+            $visits = \App\Models\SalesVisit::with(['company', 'province', 'regency', 'district', 'village'])
+                ->where('sales_id', $id)
+                ->orderBy('visit_date', 'desc')
+                ->limit(10)
+                ->get()
+                ->map(function($visit) {
+                    // Build location string
+                    $locationParts = collect([
+                        optional($visit->province)->name,
+                        optional($visit->regency)->name,
+                        optional($visit->district)->name,
+                        optional($visit->village)->name
+                    ])->filter()->toArray();
+                    
+                    return [
+                        'visit_date' => $visit->visit_date ? $visit->visit_date->format('d M Y') : '-',
+                        'company_name' => optional($visit->company)->company_name ?? $visit->company_name ?? '-',
+                        'pic_name' => $visit->pic_name ?? '-',
+                        'location' => implode(', ', $locationParts) ?: '-',
+                        'visit_purpose' => $visit->visit_purpose ?? '-',
+                        'is_follow_up' => $visit->is_follow_up
+                    ];
+                });
+            
+            return response()->json([
+                'success' => true,
+                'user' => [
+                    'username' => $user->username ?? '-',
+                    'email' => $user->email ?? '-',
+                    'phone' => $user->phone ?? '-',
+                    'birth_date' => $user->birth_date 
+                        ? \Carbon\Carbon::parse($user->birth_date)->format('d M Y') 
+                        : '-',
+                    'role' => optional($user->role)->role_name ?? '-',
+                    'province' => optional($user->province)->name ?? '-',
+                    'regency' => optional($user->regency)->name ?? '-',
+                    'district' => optional($user->district)->name ?? '-',
+                    'village' => optional($user->village)->name ?? '-',
+                    'address' => $user->address ?? '-',
+                ],
+                'visits' => $visits
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error fetching sales detail: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'Gagal memuat data'
+            ], 500);
+        }
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -235,7 +297,7 @@ class SalesController extends Controller
                 \Log::info('Province filter applied', ['province_id' => $request->province_id]);
             }
 
-            $users = $query->paginate(5);
+            $users = $query->paginate(10);
             \Log::info('Users found', ['count' => $users->count()]);
 
             $items = $users->map(function($user, $index) use ($users) {

@@ -82,6 +82,54 @@ public function index(Request $request)
     ));
 }
 
+// 🔥 NEW: Show Visit Detail with PIC
+public function show($id)
+{
+    try {
+        $visit = SalesVisit::with([
+            'company', 
+            'sales', 
+            'pic',
+            'province', 
+            'regency', 
+            'district', 
+            'village'
+        ])->findOrFail($id);
+        
+        // Build location string
+        $locationParts = [];
+        if ($visit->province) $locationParts[] = $visit->province->name;
+        if ($visit->regency) $locationParts[] = $visit->regency->name;
+        if ($visit->district) $locationParts[] = $visit->district->name;
+        if ($visit->village) $locationParts[] = $visit->village->name;
+        
+        return response()->json([
+            'success' => true,
+            'visit' => [
+                'visit_date' => $visit->visit_date->format('d/m/Y'),
+                'sales_name' => $visit->sales->username ?? '-',
+                'company_name' => $visit->company->company_name ?? '-',
+                'location' => implode(', ', $locationParts) ?: '-',
+                'address' => $visit->address ?? '-',
+                'visit_purpose' => $visit->visit_purpose ?? '-',
+                'is_follow_up' => $visit->is_follow_up
+            ],
+            'pic' => $visit->pic ? [
+                'pic_name' => $visit->pic->pic_name,
+                'position' => $visit->pic->position ?? '-',
+                'phone' => $visit->pic->phone ?? '-',
+                'email' => $visit->pic->email ?? '-'
+            ] : null
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('Error fetching visit detail: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal memuat data'
+        ], 500);
+    }
+}
+
 public function getSalesUsers()
 {
     $salesUsers = User::where('role_id', 12)
@@ -220,7 +268,7 @@ public function search(Request $request)
             'visit_date' => $visit->visit_date ? $visit->visit_date->format('d M Y') : '-',
             'company' => optional($visit->company)->company_name ?? '-',
             'pic' => $visit->pic_name ?? '-',
-            'location' => $locationDisplay, // ✅ Format baru
+            'location' => $locationDisplay,
             'purpose' => $visit->visit_purpose ? \Illuminate\Support\Str::limit($visit->visit_purpose, 45) : '-',
             'sales' => [
                 'username' => optional($visit->sales)->username ?? '-',
@@ -317,7 +365,7 @@ public function store(Request $request)
             'sales_id' => $request->sales_id,
             'user_id' => $user->user_id,
             'pic_name' => $request->pic_name,
-            'pic_id' => $picId, // Gunakan pic_id yang baru dibuat
+            'pic_id' => $picId,
             'company_name' => $request->company_name ?? null,
             'company_id' => $request->company_id ?? null,
             'province_id' => $request->province_id,
@@ -401,7 +449,7 @@ public function update(Request $request, $id)
             'sales_id' => $request->sales_id,
             'user_id' => $user->user_id,
             'pic_name' => $request->pic_name,
-            'pic_id' => $picId, // Gunakan pic_id yang baru dibuat
+            'pic_id' => $picId,
             'company_name' => $request->company_name ?? null,
             'company_id' => $request->company_id ?? null,
             'province_id' => $request->province_id,
@@ -694,13 +742,24 @@ private function getVisitActions($visit)
 
     $canEdit = true;
     $canDelete = true;
+    $canView = true;
 
     try {
         $currentMenuId = session('currentMenuId', 1);
+        $canView = auth()->user()->canAccess($currentMenuId, 'view');
         $canEdit = auth()->user()->canAccess($currentMenuId, 'edit');
         $canDelete = auth()->user()->canAccess($currentMenuId, 'delete');
     } catch (\Exception $e) {
         \Log::error('Error checking permissions: ' . $e->getMessage());
+    }
+
+    // 🔥 Add View action
+    if ($canView) {
+        $actions[] = [
+            'type' => 'view',
+            'onclick' => "showVisitDetail('{$visit->id}')",
+            'title' => 'Show Detail'
+        ];
     }
 
     if ($canEdit) {
@@ -739,6 +798,7 @@ private function getVisitActions($visit)
 
     return $actions;
 }
+
 public function searchPics(Request $request)
 {
     try {
@@ -773,6 +833,7 @@ public function searchPics(Request $request)
         ], 500);
     }
 }
+
 public function storePic(Request $request)
 {
     $request->validate([
