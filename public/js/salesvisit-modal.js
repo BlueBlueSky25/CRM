@@ -33,12 +33,13 @@ function initCreateVisitCascade() {
         createVisitCascade.destroy();
     }
 
+    // 🔥 DIPERBAIKI: Ubah baseUrl dari '/salesvisit' ke '/'
     createVisitCascade = new AddressCascade({
         provinceId: 'create-province',
         regencyId: 'create-regency',
         districtId: 'create-district',
         villageId: 'create-village',
-        baseUrl: '/salesvisit'
+        baseUrl: '/' // ← UBAH INI dari '/salesvisit' ke '/'
     });
 }
 
@@ -907,12 +908,13 @@ function initEditVisitCascade() {
         editVisitCascade.destroy();
     }
 
+    // 🔥 DIPERBAIKI: Ubah baseUrl dari '/salesvisit' ke '/'
     editVisitCascade = new AddressCascade({
         provinceId: 'edit-province',
         regencyId: 'edit-regency',
         districtId: 'edit-district',
         villageId: 'edit-village',
-        baseUrl: '/salesvisit'
+        baseUrl: '/' // ← UBAH INI dari '/salesvisit' ke '/'
     });
 
     // Load cascade data jika ada provinceId

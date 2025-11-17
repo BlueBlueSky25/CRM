@@ -165,7 +165,7 @@ class AddressCascade {
         console.log(`✅ [${this.instanceId}] Cascade instance destroyed`);
     }
     
-    // Load regencies with promise
+    // 🔥 FIX: Handle both direct array response and wrapped response
     async loadRegencies(provinceId) {
         if (this.loadingQueue.regencies) {
             console.log(`⏳ [${this.instanceId}] Regencies already loading, skipping...`);
@@ -178,19 +178,29 @@ class AddressCascade {
         console.log(`📥 [${this.instanceId}] Fetching regencies for province:`, provinceId);
         
         try {
-            const url = `${this.baseUrl}/get-regencies/${provinceId}`;
+            const url = `${this.baseUrl}get-regencies/${provinceId}`;
             console.log(`🌐 [${this.instanceId}] Request URL:`, url);
             
             const response = await fetch(url);
+            
+            console.log(`📊 [${this.instanceId}] Response status:`, response.status);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
             const data = await response.json();
-            console.log(`✅ [${this.instanceId}] Regencies received:`, data.length, 'items');
+            console.log(`✅ [${this.instanceId}] Raw response:`, data);
             
-            this.populateSelect(this.regency, data, 'Pilih Kabupaten/Kota');
+            // 🔥 Handle both formats:
+            // Format 1: Direct array [{ id, name }, ...]
+            // Format 2: Object with data property { data: [{ id, name }, ...] }
+            let items = Array.isArray(data) ? data : (data.data || []);
+            
+            console.log(`✅ [${this.instanceId}] Regencies received:`, items.length, 'items');
+            console.log(`📋 [${this.instanceId}] First item structure:`, items[0]);
+            
+            this.populateSelect(this.regency, items, 'Pilih Kabupaten/Kota');
             
         } catch (error) {
             console.error(`❌ [${this.instanceId}] Error fetching regencies:`, error);
@@ -200,7 +210,7 @@ class AddressCascade {
         }
     }
     
-    // Load districts with promise
+    // 🔥 FIX: Handle both direct array response and wrapped response
     async loadDistricts(regencyId) {
         if (this.loadingQueue.districts) {
             console.log(`⏳ [${this.instanceId}] Districts already loading, skipping...`);
@@ -213,19 +223,27 @@ class AddressCascade {
         console.log(`📥 [${this.instanceId}] Fetching districts for regency:`, regencyId);
         
         try {
-            const url = `${this.baseUrl}/get-districts/${regencyId}`;
+            const url = `${this.baseUrl}get-districts/${regencyId}`;
             console.log(`🌐 [${this.instanceId}] Request URL:`, url);
             
             const response = await fetch(url);
+            
+            console.log(`📊 [${this.instanceId}] Response status:`, response.status);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
             const data = await response.json();
-            console.log(`✅ [${this.instanceId}] Districts received:`, data.length, 'items');
+            console.log(`✅ [${this.instanceId}] Raw response:`, data);
             
-            this.populateSelect(this.district, data, 'Pilih Kecamatan');
+            // 🔥 Handle both formats:
+            let items = Array.isArray(data) ? data : (data.data || []);
+            
+            console.log(`✅ [${this.instanceId}] Districts received:`, items.length, 'items');
+            console.log(`📋 [${this.instanceId}] First item structure:`, items[0]);
+            
+            this.populateSelect(this.district, items, 'Pilih Kecamatan');
             
         } catch (error) {
             console.error(`❌ [${this.instanceId}] Error fetching districts:`, error);
@@ -235,7 +253,7 @@ class AddressCascade {
         }
     }
     
-    // Load villages with promise
+    // 🔥 FIX: Handle both direct array response and wrapped response
     async loadVillages(districtId) {
         if (this.loadingQueue.villages) {
             console.log(`⏳ [${this.instanceId}] Villages already loading, skipping...`);
@@ -248,19 +266,27 @@ class AddressCascade {
         console.log(`📥 [${this.instanceId}] Fetching villages for district:`, districtId);
         
         try {
-            const url = `${this.baseUrl}/get-villages/${districtId}`;
+            const url = `${this.baseUrl}get-villages/${districtId}`;
             console.log(`🌐 [${this.instanceId}] Request URL:`, url);
             
             const response = await fetch(url);
+            
+            console.log(`📊 [${this.instanceId}] Response status:`, response.status);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
             const data = await response.json();
-            console.log(`✅ [${this.instanceId}] Villages received:`, data.length, 'items');
+            console.log(`✅ [${this.instanceId}] Raw response:`, data);
             
-            this.populateSelect(this.village, data, 'Pilih Kelurahan/Desa');
+            // 🔥 Handle both formats:
+            let items = Array.isArray(data) ? data : (data.data || []);
+            
+            console.log(`✅ [${this.instanceId}] Villages received:`, items.length, 'items');
+            console.log(`📋 [${this.instanceId}] First item structure:`, items[0]);
+            
+            this.populateSelect(this.village, items, 'Pilih Kelurahan/Desa');
             
         } catch (error) {
             console.error(`❌ [${this.instanceId}] Error fetching villages:`, error);
@@ -277,19 +303,32 @@ class AddressCascade {
         select.disabled = disabled;
     }
     
-    // Populate select with data
+    // Populate select with data - 🔥 IMPROVED to handle edge cases
     populateSelect(select, data, placeholder) {
-        if (!select) return;
+        if (!select) {
+            console.warn(`❌ Select element is null, skipping populate`);
+            return;
+        }
         
         select.innerHTML = `<option value="">-- ${placeholder} --</option>`;
         
         if (data && Array.isArray(data) && data.length > 0) {
+            // 🔥 ROBUST: Handle both camelCase (id, name) and different property names
             data.forEach(item => {
                 const option = document.createElement('option');
-                option.value = item.id;
-                option.textContent = item.name;
+                const itemId = item.id || item.Id || item.ID;
+                const itemName = item.name || item.Name || item.NAME;
+                
+                if (!itemId || !itemName) {
+                    console.warn(`⚠️ [${this.instanceId}] Item missing id or name:`, item);
+                    return; // Skip this item
+                }
+                
+                option.value = itemId;
+                option.textContent = itemName;
                 select.appendChild(option);
             });
+            
             select.disabled = false;
             console.log(`✅ [${this.instanceId}] Populated ${data.length} items into select`);
         } else {
