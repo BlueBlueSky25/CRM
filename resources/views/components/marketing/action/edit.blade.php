@@ -95,7 +95,7 @@
                 </div>
 
                 <!-- Address Section with Collapsible -->
-                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200 overflow-hidden">
+                <div class="bg-gradient-to-br bg-blue-50 from-blue-50 to-indigo-50 rounded-lg border border-blue-200 overflow-hidden">
                     <!-- Header - Always Visible -->
                     <div class="p-3 cursor-pointer hover:bg-blue-100 transition-colors" onclick="toggleEditAddressSection()">
                         <div class="flex items-center justify-between">
@@ -211,7 +211,7 @@
                                             <i class="fas fa-map-marked-alt text-gray-400 text-xs"></i>
                                         </div>
                                         <textarea id="editAlamat" name="address" rows="2"
-                                            class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"
+                                            class="w-full pl-9 pr-3 py-2 text-sm border bg-white border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"
                                             placeholder="Contoh: Jl. Merdeka No. 123, RT 01/RW 02"
                                             oninput="checkEditAddressCompletion()"></textarea>
                                     </div>
@@ -272,6 +272,8 @@ select:disabled {
 </style>
 
 <script>
+// ========== EDIT MODAL SCRIPT - FIXED VERSION ==========
+
 let editCascadeInstance = null;
 
 // ========== ADDRESS SECTION TOGGLE ==========
@@ -289,24 +291,14 @@ function toggleEditAddressSection() {
 }
 
 function checkEditAddressCompletion() {
-    const province = document.getElementById('edit-province').value;
-    const address = document.getElementById('editAlamat').value.trim();
+    const province = document.getElementById('edit-province')?.value;
+    const address = document.getElementById('editAlamat')?.value?.trim();
     const statusText = document.getElementById('edit-address-status');
-    const content = document.getElementById('edit-address-content');
-    const icon = document.getElementById('edit-address-toggle-icon');
     
     if (province && address) {
         statusText.textContent = 'Sudah diisi';
         statusText.classList.remove('text-gray-500');
         statusText.classList.add('text-green-600', 'font-medium');
-        
-        // Auto collapse setelah 800ms
-        setTimeout(() => {
-            if (!content.classList.contains('hidden')) {
-                content.classList.add('hidden');
-                icon.style.transform = 'rotate(0deg)';
-            }
-        }, 800);
     } else {
         statusText.textContent = 'Belum diisi';
         statusText.classList.remove('text-green-600', 'font-medium');
@@ -314,33 +306,47 @@ function checkEditAddressCompletion() {
     }
 }
 
-// ========== MODAL FUNCTIONS ==========
-function openEditSalesModal(user_id, username, email, phone, birth_date, address, provinceId, regencyId, districtId, villageId) {
-    console.log('Opening edit modal with data:', {user_id, username, email, phone, birth_date, address, provinceId, regencyId, districtId, villageId});
+// ========== MODAL FUNCTIONS - IMPROVED ==========
+async function openEditSalesModal(user_id, username, email, phone, birth_date, address, provinceId, regencyId, districtId, villageId) {
+    console.log('🔓 Opening edit modal with data:', {
+        user_id, username, email, phone, birth_date, 
+        address, provinceId, regencyId, districtId, villageId
+    });
     
+    // Fill form fields
     document.getElementById('editUserId').value = user_id;
     document.getElementById('editUsername').value = username;
     document.getElementById('editEmail').value = email;
     document.getElementById('editPhone').value = phone ?? '';
     document.getElementById('editBirthDate').value = birth_date ?? '';
     document.getElementById('editAlamat').value = address ?? '';
+    
+    // Update form action
+    const form = document.getElementById('editUserForm');
+    form.action = `/marketing/sales/${user_id}`;
+    
+    // Show modal
     document.getElementById('editUserModal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     
     // Initialize cascade dengan data wilayah
-    setTimeout(() => {
-        initEditAddressCascade(provinceId, regencyId, districtId, villageId);
-    }, 300);
+    await initEditAddressCascade(provinceId, regencyId, districtId, villageId);
 }
 
-function initEditAddressCascade(provinceId, regencyId, districtId, villageId) {
-    console.log('Initializing EDIT cascade with data:', {provinceId, regencyId, districtId, villageId});
+async function initEditAddressCascade(provinceId, regencyId, districtId, villageId) {
+    console.log('🚀 Initializing EDIT cascade with data:', {
+        provinceId, regencyId, districtId, villageId
+    });
     
     // Destroy previous instance if exists
     if (editCascadeInstance) {
-        console.log('Destroying previous cascade instance');
+        console.log('🗑️ Destroying previous cascade instance');
         editCascadeInstance.destroy();
+        editCascadeInstance = null;
     }
+    
+    // Wait a bit for DOM cleanup
+    await new Promise(resolve => setTimeout(resolve, 100));
     
     // Create new instance
     editCascadeInstance = new AddressCascade({
@@ -350,53 +356,36 @@ function initEditAddressCascade(provinceId, regencyId, districtId, villageId) {
         villageId: 'edit-village'
     });
     
-    console.log('Cascade instance created');
+    console.log('✅ Cascade instance created');
     
-    // Set values with cascade
+    // Load cascade with values using the improved method
     if (provinceId && provinceId !== 'null' && provinceId !== '') {
-        console.log('Setting province:', provinceId);
-        document.getElementById('edit-province').value = provinceId;
-        document.getElementById('edit-province').dispatchEvent(new Event('change'));
-        
-        // Check initial address completion
-        checkEditAddressCompletion();
-        
-        if (regencyId && regencyId !== 'null' && regencyId !== '') {
-            setTimeout(() => {
-                console.log('Setting regency:', regencyId);
-                document.getElementById('edit-regency').value = regencyId;
-                document.getElementById('edit-regency').dispatchEvent(new Event('change'));
-                checkEditAddressCompletion();
-                
-                if (districtId && districtId !== 'null' && districtId !== '') {
-                    setTimeout(() => {
-                        console.log('Setting district:', districtId);
-                        document.getElementById('edit-district').value = districtId;
-                        document.getElementById('edit-district').dispatchEvent(new Event('change'));
-                        checkEditAddressCompletion();
-                        
-                        if (villageId && villageId !== 'null' && villageId !== '') {
-                            setTimeout(() => {
-                                console.log('Setting village:', villageId);
-                                document.getElementById('edit-village').value = villageId;
-                                checkEditAddressCompletion();
-                            }, 500);
-                        }
-                    }, 500);
-                }
-            }, 500);
+        try {
+            console.log('📥 Loading cascade with values...');
+            await editCascadeInstance.loadWithValues(provinceId, regencyId, districtId, villageId);
+            
+            // Check address completion after loading
+            checkEditAddressCompletion();
+            
+            console.log('✅ Cascade loaded and values set successfully');
+        } catch (error) {
+            console.error('❌ Error loading cascade with values:', error);
         }
+    } else {
+        console.log('ℹ️ No province ID provided, skipping cascade loading');
     }
 }
 
 function closeEditSalesModal() {
-    console.log('Closing edit modal');
-    document.getElementById('editUserModal').classList.add('hidden');
+    console.log('🔒 Closing edit modal');
+    
+    const modal = document.getElementById('editUserModal');
+    modal.classList.add('hidden');
     document.body.style.overflow = 'auto';
     
     // Destroy cascade instance
     if (editCascadeInstance) {
-        console.log('Destroying cascade on close');
+        console.log('🗑️ Destroying cascade on close');
         editCascadeInstance.destroy();
         editCascadeInstance = null;
     }
@@ -404,10 +393,15 @@ function closeEditSalesModal() {
     // Reset form
     document.getElementById('editUserForm').reset();
     
-    // Reset dropdowns
+    // Reset dropdowns to initial state
     document.getElementById('edit-regency').innerHTML = '<option value="">-- Pilih Kabupaten/Kota --</option>';
+    document.getElementById('edit-regency').disabled = true;
+    
     document.getElementById('edit-district').innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+    document.getElementById('edit-district').disabled = true;
+    
     document.getElementById('edit-village').innerHTML = '<option value="">-- Pilih Kelurahan/Desa --</option>';
+    document.getElementById('edit-village').disabled = true;
     
     // Reset address collapse state
     const content = document.getElementById('edit-address-content');
@@ -439,4 +433,25 @@ document.addEventListener('keydown', function(e) {
         }
     }
 });
+
+// Form validation
+document.getElementById('editUserForm')?.addEventListener('submit', function(e) {
+    const username = document.getElementById('editUsername').value.trim();
+    const email = document.getElementById('editEmail').value.trim();
+    
+    if (!username || !email) {
+        e.preventDefault();
+        alert('Nama dan Email wajib diisi!');
+        return false;
+    }
+    
+    // Show loading state
+    const submitBtn = this.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
+    }
+});
+
+console.log('✅ Edit modal script loaded');
 </script>

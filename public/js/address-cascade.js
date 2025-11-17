@@ -1,4 +1,5 @@
-// Address Cascade System - Reusable untuk semua form
+// Address Cascade System - ULTIMATE FIX VERSION
+// Supports multiple instances with proper isolation
 
 class AddressCascade {
     constructor(config) {
@@ -6,6 +7,10 @@ class AddressCascade {
         this.regencyId = config.regencyId;
         this.districtId = config.districtId;
         this.villageId = config.villageId;
+        this.baseUrl = config.baseUrl || '';
+        
+        // Unique identifier for this instance
+        this.instanceId = `cascade_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         
         this.province = null;
         this.regency = null;
@@ -19,12 +24,27 @@ class AddressCascade {
             district: null
         };
         
+        // Queue untuk prevent multiple concurrent requests
+        this.loadingQueue = {
+            regencies: false,
+            districts: false,
+            villages: false
+        };
+        
+        // Track if instance is active
+        this.isActive = false;
+        
         this.init();
     }
     
     // Initialize cascade
     init() {
-        console.log('Initializing address cascade...');
+        console.log(`🔧 [${this.instanceId}] Initializing address cascade...`, {
+            provinceId: this.provinceId,
+            regencyId: this.regencyId,
+            districtId: this.districtId,
+            villageId: this.villageId
+        });
         
         this.province = document.getElementById(this.provinceId);
         this.regency = document.getElementById(this.regencyId);
@@ -32,12 +52,13 @@ class AddressCascade {
         this.village = document.getElementById(this.villageId);
         
         if (!this.checkElements()) {
-            console.error('One or more dropdown elements not found');
+            console.error(`❌ [${this.instanceId}] One or more dropdown elements not found`);
             return;
         }
         
-        console.log('All dropdown elements found');
+        console.log(`✅ [${this.instanceId}] All dropdown elements found`);
         this.attachEventListeners();
+        this.isActive = true;
     }
     
     // Check if all elements exist
@@ -49,54 +70,75 @@ class AddressCascade {
             village: this.village
         };
         
-        console.log('Elements check:', elements);
-        
         let allFound = true;
         Object.keys(elements).forEach(key => {
             if (!elements[key]) {
-                console.error(`Element ${key} not found!`);
+                console.error(`❌ [${this.instanceId}] Element ${key} (${this[key + 'Id']}) not found!`);
                 allFound = false;
-            } else {
-                console.log(`Element ${key} found`);
             }
         });
         
         return allFound;
     }
     
-    // Attach event listeners
+    // Attach event listeners with proper binding
     attachEventListeners() {
         // Province change
-        this.handlers.province = () => {
-            const provinceId = this.province.value;
-            console.log('Province selected:', provinceId);
-            this.loadRegencies(provinceId);
+        this.handlers.province = async (e) => {
+            const provinceId = e.target.value;
+            console.log(`📍 [${this.instanceId}] Province changed:`, provinceId);
+            
+            // Reset dependent dropdowns
+            this.resetSelect(this.district, 'Pilih Kecamatan', true);
+            this.resetSelect(this.village, 'Pilih Kelurahan/Desa', true);
+            
+            if (provinceId) {
+                await this.loadRegencies(provinceId);
+            } else {
+                this.resetSelect(this.regency, 'Pilih Kabupaten/Kota', true);
+            }
         };
-        this.province.addEventListener('change', this.handlers.province);
         
         // Regency change
-        this.handlers.regency = () => {
-            const regencyId = this.regency.value;
-            console.log('Regency selected:', regencyId);
-            this.loadDistricts(regencyId);
+        this.handlers.regency = async (e) => {
+            const regencyId = e.target.value;
+            console.log(`🏙️ [${this.instanceId}] Regency changed:`, regencyId);
+            
+            // Reset dependent dropdowns
+            this.resetSelect(this.village, 'Pilih Kelurahan/Desa', true);
+            
+            if (regencyId) {
+                await this.loadDistricts(regencyId);
+            } else {
+                this.resetSelect(this.district, 'Pilih Kecamatan', true);
+            }
         };
-        this.regency.addEventListener('change', this.handlers.regency);
         
         // District change
-        this.handlers.district = () => {
-            const districtId = this.district.value;
-            console.log('District selected:', districtId);
-            this.loadVillages(districtId);
+        this.handlers.district = async (e) => {
+            const districtId = e.target.value;
+            console.log(`🗺️ [${this.instanceId}] District changed:`, districtId);
+            
+            if (districtId) {
+                await this.loadVillages(districtId);
+            } else {
+                this.resetSelect(this.village, 'Pilih Kelurahan/Desa', true);
+            }
         };
+        
+        // Remove old listeners first (if any)
+        this.removeEventListeners();
+        
+        // Add new listeners
+        this.province.addEventListener('change', this.handlers.province);
+        this.regency.addEventListener('change', this.handlers.regency);
         this.district.addEventListener('change', this.handlers.district);
         
-        console.log('Event listeners attached successfully');
+        console.log(`✅ [${this.instanceId}] Event listeners attached`);
     }
     
-    // Destroy instance and cleanup
-    destroy() {
-        console.log('Destroying cascade instance...');
-        
+    // Remove event listeners
+    removeEventListeners() {
         if (this.province && this.handlers.province) {
             this.province.removeEventListener('change', this.handlers.province);
         }
@@ -106,188 +148,257 @@ class AddressCascade {
         if (this.district && this.handlers.district) {
             this.district.removeEventListener('change', this.handlers.district);
         }
+    }
+    
+    // Destroy instance and cleanup
+    destroy() {
+        console.log(`🗑️ [${this.instanceId}] Destroying cascade instance...`);
         
+        this.removeEventListeners();
+        
+        // Mark as inactive
+        this.isActive = false;
+        
+        // Clear references
         this.handlers = { province: null, regency: null, district: null };
-        console.log('Cascade instance destroyed');
+        
+        console.log(`✅ [${this.instanceId}] Cascade instance destroyed`);
     }
     
-    // Load regencies
-    loadRegencies(provinceId) {
+    // Load regencies with promise
+    async loadRegencies(provinceId) {
+        if (this.loadingQueue.regencies) {
+            console.log(`⏳ [${this.instanceId}] Regencies already loading, skipping...`);
+            return;
+        }
+        
+        this.loadingQueue.regencies = true;
         this.resetSelect(this.regency, 'Loading...', true);
-        this.resetSelect(this.district, 'Pilih Kecamatan', true);
-        this.resetSelect(this.village, 'Pilih Kelurahan/Desa', true);
         
-        if (!provinceId) {
-            this.resetSelect(this.regency, 'Pilih Kabupaten/Kota', false);
-            console.log('Province cleared, resetting regency');
+        console.log(`📥 [${this.instanceId}] Fetching regencies for province:`, provinceId);
+        
+        try {
+            const url = `${this.baseUrl}/get-regencies/${provinceId}`;
+            console.log(`🌐 [${this.instanceId}] Request URL:`, url);
+            
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log(`✅ [${this.instanceId}] Regencies received:`, data.length, 'items');
+            
+            this.populateSelect(this.regency, data, 'Pilih Kabupaten/Kota');
+            
+        } catch (error) {
+            console.error(`❌ [${this.instanceId}] Error fetching regencies:`, error);
+            this.showError(this.regency, 'Error loading data');
+        } finally {
+            this.loadingQueue.regencies = false;
+        }
+    }
+    
+    // Load districts with promise
+    async loadDistricts(regencyId) {
+        if (this.loadingQueue.districts) {
+            console.log(`⏳ [${this.instanceId}] Districts already loading, skipping...`);
             return;
         }
         
-        console.log('Fetching regencies for province:', provinceId);
-        
-        fetch(`/get-regencies/${provinceId}`)
-            .then(response => {
-                console.log('Response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Regencies data received:', data);
-                this.populateSelect(this.regency, data, 'Pilih Kabupaten/Kota');
-                console.log('Regencies loaded successfully');
-            })
-            .catch(error => {
-                console.error('Error fetching regencies:', error);
-                this.showError(this.regency, 'Error loading data');
-                this.showNotification('Gagal memuat data kabupaten/kota', 'error');
-            });
-    }
-    
-    // Load districts
-    loadDistricts(regencyId) {
+        this.loadingQueue.districts = true;
         this.resetSelect(this.district, 'Loading...', true);
-        this.resetSelect(this.village, 'Pilih Kelurahan/Desa', true);
         
-        if (!regencyId) {
-            this.resetSelect(this.district, 'Pilih Kecamatan', false);
+        console.log(`📥 [${this.instanceId}] Fetching districts for regency:`, regencyId);
+        
+        try {
+            const url = `${this.baseUrl}/get-districts/${regencyId}`;
+            console.log(`🌐 [${this.instanceId}] Request URL:`, url);
+            
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log(`✅ [${this.instanceId}] Districts received:`, data.length, 'items');
+            
+            this.populateSelect(this.district, data, 'Pilih Kecamatan');
+            
+        } catch (error) {
+            console.error(`❌ [${this.instanceId}] Error fetching districts:`, error);
+            this.showError(this.district, 'Error loading data');
+        } finally {
+            this.loadingQueue.districts = false;
+        }
+    }
+    
+    // Load villages with promise
+    async loadVillages(districtId) {
+        if (this.loadingQueue.villages) {
+            console.log(`⏳ [${this.instanceId}] Villages already loading, skipping...`);
             return;
         }
         
-        console.log('Fetching districts for regency:', regencyId);
-        
-        fetch(`/get-districts/${regencyId}`)
-            .then(response => {
-                console.log('Districts response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Districts data received:', data);
-                this.populateSelect(this.district, data, 'Pilih Kecamatan');
-                console.log('Districts loaded successfully');
-            })
-            .catch(error => {
-                console.error('Error fetching districts:', error);
-                this.showError(this.district, 'Error loading data');
-                this.showNotification('Gagal memuat data kecamatan', 'error');
-            });
-    }
-    
-    // Load villages
-    loadVillages(districtId) {
+        this.loadingQueue.villages = true;
         this.resetSelect(this.village, 'Loading...', true);
         
-        if (!districtId) {
-            this.resetSelect(this.village, 'Pilih Kelurahan/Desa', false);
-            return;
+        console.log(`📥 [${this.instanceId}] Fetching villages for district:`, districtId);
+        
+        try {
+            const url = `${this.baseUrl}/get-villages/${districtId}`;
+            console.log(`🌐 [${this.instanceId}] Request URL:`, url);
+            
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log(`✅ [${this.instanceId}] Villages received:`, data.length, 'items');
+            
+            this.populateSelect(this.village, data, 'Pilih Kelurahan/Desa');
+            
+        } catch (error) {
+            console.error(`❌ [${this.instanceId}] Error fetching villages:`, error);
+            this.showError(this.village, 'Error loading data');
+        } finally {
+            this.loadingQueue.villages = false;
         }
-        
-        console.log('Fetching villages for district:', districtId);
-        
-        fetch(`/get-villages/${districtId}`)
-            .then(response => {
-                console.log('Villages response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Villages data received:', data);
-                this.populateSelect(this.village, data, 'Pilih Kelurahan/Desa');
-                console.log('Villages loaded successfully');
-            })
-            .catch(error => {
-                console.error('Error fetching villages:', error);
-                this.showError(this.village, 'Error loading data');
-                this.showNotification('Gagal memuat data kelurahan/desa', 'error');
-            });
     }
     
     // Reset select element
     resetSelect(select, placeholder, disabled = false) {
+        if (!select) return;
         select.innerHTML = `<option value="">-- ${placeholder} --</option>`;
         select.disabled = disabled;
     }
     
     // Populate select with data
     populateSelect(select, data, placeholder) {
+        if (!select) return;
+        
         select.innerHTML = `<option value="">-- ${placeholder} --</option>`;
         
         if (data && Array.isArray(data) && data.length > 0) {
-            data.forEach((item, index) => {
-                console.log(`Adding item ${index}:`, item);
-                select.innerHTML += `<option value="${item.id}">${item.name}</option>`;
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = item.name;
+                select.appendChild(option);
             });
             select.disabled = false;
+            console.log(`✅ [${this.instanceId}] Populated ${data.length} items into select`);
         } else {
             select.innerHTML += '<option value="">-- Tidak ada data --</option>';
-            select.disabled = false;
-            console.log('No data found');
+            select.disabled = true;
+            console.log(`⚠️ [${this.instanceId}] No data to populate`);
         }
     }
     
     // Show error state
     showError(select, message) {
+        if (!select) return;
         select.innerHTML = `<option value="">-- ${message} --</option>`;
         select.disabled = false;
     }
     
-    // Show notification
-    showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `fixed top-4 right-4 z-[60] p-4 rounded-lg shadow-lg text-white transform transition-all duration-300 translate-x-full`;
+    // ✨ NEW: Load cascade with initial values (IMPROVED)
+    async loadWithValues(provinceId, regencyId, districtId, villageId) {
+        console.log(`🔄 [${this.instanceId}] Loading cascade with initial values:`, {
+            provinceId, regencyId, districtId, villageId
+        });
         
-        const bgColor = {
-            success: 'bg-green-500',
-            error: 'bg-red-500',
-            info: 'bg-blue-500'
-        };
-        
-        notification.classList.add(bgColor[type]);
-        notification.innerHTML = `
-            <div class="flex items-center gap-2">
-                <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : 'info'}-circle"></i>
-                <span>${message}</span>
-            </div>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        // Animate in
-        setTimeout(() => {
-            notification.classList.remove('translate-x-full');
-        }, 100);
-        
-        // Auto remove
-        setTimeout(() => {
-            notification.classList.add('translate-x-full');
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
+        try {
+            // 1. Set province
+            if (provinceId && provinceId !== 'null' && provinceId !== '') {
+                this.province.value = provinceId;
+                console.log(`✅ [${this.instanceId}] Province set:`, provinceId);
+                
+                // 2. Load regencies and wait
+                await this.loadRegencies(provinceId);
+                await this.waitForOptions(this.regency);
+                
+                // 3. Set regency if exists
+                if (regencyId && regencyId !== 'null' && regencyId !== '') {
+                    this.regency.value = regencyId;
+                    console.log(`✅ [${this.instanceId}] Regency set:`, regencyId);
+                    
+                    // 4. Load districts and wait
+                    await this.loadDistricts(regencyId);
+                    await this.waitForOptions(this.district);
+                    
+                    // 5. Set district if exists
+                    if (districtId && districtId !== 'null' && districtId !== '') {
+                        this.district.value = districtId;
+                        console.log(`✅ [${this.instanceId}] District set:`, districtId);
+                        
+                        // 6. Load villages and wait
+                        await this.loadVillages(districtId);
+                        await this.waitForOptions(this.village);
+                        
+                        // 7. Set village if exists
+                        if (villageId && villageId !== 'null' && villageId !== '') {
+                            this.village.value = villageId;
+                            console.log(`✅ [${this.instanceId}] Village set:`, villageId);
+                        }
+                    }
                 }
-            }, 300);
-        }, 3000);
+            }
+            
+            console.log(`✅ [${this.instanceId}] Cascade loaded successfully with all values`);
+            return true;
+            
+        } catch (error) {
+            console.error(`❌ [${this.instanceId}] Error loading cascade with values:`, error);
+            return false;
+        }
+    }
+    
+    // ✨ NEW: Wait for select to have options
+    waitForOptions(select, maxAttempts = 50) {
+        return new Promise((resolve) => {
+            let attempts = 0;
+            
+            const checkOptions = setInterval(() => {
+                attempts++;
+                
+                // Check if has more than 1 option (default option + data)
+                if (select.options.length > 1) {
+                    clearInterval(checkOptions);
+                    console.log(`✅ [${this.instanceId}] Options ready for ${select.id}`);
+                    resolve(true);
+                }
+                
+                // Timeout after maxAttempts
+                if (attempts >= maxAttempts) {
+                    clearInterval(checkOptions);
+                    console.warn(`⚠️ [${this.instanceId}] Timeout waiting for options in ${select.id}`);
+                    resolve(false);
+                }
+            }, 100);
+        });
     }
     
     // Reset all dropdowns
     resetAll() {
-        this.resetSelect(this.regency, 'Pilih Kabupaten/Kota', false);
+        this.resetSelect(this.regency, 'Pilih Kabupaten/Kota', true);
         this.resetSelect(this.district, 'Pilih Kecamatan', true);
         this.resetSelect(this.village, 'Pilih Kelurahan/Desa', true);
+        if (this.province) this.province.value = '';
     }
 }
 
 // Helper function untuk quick initialization
-function initAddressCascade(provinceId, regencyId, districtId, villageId) {
+function initAddressCascade(provinceId, regencyId, districtId, villageId, baseUrl = '') {
     return new AddressCascade({
         provinceId: provinceId,
         regencyId: regencyId,
         districtId: districtId,
-        villageId: villageId
+        villageId: villageId,
+        baseUrl: baseUrl
     });
 }

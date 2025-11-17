@@ -84,7 +84,12 @@
 </style>
 
 <script>
+// ========== MARKETING PAGE SCRIPT - FIXED VERSION ==========
+
 window.Laravel = {!! json_encode(['csrfToken' => csrf_token()]) !!};
+
+// Global variable for create cascade
+let createCascadeInstance = null;
 
 // Function untuk delete sales
 function deleteSales(userId, deleteRoute, csrfToken) {
@@ -104,44 +109,139 @@ function deleteSales(userId, deleteRoute, csrfToken) {
 
 // Initialize setelah DOM siap
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Marketing page loaded');
+    console.log('🚀 Marketing page loaded');
     
+    // Check for TableHandler
     if (typeof TableHandler === 'undefined') {
-        console.error('TableHandler class not found. search.js may not be loaded.');
-        return;
-    }
-
-    console.log('Creating TableHandler instance...');
-
-    try {
-        window.salesTableHandler = new TableHandler({
-            tableId: 'salesTable',
-            ajaxUrl: '{{ route("marketing.search") }}',
-            filters: ['status'], // lowercase!
-            columns: ['number', 'user', 'phone', 'date_birth', 'alamat', 'status', 'actions']
-        });
+        console.error('❌ TableHandler class not found. search.js may not be loaded.');
+    } else {
+        console.log('✅ TableHandler found, initializing...');
         
-        console.log('TableHandler initialized successfully:', window.salesTableHandler);
-    } catch (error) {
-        console.error('Error initializing TableHandler:', error);
+        try {
+            window.salesTableHandler = new TableHandler({
+                tableId: 'salesTable',
+                ajaxUrl: '{{ route("marketing.search") }}',
+                filters: ['status'],
+                columns: ['number', 'user', 'phone', 'date_birth', 'alamat', 'status', 'actions']
+            });
+            
+            console.log('✅ TableHandler initialized successfully:', window.salesTableHandler);
+        } catch (error) {
+            console.error('❌ Error initializing TableHandler:', error);
+        }
     }
 
-    // Initialize address cascade
-    console.log('Initializing AddressCascade...');
+    // Check for AddressCascade
+    if (typeof AddressCascade === 'undefined') {
+        console.error('❌ AddressCascade class not found. address-cascade.js may not be loaded.');
+    } else {
+        console.log('✅ AddressCascade class found');
+    }
+    
+    // Initialize create cascade
+    initializeCreateCascade();
+    
+    console.log('✅ Marketing page initialization complete');
+});
+
+// Initialize create address cascade
+function initializeCreateCascade() {
+    console.log('🔧 Initializing CREATE address cascade...');
+    
     try {
-        const createCascade = new AddressCascade({
+        // Destroy previous instance if exists
+        if (createCascadeInstance) {
+            console.log('🗑️ Destroying previous CREATE cascade instance');
+            createCascadeInstance.destroy();
+            createCascadeInstance = null;
+        }
+        
+        // Create new instance
+        createCascadeInstance = new AddressCascade({
             provinceId: 'create-province',
             regencyId: 'create-regency',
             districtId: 'create-district',
             villageId: 'create-village'
         });
-        console.log('AddressCascade initialized successfully');
+        
+        console.log('✅ CREATE AddressCascade initialized successfully');
     } catch (error) {
-        console.error('Error initializing AddressCascade:', error);
+        console.error('❌ Error initializing CREATE AddressCascade:', error);
     }
+}
 
-    console.log('deleteSales function available:', typeof deleteSales !== 'undefined');
-    console.log('showNotification function available:', typeof showNotification !== 'undefined');
-});
+// Re-initialize create cascade when modal opens
+function openAddSalesModal() {
+    console.log('🔓 Opening add sales modal');
+    
+    document.getElementById('addSalesModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    
+    // Re-initialize cascade untuk memastikan event listeners fresh
+    setTimeout(() => {
+        initializeCreateCascade();
+        
+        // Focus first input
+        const firstInput = document.querySelector('#addSalesModal input[name="username"]');
+        if (firstInput) firstInput.focus();
+    }, 100);
+}
+
+function closeAddSalesModal() {
+    console.log('🔒 Closing add sales modal');
+    
+    document.getElementById('addSalesModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    
+    // Reset form
+    document.getElementById('addSalesForm').reset();
+    
+    // Destroy cascade instance
+    if (createCascadeInstance) {
+        console.log('🗑️ Destroying CREATE cascade on close');
+        createCascadeInstance.destroy();
+        createCascadeInstance = null;
+    }
+    
+    // Reset dropdowns to initial state
+    const regency = document.getElementById('create-regency');
+    const district = document.getElementById('create-district');
+    const village = document.getElementById('create-village');
+    
+    if (regency) {
+        regency.innerHTML = '<option value="">-- Pilih Kabupaten/Kota --</option>';
+        regency.disabled = true;
+    }
+    
+    if (district) {
+        district.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+        district.disabled = true;
+    }
+    
+    if (village) {
+        village.innerHTML = '<option value="">-- Pilih Kelurahan/Desa --</option>';
+        village.disabled = true;
+    }
+    
+    // Reset address collapse state
+    const content = document.getElementById('sales-address-content');
+    const icon = document.getElementById('sales-address-toggle-icon');
+    const statusText = document.getElementById('sales-address-status');
+    
+    if (content) content.classList.add('hidden');
+    if (icon) icon.style.transform = 'rotate(0deg)';
+    if (statusText) {
+        statusText.textContent = 'Belum diisi';
+        statusText.classList.remove('text-green-600', 'font-medium');
+        statusText.classList.add('text-gray-500');
+    }
+    
+    // Re-initialize untuk next use
+    setTimeout(() => {
+        initializeCreateCascade();
+    }, 300);
+}
+
+console.log('✅ Marketing page script loaded');
 </script>
 @endsection

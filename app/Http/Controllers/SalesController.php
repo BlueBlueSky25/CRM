@@ -21,7 +21,9 @@ class SalesController extends Controller
             return redirect()->back()->with('error', 'Role sales tidak ditemukan!');
         }
         
-        $salesUsers = User::where('role_id', $salesRole->role_id)->paginate(5);
+        $salesUsers = User::where('role_id', $salesRole->role_id)
+            ->with(['province', 'regency', 'district', 'village', 'role'])
+            ->paginate(5);
         $currentMenuId = view()->shared('currentMenuId', null);
         $provinces = Province::orderBy('name')->get();
 
@@ -35,62 +37,92 @@ class SalesController extends Controller
 
     /**
      * Show sales user detail (AJAX)
+     * GET /marketing/sales/{id}
      */
     public function show($id)
     {
         try {
-            $user = User::with(['role', 'province', 'regency', 'district', 'village'])
-                ->findOrFail($id);
+            // Fetch user dengan semua relasi
+            $user = User::with([
+                'role',
+                'province',
+                'regency',
+                'district',
+                'village'
+            ])->findOrFail($id);
             
-            // Get visit history for this sales user - FIXED
-            $visits = \App\Models\SalesVisit::with(['company', 'province', 'regency', 'district', 'village'])
+            // Log untuk debug
+            \Log::info('Sales Detail Fetched', [
+                'user_id' => $user->user_id,
+                'username' => $user->username,
+                'province' => $user->province ? $user->province->name : null,
+                'has_province_id' => $user->province_id ? true : false,
+            ]);
+            
+            // Get visit history
+            $visits = \App\Models\SalesVisit::with([
+                'company',
+                'province',
+                'regency',
+                'district',
+                'village'
+            ])
                 ->where('sales_id', $id)
                 ->orderBy('visit_date', 'desc')
                 ->limit(10)
                 ->get()
                 ->map(function($visit) {
-                    // Build location string
-                    $locationParts = collect([
-                        optional($visit->province)->name,
-                        optional($visit->regency)->name,
-                        optional($visit->district)->name,
-                        optional($visit->village)->name
-                    ])->filter()->toArray();
+                    $locationParts = [];
+                    if ($visit->province) $locationParts[] = $visit->province->name;
+                    if ($visit->regency) $locationParts[] = $visit->regency->name;
+                    if ($visit->district) $locationParts[] = $visit->district->name;
+                    if ($visit->village) $locationParts[] = $visit->village->name;
                     
                     return [
-                        'visit_date' => $visit->visit_date ? $visit->visit_date->format('d M Y') : '-',
-                        'company_name' => optional($visit->company)->company_name ?? $visit->company_name ?? '-',
+                        'visit_date' => $visit->visit_date ? $visit->visit_date->format('d-m-Y') : '-',
+                        'company_name' => $visit->company ? $visit->company->company_name : ($visit->company_name ?? '-'),
                         'pic_name' => $visit->pic_name ?? '-',
-                        'location' => implode(', ', $locationParts) ?: '-',
+                        'location' => count($locationParts) > 0 ? implode(', ', $locationParts) : '-',
                         'visit_purpose' => $visit->visit_purpose ?? '-',
                         'is_follow_up' => $visit->is_follow_up ? 'Ya' : 'Tidak'
                     ];
                 });
             
+            // Return response dengan data yang sudah dipastikan ada
             return response()->json([
                 'success' => true,
                 'user' => [
+                    'user_id' => $user->user_id,
                     'username' => $user->username ?? '-',
                     'email' => $user->email ?? '-',
                     'phone' => $user->phone ?? '-',
                     'birth_date' => $user->birth_date 
-                        ? \Carbon\Carbon::parse($user->birth_date)->format('d M Y') 
+                        ? \Carbon\Carbon::parse($user->birth_date)->format('d-m-Y') 
                         : '-',
-                    'role' => optional($user->role)->role_name ?? '-',
-                    'province' => optional($user->province)->name ?? '-',
-                    'regency' => optional($user->regency)->name ?? '-',
-                    'district' => optional($user->district)->name ?? '-',
-                    'village' => optional($user->village)->name ?? '-',
+                    'role' => $user->role ? $user->role->role_name : '-',
+                    'province' => $user->province ? $user->province->name : '-',
+                    'province_id' => $user->province_id,
+                    'regency' => $user->regency ? $user->regency->name : '-',
+                    'regency_id' => $user->regency_id,
+                    'district' => $user->district ? $user->district->name : '-',
+                    'district_id' => $user->district_id,
+                    'village' => $user->village ? $user->village->name : '-',
+                    'village_id' => $user->village_id,
                     'address' => $user->address ?? '-',
                 ],
-                'visits' => $visits
+                'visits' => $visits,
+                'has_address' => $user->province_id != null && $user->regency_id != null
             ]);
             
         } catch (\Exception $e) {
-            \Log::error('Error fetching sales detail: ' . $e->getMessage());
+            \Log::error('Error fetching sales detail', [
+                'user_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json([
                 'success' => false,
-                'error' => 'Gagal memuat data'
+                'error' => 'Gagal memuat data: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -185,14 +217,8 @@ class SalesController extends Controller
                 return response()->json(['error' => 'Province ID required'], 400);
             }
 
-            $provinceExists = Province::where('id', $provinceId)->exists();
-            if (!$provinceExists) {
-                return response()->json(['error' => 'Province not found'], 404);
-            }
-
             $regencies = Regency::where('province_id', $provinceId)
                                ->orderBy('name', 'asc')
-                               ->select('id', 'name', 'province_id')
                                ->get();
             
             return response()->json($regencies);
@@ -210,14 +236,8 @@ class SalesController extends Controller
                 return response()->json(['error' => 'Regency ID required'], 400);
             }
 
-            $regencyExists = Regency::where('id', $regencyId)->exists();
-            if (!$regencyExists) {
-                return response()->json(['error' => 'Regency not found'], 404);
-            }
-
             $districts = District::where('regency_id', $regencyId)
                                ->orderBy('name', 'asc')
-                               ->select('id', 'name', 'regency_id')
                                ->get();
             
             return response()->json($districts);
@@ -235,14 +255,8 @@ class SalesController extends Controller
                 return response()->json(['error' => 'District ID required'], 400);
             }
 
-            $districtExists = District::where('id', $districtId)->exists();
-            if (!$districtExists) {
-                return response()->json(['error' => 'District not found'], 404);
-            }
-
             $villages = Village::where('district_id', $districtId)
-                             ->orderBy('name', 'asc') 
-                             ->select('id', 'name', 'district_id')
+                             ->orderBy('name', 'asc')
                              ->get();
             
             return response()->json($villages);
@@ -259,21 +273,15 @@ class SalesController extends Controller
     public function search(Request $request)
     {
         try {
-            \Log::info('Sales Search Request', $request->all());
-
             $salesRole = Role::where('role_name', 'Sales')->first();
             
             if (!$salesRole) {
-                \Log::error('Sales role not found');
                 return response()->json(['error' => 'Role sales tidak ditemukan'], 404);
             }
-
-            \Log::info('Sales Role Found', ['role_id' => $salesRole->role_id]);
 
             $query = User::with('role', 'province', 'regency', 'district', 'village')
                          ->where('role_id', $salesRole->role_id);
 
-            // Filter search
             if ($request->filled('search')) {
                 $search = $request->search;
                 $query->where(function($q) use ($search) {
@@ -281,34 +289,25 @@ class SalesController extends Controller
                       ->orWhere('email', 'like', "%{$search}%")
                       ->orWhere('phone', 'like', "%{$search}%");
                 });
-                \Log::info('Search applied', ['search' => $search]);
             }
 
-            // Filter by status
             if ($request->filled('status')) {
                 $isActive = $request->status === 'active' ? 1 : 0;
                 $query->where('is_active', $isActive);
-                \Log::info('Status filter applied', ['status' => $request->status]);
             }
 
-            // Filter by province
             if ($request->filled('province_id')) {
                 $query->where('province_id', $request->province_id);
-                \Log::info('Province filter applied', ['province_id' => $request->province_id]);
             }
 
             $users = $query->paginate(10);
-            \Log::info('Users found', ['count' => $users->count()]);
 
             $items = $users->map(function($user, $index) use ($users) {
-                \Log::info('Processing user', ['user_id' => $user->user_id]);
-
-                // Format alamat
                 $alamatWilayah = collect([
-                    optional($user->village)->name,
-                    optional($user->district)->name,
-                    optional($user->regency)->name,
-                    optional($user->province)->name,
+                    $user->village ? $user->village->name : null,
+                    $user->district ? $user->district->name : null,
+                    $user->regency ? $user->regency->name : null,
+                    $user->province ? $user->province->name : null,
                 ])->filter()->implode(', ');
                 
                 $alamatDisplay = $alamatWilayah ?: ($user->address ?? '-');
@@ -319,7 +318,6 @@ class SalesController extends Controller
                 $actions = [];
                 try {
                     $actions = $this->getSalesActions($user);
-                    \Log::info('Actions generated', ['user_id' => $user->user_id, 'actions_count' => count($actions)]);
                 } catch (\Exception $e) {
                     \Log::error('Error generating actions for user', [
                         'user_id' => $user->user_id,
@@ -335,16 +333,14 @@ class SalesController extends Controller
                     ],
                     'phone' => $user->phone ?? '-',
                     'date_birth' => $user->birth_date 
-                        ? \Carbon\Carbon::parse($user->birth_date)->format('d M M Y') 
+                        ? \Carbon\Carbon::parse($user->birth_date)->format('d-m-Y') 
                         : '-',
                     'alamat' => $alamatDisplay,
-                    'role' => optional($user->role)->role_name ?? 'No Role',
+                    'role' => $user->role ? $user->role->role_name : 'No Role',
                     'status' => $user->is_active ? 'Active' : 'Inactive',
                     'actions' => $actions
                 ];
             })->toArray();
-
-            \Log::info('Response prepared successfully');
 
             return response()->json([
                 'items' => $items,
@@ -358,17 +354,11 @@ class SalesController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            // Log error untuk debugging
             \Log::error('Sales Search Error: ' . $e->getMessage());
-            \Log::error('Stack trace: ' . $e->getTraceAsString());
-            \Log::error('File: ' . $e->getFile());
-            \Log::error('Line: ' . $e->getLine());
             
             return response()->json([
                 'error' => 'Server error',
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'message' => $e->getMessage()
             ], 500);
         }
     }
@@ -380,18 +370,13 @@ class SalesController extends Controller
     {
         $actions = [];
 
-        // Cek apakah user login
         if (!auth()->check()) {
             return $actions;
         }
 
-        // TEMPORARY: Bypass permission checking untuk debug
-        // Nanti aktifkan lagi setelah masalah resolved
         $canEdit = true;
         $canDelete = true;
 
-        // COMMENTED OUT - Untuk production nanti aktifkan ini:
-    
         try {
             $currentMenuId = view()->shared('currentMenuId') ?? 1;
             $canEdit = auth()->user()->canAccess($currentMenuId, 'edit');
@@ -401,7 +386,6 @@ class SalesController extends Controller
             $canEdit = true;
             $canDelete = true;
         }
-        
 
         if ($canEdit) {
             $actions[] = [

@@ -30,7 +30,7 @@
                     </td>
                     <td class="px-3 py-2 text-xs text-gray-900">{{ $user->phone ?? '-' }}</td>
                     <td class="px-3 py-2 text-xs text-gray-900">
-                        {{ $user->birth_date ? date('d M Y', strtotime($user->birth_date)) : '-' }}
+                        {{ $user->birth_date ? date('d-m-Y', strtotime($user->birth_date)) : '-' }}
                     </td>
                     <td class="px-3 py-2 max-w-xs">
                         <div class="text-xs text-gray-900">
@@ -156,19 +156,19 @@
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
                     <div>
                         <label style="display: block; font-size: 0.6875rem; font-weight: 500; color: #6b7280; text-transform: uppercase; margin-bottom: 0.125rem;">Province</label>
-                        <p id="detailProvince" style="font-size: 0.8125rem; color: #111827; margin: 0;">-</p>
+                        <p id="detailProvince" style="font-size: 0.8125rem; color: #111827; margin: 0; font-weight: 500;">-</p>
                     </div>
                     <div>
                         <label style="display: block; font-size: 0.6875rem; font-weight: 500; color: #6b7280; text-transform: uppercase; margin-bottom: 0.125rem;">Regency</label>
-                        <p id="detailRegency" style="font-size: 0.8125rem; color: #111827; margin: 0;">-</p>
+                        <p id="detailRegency" style="font-size: 0.8125rem; color: #111827; margin: 0; font-weight: 500;">-</p>
                     </div>
                     <div>
                         <label style="display: block; font-size: 0.6875rem; font-weight: 500; color: #6b7280; text-transform: uppercase; margin-bottom: 0.125rem;">District</label>
-                        <p id="detailDistrict" style="font-size: 0.8125rem; color: #111827; margin: 0;">-</p>
+                        <p id="detailDistrict" style="font-size: 0.8125rem; color: #111827; margin: 0; font-weight: 500;">-</p>
                     </div>
                     <div>
                         <label style="display: block; font-size: 0.6875rem; font-weight: 500; color: #6b7280; text-transform: uppercase; margin-bottom: 0.125rem;">Village</label>
-                        <p id="detailVillage" style="font-size: 0.8125rem; color: #111827; margin: 0;">-</p>
+                        <p id="detailVillage" style="font-size: 0.8125rem; color: #111827; margin: 0; font-weight: 500;">-</p>
                     </div>
                     <div style="grid-column: 1 / -1;">
                         <label style="display: block; font-size: 0.6875rem; font-weight: 500; color: #6b7280; text-transform: uppercase; margin-bottom: 0.125rem;">Full Address</label>
@@ -203,13 +203,14 @@
 </div>
 
 <script>
-// Show Sales User Detail Modal
+// ========== SHOW DETAIL MODAL ==========
 function showSalesDetail(userId) {
+    console.log('Opening detail for user:', userId);
     const modal = document.getElementById('salesDetailModal');
-    modal.style.display = 'flex';
-    
-    // Show loading state
     const visitsContainer = document.getElementById('visitsContainer');
+    
+    // Show loading
+    modal.style.display = 'flex';
     visitsContainer.innerHTML = `
         <div style="text-align: center; padding: 2rem; color: #6b7280;">
             <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
@@ -217,113 +218,126 @@ function showSalesDetail(userId) {
         </div>
     `;
     
-    // Fetch sales user detail
-    fetch(`/marketing/sales/${userId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Fill personal info
-                document.getElementById('detailUsername').textContent = data.user.username || '-';
-                document.getElementById('detailEmail').textContent = data.user.email || '-';
-                document.getElementById('detailPhone').textContent = data.user.phone || '-';
-                document.getElementById('detailBirthDate').textContent = data.user.birth_date || '-';
-                document.getElementById('detailRole').textContent = data.user.role || '-';
-                
-                // Fill address info
-                document.getElementById('detailProvince').textContent = data.user.province || '-';
-                document.getElementById('detailRegency').textContent = data.user.regency || '-';
-                document.getElementById('detailDistrict').textContent = data.user.district || '-';
-                document.getElementById('detailVillage').textContent = data.user.village || '-';
-                document.getElementById('detailAddress').textContent = data.user.address || '-';
-                
-                // Fill visit history
-                const visits = data.visits || [];
-                document.getElementById('visitCount').textContent = visits.length + ' Visits';
-                
-                if (visits.length === 0) {
-                    visitsContainer.innerHTML = `
-                        <div style="text-align: center; padding: 2rem; color: #9ca3af;">
-                            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                            <p style="margin: 0;">Tidak ada riwayat kunjungan</p>
-                        </div>
-                    `;
-                } else {
-                    let visitsHTML = '<div style="overflow-x: auto;">';
-                    visitsHTML += `
-                        <table style="width: 100%; font-size: 0.75rem;">
-                            <thead>
-                                <tr style="background-color: #f3f4f6; border-bottom: 1px solid #e5e7eb;">
-                                    <th style="padding: 0.625rem; text-align: left; font-weight: 600; color: #374151;">Tanggal</th>
-                                    <th style="padding: 0.625rem; text-align: left; font-weight: 600; color: #374151;">Perusahaan</th>
-                                    <th style="padding: 0.625rem; text-align: left; font-weight: 600; color: #374151;">PIC</th>
-                                    <th style="padding: 0.625rem; text-align: left; font-weight: 600; color: #374151;">Lokasi</th>
-                                    <th style="padding: 0.625rem; text-align: left; font-weight: 600; color: #374151;">Tujuan</th>
-                                    <th style="padding: 0.625rem; text-align: center; font-weight: 600; color: #374151;">Follow Up</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                    `;
-                    
-                    visits.forEach((visit, index) => {
-                        const rowBg = index % 2 === 0 ? '#ffffff' : '#f9fafb';
-                        const followUpBg = visit.is_follow_up === 'Ya' ? '#dcfce7' : '#fee2e2';
-                        const followUpColor = visit.is_follow_up === 'Ya' ? '#166534' : '#991b1b';
-                        
-                        visitsHTML += `
-                            <tr style="background-color: ${rowBg}; border-bottom: 1px solid #e5e7eb;">
-                                <td style="padding: 0.625rem; color: #374151;">${visit.visit_date}</td>
-                                <td style="padding: 0.625rem; color: #374151;">${visit.company_name}</td>
-                                <td style="padding: 0.625rem; color: #374151;">${visit.pic_name}</td>
-                                <td style="padding: 0.625rem; color: #374151; font-size: 0.7rem;">${visit.location}</td>
-                                <td style="padding: 0.625rem; color: #374151; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${visit.visit_purpose}">${visit.visit_purpose}</td>
-                                <td style="padding: 0.625rem; text-align: center;">
-                                    <span style="background-color: ${followUpBg}; color: ${followUpColor}; padding: 0.25rem 0.625rem; border-radius: 9999px; font-weight: 500; font-size: 0.7rem;">
-                                        ${visit.is_follow_up}
-                                    </span>
-                                </td>
-                            </tr>
-                        `;
-                    });
-                    
-                    visitsHTML += `
-                            </tbody>
-                        </table>
-                    </div>
-                    `;
-                    
-                    visitsContainer.innerHTML = visitsHTML;
-                }
-            } else {
+    // Fetch data
+    fetch(`/marketing/sales/${userId}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        
+        if (data.success && data.user) {
+            // ===== FILL PERSONAL INFO =====
+            document.getElementById('detailUsername').textContent = data.user.username || '-';
+            document.getElementById('detailEmail').textContent = data.user.email || '-';
+            document.getElementById('detailPhone').textContent = data.user.phone || '-';
+            document.getElementById('detailBirthDate').textContent = data.user.birth_date || '-';
+            document.getElementById('detailRole').textContent = data.user.role || '-';
+            
+            // ===== FILL ADDRESS INFO - PALING PENTING =====
+            const province = data.user.province || '-';
+            const regency = data.user.regency || '-';
+            const district = data.user.district || '-';
+            const village = data.user.village || '-';
+            
+            console.log('Setting address data:', {province, regency, district, village});
+            
+            document.getElementById('detailProvince').textContent = province;
+            document.getElementById('detailRegency').textContent = regency;
+            document.getElementById('detailDistrict').textContent = district;
+            document.getElementById('detailVillage').textContent = village;
+            document.getElementById('detailAddress').textContent = data.user.address || '-';
+            
+            // ===== FILL VISITS =====
+            const visits = data.visits || [];
+            document.getElementById('visitCount').textContent = visits.length + ' Visits';
+            
+            if (visits.length === 0) {
                 visitsContainer.innerHTML = `
-                    <div style="text-align: center; padding: 2rem; color: #dc2626; background-color: #fee2e2; border-radius: 0.5rem;">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                        <p style="margin: 0;">Error: ${data.error || 'Gagal memuat data'}</p>
+                    <div style="text-align: center; padding: 2rem; color: #9ca3af;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                        <p style="margin: 0;">Tidak ada riwayat kunjungan</p>
                     </div>
                 `;
+            } else {
+                let visitsHTML = '<div style="overflow-x: auto;"><table style="width: 100%; font-size: 0.75rem;">';
+                visitsHTML += `
+                    <thead>
+                        <tr style="background-color: #f3f4f6; border-bottom: 1px solid #e5e7eb;">
+                            <th style="padding: 0.625rem; text-align: left; font-weight: 600; color: #374151;">Tanggal</th>
+                            <th style="padding: 0.625rem; text-align: left; font-weight: 600; color: #374151;">Perusahaan</th>
+                            <th style="padding: 0.625rem; text-align: left; font-weight: 600; color: #374151;">PIC</th>
+                            <th style="padding: 0.625rem; text-align: left; font-weight: 600; color: #374151;">Lokasi</th>
+                            <th style="padding: 0.625rem; text-align: left; font-weight: 600; color: #374151;">Tujuan</th>
+                            <th style="padding: 0.625rem; text-align: center; font-weight: 600; color: #374151;">Follow Up</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                `;
+                
+                visits.forEach((visit, index) => {
+                    const rowBg = index % 2 === 0 ? '#ffffff' : '#f9fafb';
+                    const followUpBg = visit.is_follow_up === 'Ya' ? '#dcfce7' : '#fee2e2';
+                    const followUpColor = visit.is_follow_up === 'Ya' ? '#166534' : '#991b1b';
+                    
+                    visitsHTML += `
+                        <tr style="background-color: ${rowBg}; border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 0.625rem; color: #374151;">${visit.visit_date}</td>
+                            <td style="padding: 0.625rem; color: #374151;">${visit.company_name}</td>
+                            <td style="padding: 0.625rem; color: #374151;">${visit.pic_name}</td>
+                            <td style="padding: 0.625rem; color: #374151; font-size: 0.7rem;">${visit.location}</td>
+                            <td style="padding: 0.625rem; color: #374151; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${visit.visit_purpose}">${visit.visit_purpose}</td>
+                            <td style="padding: 0.625rem; text-align: center;">
+                                <span style="background-color: ${followUpBg}; color: ${followUpColor}; padding: 0.25rem 0.625rem; border-radius: 9999px; font-weight: 500; font-size: 0.7rem;">
+                                    ${visit.is_follow_up}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                visitsHTML += '</tbody></table></div>';
+                visitsContainer.innerHTML = visitsHTML;
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
+            
+            console.log('Detail modal updated successfully');
+        } else {
+            console.error('Success is false or user data missing');
             visitsContainer.innerHTML = `
                 <div style="text-align: center; padding: 2rem; color: #dc2626; background-color: #fee2e2; border-radius: 0.5rem;">
                     <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <p style="margin: 0;">Gagal memuat data: ${error.message}</p>
+                    <p style="margin: 0;">Error: ${data.error || 'Data tidak valid'}</p>
                 </div>
             `;
-        });
+        }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
+        visitsContainer.innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: #dc2626; background-color: #fee2e2; border-radius: 0.5rem;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                <p style="margin: 0;">Error: ${error.message}</p>
+            </div>
+        `;
+    });
 }
 
-// Close Modal
+// Close modal
 function closeSalesDetailModal() {
     document.getElementById('salesDetailModal').style.display = 'none';
 }
 
-// Close modal when clicking outside
+// Close when clicking outside
 document.getElementById('salesDetailModal').addEventListener('click', function(e) {
     if (e.target === this) {
         closeSalesDetailModal();
