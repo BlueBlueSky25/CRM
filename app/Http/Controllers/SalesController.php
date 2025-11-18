@@ -10,6 +10,7 @@ use App\Models\District;
 use App\Models\Village;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 class SalesController extends Controller
 {
@@ -38,6 +39,7 @@ class SalesController extends Controller
     /**
      * Show sales user detail (AJAX)
      * GET /marketing/sales/{id}
+     * Query parameters: year, month, start_date, end_date
      */
     public function show($id)
     {
@@ -59,19 +61,45 @@ class SalesController extends Controller
                 'has_province_id' => $user->province_id ? true : false,
             ]);
             
-            // Get visit history
-            $visits = \App\Models\SalesVisit::with([
+            // Get visit history dengan filtering
+            $visitsQuery = \App\Models\SalesVisit::with([
                 'company',
                 'province',
                 'regency',
                 'district',
                 'village'
-            ])
-                ->where('sales_id', $id)
-                ->orderBy('visit_date', 'desc')
-                ->limit(10)
-                ->get()
-                ->map(function($visit) {
+            ])->where('sales_id', $id);
+
+            // Apply filters jika ada
+            if (request()->filled('year') && request()->filled('month')) {
+                $year = request()->input('year');
+                $month = request()->input('month');
+                
+                $visitsQuery->whereYear('visit_date', $year)
+                           ->whereMonth('visit_date', $month);
+                
+                \Log::info('Applying month filter', [
+                    'year' => $year,
+                    'month' => $month,
+                    'sales_id' => $id
+                ]);
+            } elseif (request()->filled('start_date') && request()->filled('end_date')) {
+                $startDate = Carbon::parse(request()->input('start_date'))->startOfDay();
+                $endDate = Carbon::parse(request()->input('end_date'))->endOfDay();
+                
+                $visitsQuery->whereBetween('visit_date', [$startDate, $endDate]);
+                
+                \Log::info('Applying date range filter', [
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                    'sales_id' => $id
+                ]);
+            }
+
+            $visits = $visitsQuery->orderBy('visit_date', 'desc')
+                                 ->limit(10)
+                                 ->get()
+                                 ->map(function($visit) {
                     $locationParts = [];
                     if ($visit->province) $locationParts[] = $visit->province->name;
                     if ($visit->regency) $locationParts[] = $visit->regency->name;

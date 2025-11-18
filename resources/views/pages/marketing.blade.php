@@ -2,7 +2,7 @@
 @section('title','Marketing')
 
 @section('content')
-<div class="container-expanded mx-auto px-6 lg:px-8 py-8 pt-[60px] mt-4">
+<div class="container-expanded mx-auto px-6 lg:px-8 py-8 pt-[60px] mt-4 fade-in">
     
     <!-- Sales Management Card dengan Everything Inside -->
     <div style="background-color: #ffffff; border-radius: 0.5rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); border: 1px solid #e5e7eb; overflow: hidden;">
@@ -46,7 +46,7 @@
             </div>
         </div>
 
-        <!-- Table Section - NO PADDING! -->
+        <!-- Table Section -->
         <x-marketing.table.table :salesUsers="$salesUsers" :currentMenuId="$currentMenuId" />
     </div>
 </div>

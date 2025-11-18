@@ -1,7 +1,7 @@
 @props(['salesVisits', 'currentMenuId'])
 
-<!-- Table Only (No Header, No Pagination) -->
-<div class="overflow-x-auto" style="margin: 0; padding: 0;">
+<!-- Table Only -->
+<div class="overflow-x-auto fade-in" style="margin: 0; padding: 0;">
     <table id="salesVisitTable" class="w-full" style="margin: 0; border-collapse: collapse;">
         <thead style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb;">
             <tr>

@@ -1,7 +1,7 @@
 @props(['companies', 'currentMenuId'])
 
-<div style="margin: 0; padding: 0;">
-    <!-- Table ONLY (No Search Here!) -->
+<div class="fade-in" style="margin: 0; padding: 0;">
+    <!-- Table ONLY -->
     <div class="overflow-x-auto" style="margin: 0; padding: 0;">
         <table id="companyTable" class="w-full" style="margin: 0; border-collapse: collapse;">
             <thead style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb;">
