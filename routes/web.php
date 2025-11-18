@@ -13,6 +13,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\SalesVisitController;
 use App\Http\Controllers\PicController;
+use App\Http\Controllers\TransaksiController;
 
 
 // ==========================
@@ -112,6 +113,17 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/salesvisit/get-companies', [CompanyController::class, 'getCompaniesForDropdown']);
     Route::post('/salesvisit/store-company', [CompanyController::class, 'storeCompanyAjax']);
     Route::post('/sales-visit/pic', [SalesVisitController::class, 'storePic'])->name('salesvisit.pic.store');
+
+    // ==========================
+    // TRANSAKSI ROUTES (NEW)
+    // ==========================
+    Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi');
+    Route::post('/transaksi', [TransaksiController::class, 'store'])->name('transaksi.store');
+    Route::get('/transaksi/{id}', [TransaksiController::class, 'show'])->name('transaksi.show');
+    Route::get('/transaksi/{id}/edit', [TransaksiController::class, 'edit'])->name('transaksi.edit');
+    Route::put('/transaksi/{id}', [TransaksiController::class, 'update'])->name('transaksi.update');
+    Route::delete('/transaksi/{id}', [TransaksiController::class, 'destroy'])->name('transaksi.destroy');
+    Route::get('/transaksi/search', [TransaksiController::class, 'search'])->name('transaksi.search');
 
     // ==========================
     // PIC Management
