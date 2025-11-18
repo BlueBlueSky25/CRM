@@ -100,206 +100,248 @@
     </div>
 </div>
 
-{{-- Company Detail Modal --}}
+{{-- Company Detail Modal - ROUNDED KONSISTEN --}}
 <div id="companyDetailModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 9999; align-items: center; justify-content: center;">
-    <div style="background-color: white; border-radius: 0.5rem; width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
-        {{-- Modal Header --}}
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; background: linear-gradient(to right, #4f46e5, #7c3aed);">
-            <h3 style="font-size: 1.125rem; font-weight: 600; color: white; margin: 0;">
-                <i class="fas fa-building" style="margin-right: 0.5rem;"></i>
-                Detail Perusahaan
-            </h3>
-            <button onclick="closeCompanyDetailModal()" style="color: white; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 0; line-height: 1; opacity: 0.9; transition: opacity 0.15s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
+    <div style="background-color: white; border-radius: 1.5rem; width: 95%; max-width: 700px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); overflow: hidden;">
+        
+        {{-- Modal Header - FIXED --}}
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; background: linear-gradient(to right, #4f46e5, #7c3aed); flex-shrink: 0;">
+            <h3 style="font-size: 1.25rem; font-weight: 600; color: white; margin: 0;">Detail Perusahaan</h3>
+            <button onclick="closeCompanyDetailModal()" style="color: white; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 0;">
                 <i class="fas fa-times"></i>
             </button>
         </div>
 
-        {{-- Modal Body --}}
-        <div style="padding: 1rem;">
-            {{-- Company Info --}}
-            <div style="background-color: #f9fafb; padding: 0.875rem; border-radius: 0.375rem; margin-bottom: 1rem;">
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+        {{-- Modal Body - SCROLLABLE WITH BORDER RADIUS AT BOTTOM --}}
+        <div style="overflow-y: auto; flex: 1; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; border-radius: 0 0 1.5rem 1.5rem;">
+            
+            {{-- Logo --}}
+            <div style="text-align: center;">
+                <div id="detailLogoContainer" style="display: flex; justify-content: center; align-items: center; min-height: 120px;">
+                    <p style="color: #9ca3af; font-size: 0.875rem;">Loading...</p>
+                </div>
+            </div>
+
+            {{-- Info Grid --}}
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #6b7280; text-transform: uppercase; margin-bottom: 0.375rem;">Nama</label>
+                    <p id="detailCompanyName" style="font-size: 0.9375rem; font-weight: 500; color: #111827; margin: 0;">-</p>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #6b7280; text-transform: uppercase; margin-bottom: 0.375rem;">Jenis</label>
+                    <p id="detailCompanyType" style="font-size: 0.9375rem; color: #111827; margin: 0;">-</p>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #6b7280; text-transform: uppercase; margin-bottom: 0.375rem;">Tier</label>
+                    <p id="detailCompanyTier" style="font-size: 0.9375rem; color: #111827; margin: 0;">-</p>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #6b7280; text-transform: uppercase; margin-bottom: 0.375rem;">Status</label>
+                    <span id="detailCompanyStatus" style="display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500;">-</span>
+                </div>
+            </div>
+
+            {{-- Deskripsi --}}
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #6b7280; text-transform: uppercase; margin-bottom: 0.375rem;">Deskripsi</label>
+                <p id="detailCompanyDescription" style="font-size: 0.9375rem; color: #111827; margin: 0; line-height: 1.5;">-</p>
+            </div>
+
+            {{-- Address --}}
+            <div style="border-top: 1px solid #e5e7eb; padding-top: 1rem;">
+                <h4 style="font-size: 0.875rem; font-weight: 600; color: #111827; margin: 0 0 0.75rem 0;">Lokasi</h4>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
                     <div>
-                        <label style="display: block; font-size: 0.6875rem; font-weight: 500; color: #6b7280; text-transform: uppercase; margin-bottom: 0.125rem;">Nama Perusahaan</label>
-                        <p id="detailCompanyName" style="font-size: 0.8125rem; font-weight: 600; color: #111827; margin: 0;">-</p>
+                        <label style="font-size: 0.75rem; font-weight: 600; color: #6b7280; margin-bottom: 0.25rem;">Provinsi</label>
+                        <p id="detailProvince" style="font-size: 0.875rem; color: #111827; margin: 0;">-</p>
                     </div>
                     <div>
-                        <label style="display: block; font-size: 0.6875rem; font-weight: 500; color: #6b7280; text-transform: uppercase; margin-bottom: 0.125rem;">Jenis Perusahaan</label>
-                        <p id="detailCompanyType" style="font-size: 0.8125rem; color: #111827; margin: 0;">-</p>
+                        <label style="font-size: 0.75rem; font-weight: 600; color: #6b7280; margin-bottom: 0.25rem;">Kabupaten</label>
+                        <p id="detailRegency" style="font-size: 0.875rem; color: #111827; margin: 0;">-</p>
                     </div>
                     <div>
-                        <label style="display: block; font-size: 0.6875rem; font-weight: 500; color: #6b7280; text-transform: uppercase; margin-bottom: 0.125rem;">Tier</label>
-                        <p id="detailCompanyTier" style="font-size: 0.8125rem; color: #111827; margin: 0;">-</p>
+                        <label style="font-size: 0.75rem; font-weight: 600; color: #6b7280; margin-bottom: 0.25rem;">Kecamatan</label>
+                        <p id="detailDistrict" style="font-size: 0.875rem; color: #111827; margin: 0;">-</p>
                     </div>
                     <div>
-                        <label style="display: block; font-size: 0.6875rem; font-weight: 500; color: #6b7280; text-transform: uppercase; margin-bottom: 0.125rem;">Status</label>
-                        <span id="detailCompanyStatus" style="display: inline-flex; align-items: center; padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.6875rem; font-weight: 500;">-</span>
+                        <label style="font-size: 0.75rem; font-weight: 600; color: #6b7280; margin-bottom: 0.25rem;">Kelurahan</label>
+                        <p id="detailVillage" style="font-size: 0.875rem; color: #111827; margin: 0;">-</p>
+                    </div>
+                </div>
+                <div style="margin-top: 0.75rem;">
+                    <label style="font-size: 0.75rem; font-weight: 600; color: #6b7280; margin-bottom: 0.25rem;">Alamat Lengkap</label>
+                    <p id="detailFullAddress" style="font-size: 0.875rem; color: #111827; margin: 0; line-height: 1.5;">-</p>
+                </div>
+            </div>
+
+            {{-- Contact Info --}}
+            <div style="border-top: 1px solid #e5e7eb; padding-top: 1rem;">
+                <h4 style="font-size: 0.875rem; font-weight: 600; color: #111827; margin: 0 0 0.75rem 0;">Kontak & Media</h4>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                    <div>
+                        <label style="font-size: 0.75rem; font-weight: 600; color: #6b7280; margin-bottom: 0.25rem;">Telepon</label>
+                        <p id="detailCompanyPhone" style="font-size: 0.875rem; color: #111827; margin: 0;">-</p>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem; font-weight: 600; color: #6b7280; margin-bottom: 0.25rem;">Email</label>
+                        <p id="detailCompanyEmail" style="font-size: 0.875rem; color: #111827; margin: 0;">-</p>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem; font-weight: 600; color: #6b7280; margin-bottom: 0.25rem;">Website</label>
+                        <p id="detailCompanyWebsite" style="font-size: 0.875rem; margin: 0;"><a id="detailCompanyWebsiteLink" href="#" target="_blank" style="color: #3b82f6; text-decoration: none;">-</a></p>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem; font-weight: 600; color: #6b7280; margin-bottom: 0.25rem;">LinkedIn</label>
+                        <p id="detailCompanyLinkedin" style="font-size: 0.875rem; margin: 0;"><a id="detailCompanyLinkedinLink" href="#" target="_blank" style="color: #3b82f6; text-decoration: none;">-</a></p>
                     </div>
                     <div style="grid-column: 1 / -1;">
-                        <label style="display: block; font-size: 0.6875rem; font-weight: 500; color: #6b7280; text-transform: uppercase; margin-bottom: 0.125rem;">Deskripsi</label>
-                        <p id="detailCompanyDescription" style="font-size: 0.8125rem; color: #111827; margin: 0;">-</p>
+                        <label style="font-size: 0.75rem; font-weight: 600; color: #6b7280; margin-bottom: 0.25rem;">Instagram</label>
+                        <p id="detailCompanyInstagram" style="font-size: 0.875rem; margin: 0;"><a id="detailCompanyInstagramLink" href="#" target="_blank" style="color: #3b82f6; text-decoration: none;">-</a></p>
                     </div>
                 </div>
             </div>
 
-            {{-- PICs Section --}}
-            <div>
+            {{-- PICs - COMPACT & ROUNDED --}}
+            <div style="border-top: 1px solid #e5e7eb; padding-top: 1rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                    <h4 style="font-size: 0.9375rem; font-weight: 600; color: #111827; margin: 0;">
-                        <i class="fas fa-users" style="margin-right: 0.375rem; color: #2563eb;"></i>
-                        Daftar PIC
-                    </h4>
-                    <span id="picCount" style="font-size: 0.8125rem; color: #6b7280; background-color: #f3f4f6; padding: 0.25rem 0.625rem; border-radius: 9999px; font-weight: 500;">0 PIC</span>
+                    <h4 style="font-size: 0.875rem; font-weight: 600; color: #111827; margin: 0;">PIC</h4>
+                    <span id="picCount" style="font-size: 0.75rem; color: #ffffff; background-color: #4f46e5; padding: 0.25rem 0.625rem; border-radius: 9999px; font-weight: 600;">0</span>
                 </div>
-
-                <div id="picsContainer">
+                <div id="picsContainer" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 300px; overflow-y: auto;">
                     {{-- PICs will be loaded here --}}
                 </div>
             </div>
-        </div>
-
-        {{-- Modal Footer --}}
-        <div style="display: flex; justify-content: flex-end; padding: 0.75rem 1rem; border-top: 1px solid #e5e7eb; background-color: #f9fafb;">
-            <button onclick="closeCompanyDetailModal()" style="padding: 0.5rem 1.25rem; background-color: #6b7280; color: white; border: none; border-radius: 0.375rem; font-size: 0.8125rem; font-weight: 500; cursor: pointer; transition: all 0.15s;">
-                Tutup
-            </button>
         </div>
     </div>
 </div>
 
 <script>
-// Show Company Detail Modal
 function showCompanyDetail(companyId) {
     const modal = document.getElementById('companyDetailModal');
     modal.style.display = 'flex';
     
-    // Show loading
     document.getElementById('picsContainer').innerHTML = `
-        <div style="text-align: center; padding: 2rem; color: #6b7280;">
-            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-            <p style="margin: 0;">Loading...</p>
+        <div style="text-align: center; padding: 1rem; color: #6b7280;">
+            <i class="fas fa-spinner fa-spin"></i> Loading...
         </div>
     `;
     
-    // Fetch company detail
     fetch(`/company/${companyId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Fill company info
-                document.getElementById('detailCompanyName').textContent = data.company.company_name;
-                document.getElementById('detailCompanyType').textContent = data.company.company_type;
-                document.getElementById('detailCompanyTier').textContent = data.company.tier;
-                document.getElementById('detailCompanyDescription').textContent = data.company.description;
+                const c = data.company;
+
+                // Basic info
+                document.getElementById('detailCompanyName').textContent = c.company_name || '-';
+                document.getElementById('detailCompanyType').textContent = c.company_type || '-';
+                document.getElementById('detailCompanyTier').textContent = c.tier || '-';
+                document.getElementById('detailCompanyDescription').textContent = c.description || '-';
                 
-                // Status badge
+                // Status
                 const statusBadge = document.getElementById('detailCompanyStatus');
-                statusBadge.textContent = data.company.status;
-                if (data.company.status.toLowerCase() === 'active') {
+                statusBadge.textContent = c.status;
+                if (c.status.toLowerCase() === 'active') {
                     statusBadge.style.backgroundColor = '#d1fae5';
                     statusBadge.style.color = '#065f46';
                 } else {
                     statusBadge.style.backgroundColor = '#fee2e2';
                     statusBadge.style.color = '#991b1b';
                 }
+
+                // Address
+                document.getElementById('detailProvince').textContent = c.province || '-';
+                document.getElementById('detailRegency').textContent = c.regency || '-';
+                document.getElementById('detailDistrict').textContent = c.district || '-';
+                document.getElementById('detailVillage').textContent = c.village || '-';
+                document.getElementById('detailFullAddress').textContent = c.full_address || '-';
+
+                // Contact
+                document.getElementById('detailCompanyPhone').textContent = c.company_phone || '-';
+                document.getElementById('detailCompanyEmail').textContent = c.company_email || '-';
                 
-                // Fill PICs
+                if (c.company_website) {
+                    document.getElementById('detailCompanyWebsiteLink').href = c.company_website;
+                    document.getElementById('detailCompanyWebsiteLink').textContent = c.company_website;
+                } else {
+                    document.getElementById('detailCompanyWebsite').innerHTML = '<span style="color: #111827;">-</span>';
+                }
+
+                if (c.company_linkedin) {
+                    document.getElementById('detailCompanyLinkedinLink').href = c.company_linkedin;
+                    document.getElementById('detailCompanyLinkedinLink').textContent = c.company_linkedin;
+                } else {
+                    document.getElementById('detailCompanyLinkedin').innerHTML = '<span style="color: #111827;">-</span>';
+                }
+
+                if (c.company_instagram) {
+                    document.getElementById('detailCompanyInstagramLink').href = `https://instagram.com/${c.company_instagram.replace('@', '')}`;
+                    document.getElementById('detailCompanyInstagramLink').textContent = c.company_instagram;
+                } else {
+                    document.getElementById('detailCompanyInstagram').innerHTML = '<span style="color: #111827;">-</span>';
+                }
+
+                // Logo
+                const logoContainer = document.getElementById('detailLogoContainer');
+                if (c.company_logo) {
+                    logoContainer.innerHTML = `<img src="${c.company_logo}" style="max-width: 100%; max-height: 150px; border-radius: 0.75rem;">`;
+                } else {
+                    logoContainer.innerHTML = `<div style="width: 120px; height: 120px; background-color: #e5e7eb; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center;"><i class="fas fa-image" style="font-size: 2.5rem; color: #9ca3af;"></i></div>`;
+                }
+
+                // PICs - COMPACT & ROUNDED
                 const picsContainer = document.getElementById('picsContainer');
                 const picCount = document.getElementById('picCount');
                 
-                if (data.pics.length > 0) {
-                    picCount.textContent = `${data.pics.length} PIC`;
-                    
+                if (data.pics && data.pics.length > 0) {
+                    picCount.textContent = data.pics.length;
                     picsContainer.innerHTML = data.pics.map(pic => `
-                        <div style="border: 1px solid #e5e7eb; border-radius: 0.375rem; padding: 0.75rem; margin-bottom: 0.5rem; background-color: white; transition: all 0.15s;" onmouseover="this.style.borderColor='#2563eb'; this.style.backgroundColor='#eff6ff';" onmouseout="this.style.borderColor='#e5e7eb'; this.style.backgroundColor='white';">
-                            <div style="display: flex; align-items: start; gap: 0.75rem;">
-                                <div style="flex-shrink: 0; width: 2.5rem; height: 2.5rem; border-radius: 9999px; background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 1rem;">
-                                    ${pic.pic_name.charAt(0).toUpperCase()}
-                                </div>
-                                <div style="flex: 1; min-width: 0;">
-                                    <h5 style="font-size: 0.875rem; font-weight: 600; color: #111827; margin: 0 0 0.125rem 0;">${pic.pic_name}</h5>
-                                    <p style="font-size: 0.75rem; color: #6b7280; margin: 0 0 0.375rem 0;">${pic.position}</p>
-                                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                                        <div style="display: flex; align-items: center; gap: 0.375rem;">
-                                            <i class="fas fa-phone" style="color: #059669; font-size: 0.6875rem;"></i>
-                                            <span style="font-size: 0.75rem; color: #374151;">${pic.phone}</span>
-                                        </div>
-                                        <div style="display: flex; align-items: center; gap: 0.375rem;">
-                                            <i class="fas fa-envelope" style="color: #2563eb; font-size: 0.6875rem;"></i>
-                                            <span style="font-size: 0.75rem; color: #374151;">${pic.email}</span>
-                                        </div>
-                                    </div>
+                        <div style="border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 0.5rem; background-color: #f9fafb; display: flex; gap: 0.5rem; align-items: flex-start;">
+                            <div style="flex-shrink: 0; width: 2rem; height: 2rem; border-radius: 0.75rem; background: linear-gradient(135deg, #4f46e5, #7c3aed); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.875rem;">
+                                ${pic.pic_name.charAt(0).toUpperCase()}
+                            </div>
+                            <div style="flex: 1; min-width: 0;">
+                                <p style="font-size: 0.8125rem; font-weight: 600; color: #111827; margin: 0 0 0.125rem 0;">${pic.pic_name}</p>
+                                <p style="font-size: 0.75rem; color: #6b7280; margin: 0 0 0.25rem 0;">${pic.position || '-'}</p>
+                                <div style="display: flex; gap: 0.5rem; font-size: 0.7rem;">
+                                    <a href="tel:${pic.phone}" style="color: #3b82f6; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${pic.phone || '-'}</a>
+                                    <span style="color: #d1d5db;">•</span>
+                                    <a href="mailto:${pic.email}" style="color: #3b82f6; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${pic.email || '-'}</a>
                                 </div>
                             </div>
                         </div>
                     `).join('');
                 } else {
-                    picCount.textContent = '0 PIC';
-                    picsContainer.innerHTML = `
-                        <div style="text-align: center; padding: 3rem; background-color: #f9fafb; border-radius: 0.5rem; border: 2px dashed #e5e7eb;">
-                            <div style="width: 4rem; height: 4rem; border-radius: 9999px; background-color: #f3f4f6; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
-                                <i class="fas fa-user-slash" style="font-size: 1.5rem; color: #d1d5db;"></i>
-                            </div>
-                            <p style="font-size: 0.875rem; color: #6b7280; margin: 0;">Belum ada PIC untuk perusahaan ini</p>
-                        </div>
-                    `;
+                    picCount.textContent = '0';
+                    picsContainer.innerHTML = `<p style="text-align: center; color: #9ca3af; font-size: 0.875rem; margin: 0;">Belum ada PIC</p>`;
                 }
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            document.getElementById('picsContainer').innerHTML = `
-                <div style="text-align: center; padding: 2rem; color: #dc2626; background-color: #fee2e2; border-radius: 0.5rem;">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <p style="margin: 0;">Gagal memuat data</p>
-                </div>
-            `;
+            document.getElementById('picsContainer').innerHTML = `<div style="text-align: center; color: #dc2626; font-size: 0.875rem;">Gagal memuat data</div>`;
         });
 }
 
-// Close Modal
 function closeCompanyDetailModal() {
     document.getElementById('companyDetailModal').style.display = 'none';
 }
 
-// Close modal when clicking outside
 document.getElementById('companyDetailModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeCompanyDetailModal();
-    }
+    if (e.target === this) closeCompanyDetailModal();
 });
 </script>
 
 <style>
-/* Responsive improvements */
 @media (max-width: 1024px) {
-    #companyTable {
-        font-size: 0.8125rem;
-    }
-    
-    #companyTable th,
-    #companyTable td {
-        padding: 0.4rem 0.65rem;
-    }
+    #companyTable { font-size: 0.8125rem; }
+    #companyTable th, #companyTable td { padding: 0.4rem 0.65rem; }
 }
 
 @media (max-width: 768px) {
-    #companyTable {
-        font-size: 0.75rem;
-    }
-    
-    #companyTable th,
-    #companyTable td {
-        padding: 0.375rem 0.5rem;
-    }
-    
-    #companyDetailModal > div {
-        width: 95%;
-        margin: 1rem;
-    }
-    
-    #companyDetailModal > div > div:nth-child(2) > div:first-child > div {
-        grid-template-columns: 1fr !important;
-    }
+    #companyTable { font-size: 0.75rem; }
+    #companyTable th, #companyTable td { padding: 0.375rem 0.5rem; }
+    #companyDetailModal > div { width: 95%; }
 }
 </style>
