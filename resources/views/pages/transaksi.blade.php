@@ -26,9 +26,9 @@
             </div>
             @if(auth()->user()->canAccess($currentMenuId ?? 17, 'create'))
             <button onclick="openTransaksiModal()"
-                style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.875rem; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; border: none; border-radius: 0.375rem; font-weight: 500; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2);"
-                onmouseover="this.style.boxShadow='0 10px 15px rgba(34, 197, 94, 0.3)'; this.style.transform='translateY(-2px)'"
-                onmouseout="this.style.boxShadow='0 4px 6px rgba(34, 197, 94, 0.2)'; this.style.transform='translateY(0)'">
+                style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.875rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 0.375rem; font-weight: 500; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);"
+                onmouseover="this.style.boxShadow='0 10px 15px rgba(59, 130, 246, 0.3)'; this.style.transform='translateY(-2px)'"
+                onmouseout="this.style.boxShadow='0 4px 6px rgba(59, 130, 246, 0.2)'; this.style.transform='translateY(0)'">
                 <i class="fas fa-plus"></i>
                 <span>Tambah Transaksi</span>
             </button>

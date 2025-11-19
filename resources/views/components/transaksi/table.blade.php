@@ -76,7 +76,7 @@
     <h3 style="font-size: 1rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">Belum ada transaksi</h3>
     <p style="color: #6b7280; margin-bottom: 1rem; font-size: 0.875rem;">Mulai tambahkan transaksi dari sales visit</p>
     <button onclick="openTransaksiModal()"
-        style="display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.5rem 0.875rem; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; border: none; border-radius: 0.375rem; font-weight: 500; font-size: 0.75rem; cursor: pointer;">
+        style="display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.5rem 0.875rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 0.375rem; font-weight: 500; font-size: 0.75rem; cursor: pointer;">
         <i class="fas fa-plus"></i> Tambah Transaksi
     </button>
 </div>
