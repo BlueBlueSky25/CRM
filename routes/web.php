@@ -50,7 +50,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/get-regencies/{provinceId}', [UserController::class, 'getRegencies']);
     Route::get('/get-districts/{regencyId}', [UserController::class, 'getDistricts']);
     Route::get('/get-villages/{districtId}', [UserController::class, 'getVillages']);
-});
+
+    Route::get('/company/get-regencies/{provinceId}', [CompanyController::class, 'getRegencies']);
+    Route::get('/company/get-districts/{regencyId}', [CompanyController::class, 'getDistricts']);
+    Route::get('/company/get-villages/{districtId}', [CompanyController::class, 'getVillages']);
+}); 
+
 
 // ==========================
 // Protected Routes (Login + Permission)

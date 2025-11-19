@@ -17,7 +17,7 @@
 
         <!-- Body - Two Column Layout with Independent Scrolling -->
         <div class="flex-1 overflow-hidden flex" style="background-color: #f3f4f6;">
-            <form id="addCompanyForm" action="/company" method="POST" class="w-full flex overflow-hidden">
+            <form id="addCompanyForm" action="/company" method="POST" enctype="multipart/form-data" class="w-full flex overflow-hidden">
                 @csrf
                 
                 <!-- LEFT COLUMN - Company Basic Info & PICs & Address -->
@@ -112,10 +112,13 @@
                                 <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
                                     Provinsi
                                 </label>
-                                <select id="add_province" 
+                                <select id="create-province" 
                                         name="province_id"
                                         style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;">
                                     <option value="">-- Pilih Provinsi --</option>
+                                            @foreach($provinces as $province)
+                                                <option value="{{ $province->id }}">{{ $province->name }}</option>
+                                            @endforeach
                                 </select>
                             </div>
 
@@ -124,7 +127,7 @@
                                 <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
                                     Kabupaten/Kota
                                 </label>
-                                <select id="add_regency" 
+                                <select id="create-regency" 
                                         name="regency_id"
                                         style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;" disabled>
                                     <option value="">-- Pilih Kabupaten/Kota --</option>
@@ -136,7 +139,7 @@
                                 <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
                                     Kecamatan
                                 </label>
-                                <select id="add_district" 
+                                <select id="create-district" 
                                         name="district_id"
                                         style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;" disabled>
                                     <option value="">-- Pilih Kecamatan --</option>
@@ -148,7 +151,7 @@
                                 <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
                                     Kelurahan/Desa
                                 </label>
-                                <select id="add_village" 
+                                <select id="create-village" 
                                         name="village_id"
                                         style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;" disabled>
                                     <option value="">-- Pilih Kelurahan/Desa --</option>
@@ -160,8 +163,8 @@
                                 <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
                                     Alamat Lengkap
                                 </label>
-                                <textarea id="add_full_address"
-                                          name="full_address"
+                                <textarea id="create-address"
+                                          name="address"
                                           rows="2" 
                                           style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem; resize: none;" 
                                           placeholder="Masukkan alamat lengkap perusahaan..."></textarea>
@@ -381,252 +384,3 @@ input:focus, select:focus, textarea:focus {
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
 }
 </style>
-
-<script>
-let picCounter = 0;
-
-function openAddCompanyModal() {
-    document.getElementById('addCompanyModal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    
-    // Initialize address cascade setelah modal terbuka
-    setTimeout(() => {
-        initAddAddressCascade();
-    }, 100);
-}
-
-function closeAddCompanyModal() {
-    document.getElementById('addCompanyModal').classList.add('hidden');
-    document.getElementById('addCompanyForm').reset();
-    document.body.style.overflow = 'auto';
-    
-    // Reset PIC section
-    document.getElementById('pic-fields-container').innerHTML = '';
-    picCounter = 0;
-    
-    const content = document.getElementById('pic-content');
-    const icon = document.getElementById('pic-toggle-icon');
-    const statusText = document.getElementById('pic-status');
-    
-    content.classList.add('hidden');
-    icon.style.transform = 'rotate(0deg)';
-    statusText.textContent = 'Belum diisi';
-    statusText.style.color = '#6b7280';
-
-    // Clear logo preview
-    clearLogoPreview();
-
-    // Destroy cascade instance
-    if (window.addCompanyCascade) {
-        window.addCompanyCascade.destroy();
-        window.addCompanyCascade = null;
-    }
-}
-
-function togglePICSection() {
-    const content = document.getElementById('pic-content');
-    const icon = document.getElementById('pic-toggle-icon');
-    
-    if (content.classList.contains('hidden')) {
-        content.classList.remove('hidden');
-        icon.style.transform = 'rotate(180deg)';
-    } else {
-        content.classList.add('hidden');
-        icon.style.transform = 'rotate(0deg)';
-    }
-}
-
-function addPICField() {
-    picCounter++;
-    const container = document.getElementById('pic-fields-container');
-    
-    const picFieldGroup = document.createElement('div');
-    picFieldGroup.id = `pic-group-${picCounter}`;
-    picFieldGroup.style.cssText = 'background-color: white; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 0.75rem;';
-    
-    picFieldGroup.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-            <span style="font-size: 0.75rem; font-weight: 600; color: #4f46e5;">PIC #${picCounter}</span>
-            <button type="button" 
-                    onclick="removePICField(${picCounter})" 
-                    style="background-color: #ef4444; color: white; border: none; border-radius: 0.375rem; padding: 0.25rem 0.5rem; font-size: 0.625rem; cursor: pointer;">
-                <i class="fas fa-trash"></i>
-            </button>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
-            <!-- Nama PIC -->
-            <div style="grid-column: span 2;">
-                <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.25rem;">
-                    Nama PIC <span style="color: #ef4444;">*</span>
-                </label>
-                <input type="text" 
-                       name="pics[${picCounter - 1}][pic_name]" 
-                       placeholder="Contoh: John Doe"
-                       style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem; font-size: 0.75rem;"
-                       oninput="checkPICCompletion()"
-                       required>
-            </div>
-            
-            <!-- Position -->
-            <div>
-                <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.25rem;">
-                    Position
-                </label>
-                <input type="text" 
-                       name="pics[${picCounter - 1}][position]" 
-                       placeholder="Contoh: Manager"
-                       style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem; font-size: 0.75rem;"
-                       oninput="checkPICCompletion()">
-            </div>
-            
-            <!-- Phone -->
-            <div>
-                <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.25rem;">
-                    Phone
-                </label>
-                <input type="text" 
-                       name="pics[${picCounter - 1}][phone]" 
-                       placeholder="Contoh: 08123456789"
-                       style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem; font-size: 0.75rem;"
-                       oninput="checkPICCompletion()">
-            </div>
-            
-            <!-- Email -->
-            <div style="grid-column: span 2;">
-                <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.25rem;">
-                    Email
-                </label>
-                <input type="email" 
-                       name="pics[${picCounter - 1}][email]" 
-                       placeholder="Contoh: john@company.com"
-                       style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem; font-size: 0.75rem;"
-                       oninput="checkPICCompletion()">
-            </div>
-        </div>
-    `;
-    
-    container.appendChild(picFieldGroup);
-    checkPICCompletion();
-    
-    // Auto-expand section
-    const content = document.getElementById('pic-content');
-    const icon = document.getElementById('pic-toggle-icon');
-    content.classList.remove('hidden');
-    icon.style.transform = 'rotate(180deg)';
-}
-
-function removePICField(picIndex) {
-    const field = document.getElementById(`pic-group-${picIndex}`);
-    if (field) {
-        field.remove();
-        checkPICCompletion();
-    }
-}
-
-function checkPICCompletion() {
-    const container = document.getElementById('pic-fields-container');
-    const picGroups = container.querySelectorAll('[id^="pic-group-"]');
-    const statusText = document.getElementById('pic-status');
-    
-    if (picGroups.length === 0) {
-        statusText.textContent = 'Belum diisi';
-        statusText.style.color = '#6b7280';
-        statusText.style.fontWeight = 'normal';
-    } else {
-        let filledCount = 0;
-        picGroups.forEach(group => {
-            const nameInput = group.querySelector('input[name*="[pic_name]"]');
-            if (nameInput && nameInput.value.trim() !== '') {
-                filledCount++;
-            }
-        });
-        
-        if (filledCount > 0) {
-            statusText.textContent = `${filledCount} PIC ditambahkan`;
-            statusText.style.color = '#059669';
-            statusText.style.fontWeight = '500';
-        } else {
-            statusText.textContent = `${picGroups.length} PIC (belum diisi)`;
-            statusText.style.color = '#f59e0b';
-            statusText.style.fontWeight = '500';
-        }
-    }
-}
-
-function previewLogo(event) {
-    const file = event.target.files[0];
-    if (file) {
-        // Validate file size (5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            alert('Ukuran file terlalu besar! Maksimal 5MB');
-            document.getElementById('company_logo').value = '';
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('logoPreview').src = e.target.result;
-            document.getElementById('logoPreviewContainer').style.display = 'block';
-            document.getElementById('logoUploadPrompt').style.display = 'none';
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
-function clearLogoPreview() {
-    document.getElementById('company_logo').value = '';
-    document.getElementById('logoPreviewContainer').style.display = 'none';
-    document.getElementById('logoUploadPrompt').style.display = 'block';
-}
-
-function initAddAddressCascade() {
-    // Initialize address cascade untuk form add
-    console.log('Initializing add company cascade...');
-    
-    if (window.addCompanyCascade) {
-        window.addCompanyCascade.destroy();
-    }
-
-    window.addCompanyCascade = new AddressCascade({
-        provinceId: 'add_province',
-        regencyId: 'add_regency',
-        districtId: 'add_district',
-        villageId: 'add_village',
-        baseUrl: '/api/'
-    });
-}
-
-// Drag and drop untuk logo
-document.addEventListener('DOMContentLoaded', function() {
-    const dropZone = document.getElementById('logoDropZone');
-    if (dropZone) {
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.style.borderColor = '#3b82f6';
-            dropZone.style.backgroundColor = '#eff6ff';
-        });
-
-        dropZone.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            dropZone.style.borderColor = '#d1d5db';
-            dropZone.style.backgroundColor = '#fafafa';
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                document.getElementById('company_logo').files = files;
-                previewLogo({ target: { files } });
-            }
-            dropZone.style.borderColor = '#d1d5db';
-            dropZone.style.backgroundColor = '#fafafa';
-        });
-
-        dropZone.addEventListener('click', () => {
-            document.getElementById('company_logo').click();
-        });
-    }
-});
-</script>

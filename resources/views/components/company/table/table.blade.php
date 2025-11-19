@@ -101,13 +101,13 @@
 </div>
 
 {{-- Company Detail Modal - ROUNDED KONSISTEN --}}
-<div id="companyDetailModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 9999; align-items: center; justify-content: center;">
-    <div style="background-color: white; border-radius: 1.5rem; width: 95%; max-width: 700px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); overflow: hidden;">
+<div id="companyDetailModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 9999; align-items: center; justify-content: center;" onclick="closeCompanyDetailModal()">
+    <div style="background-color: white; border-radius: 1.5rem; width: 95%; max-width: 700px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); overflow: hidden;" onclick="event.stopPropagation()">
         
         {{-- Modal Header - FIXED --}}
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; background: linear-gradient(to right, #4f46e5, #7c3aed); flex-shrink: 0;">
             <h3 style="font-size: 1.25rem; font-weight: 600; color: white; margin: 0;">Detail Perusahaan</h3>
-            <button onclick="closeCompanyDetailModal()" style="color: white; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 0;">
+            <button onclick="closeCompanyDetailModal()" style="color: white; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.5rem; line-height: 1; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -217,9 +217,21 @@
 </div>
 
 <script>
+// ==================== CLOSE MODAL FUNCTION ====================
+function closeCompanyDetailModal() {
+    console.log('❌ Closing Company Detail Modal...');
+    const modal = document.getElementById('companyDetailModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// ==================== SHOW COMPANY DETAIL ====================
 function showCompanyDetail(companyId) {
     const modal = document.getElementById('companyDetailModal');
     modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
     
     document.getElementById('picsContainer').innerHTML = `
         <div style="text-align: center; padding: 1rem; color: #6b7280;">
@@ -230,8 +242,13 @@ function showCompanyDetail(companyId) {
     fetch(`/company/${companyId}`)
         .then(response => response.json())
         .then(data => {
+            console.log('Company data:', data);
+            
             if (data.success) {
                 const c = data.company;
+                
+                console.log('Logo data:', c.company_logo);
+                console.log('Full company object:', c);
 
                 // Basic info
                 document.getElementById('detailCompanyName').textContent = c.company_name || '-';
@@ -284,13 +301,15 @@ function showCompanyDetail(companyId) {
 
                 // Logo
                 const logoContainer = document.getElementById('detailLogoContainer');
-                if (c.company_logo) {
-                    logoContainer.innerHTML = `<img src="${c.company_logo}" style="max-width: 100%; max-height: 150px; border-radius: 0.75rem;">`;
+                console.log('Checking logo:', c.company_logo);
+                
+                if (c.company_logo && c.company_logo !== null && c.company_logo !== '') {
+                    logoContainer.innerHTML = `<img src="${c.company_logo}" style="max-width: 100%; max-height: 150px; border-radius: 0.75rem;" onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\\'width: 120px; height: 120px; background-color: #e5e7eb; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center;\\'><i class=\\'fas fa-image\\' style=\\'font-size: 2.5rem; color: #9ca3af;\\'></i></div>';">`;
                 } else {
                     logoContainer.innerHTML = `<div style="width: 120px; height: 120px; background-color: #e5e7eb; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center;"><i class="fas fa-image" style="font-size: 2.5rem; color: #9ca3af;"></i></div>`;
                 }
 
-                // PICs - COMPACT & ROUNDED
+                // PICs
                 const picsContainer = document.getElementById('picsContainer');
                 const picCount = document.getElementById('picCount');
                 
@@ -324,12 +343,14 @@ function showCompanyDetail(companyId) {
         });
 }
 
-function closeCompanyDetailModal() {
-    document.getElementById('companyDetailModal').style.display = 'none';
-}
-
-document.getElementById('companyDetailModal').addEventListener('click', function(e) {
-    if (e.target === this) closeCompanyDetailModal();
+// ==================== ESC KEY TO CLOSE ====================
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('companyDetailModal');
+        if (modal && modal.style.display === 'flex') {
+            closeCompanyDetailModal();
+        }
+    }
 });
 </script>
 

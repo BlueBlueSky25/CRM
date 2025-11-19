@@ -19,7 +19,7 @@
 
         <!-- Body - Two Column Layout with Independent Scrolling -->
         <div class="flex-1 overflow-hidden flex" style="background-color: #f3f4f6;">
-            <form id="editCompanyForm" method="POST" class="w-full flex overflow-hidden">
+            <form id="editCompanyForm" method="POST" enctype="multipart/form-data"  class="w-full flex overflow-hidden">
                 @csrf
                 @method('PUT')
                 <input type="hidden" id="edit_company_id" name="company_id">
@@ -135,10 +135,13 @@
                                 <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
                                     Provinsi
                                 </label>
-                                <select id="edit_province" 
+                                <select id="edit-province" 
                                         name="province_id"
                                         style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;">
                                     <option value="">-- Pilih Provinsi --</option>
+                                            @foreach($provinces as $province)
+                                                <option value="{{ $province->id }}">{{ $province->name }}</option>
+                                            @endforeach
                                 </select>
                             </div>
 
@@ -147,7 +150,7 @@
                                 <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
                                     Kabupaten/Kota
                                 </label>
-                                <select id="edit_regency" 
+                                <select id="edit-regency" 
                                         name="regency_id"
                                         style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;" disabled>
                                     <option value="">-- Pilih Kabupaten/Kota --</option>
@@ -159,7 +162,7 @@
                                 <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
                                     Kecamatan
                                 </label>
-                                <select id="edit_district" 
+                                <select id="edit-district" 
                                         name="district_id"
                                         style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;" disabled>
                                     <option value="">-- Pilih Kecamatan --</option>
@@ -171,7 +174,7 @@
                                 <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
                                     Kelurahan/Desa
                                 </label>
-                                <select id="edit_village" 
+                                <select id="edit-village" 
                                         name="village_id"
                                         style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;" disabled>
                                     <option value="">-- Pilih Kelurahan/Desa --</option>
@@ -183,8 +186,8 @@
                                 <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem;">
                                     Alamat Lengkap
                                 </label>
-                                <textarea id="edit_full_address"
-                                          name="full_address"
+                                <textarea id="edit-address"
+                                          name="address"
                                           rows="2" 
                                           style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem; resize: none;" 
                                           placeholder="Masukkan alamat lengkap perusahaan..."></textarea>
@@ -394,356 +397,3 @@ input:focus, select:focus, textarea:focus {
     div[style*="grid-template-columns: repeat(2, 1fr)"] { grid-template-columns: 1fr !important; }
 }
 </style>
-
-<script>
-let editPicCounter = 0;
-let currentEditCompanyId = null;
-
-async function openEditCompanyModal(companyId, companyName, companyTypeId, tier, description, status) {
-    console.log('=== OPEN EDIT MODAL ===');
-    console.log({ companyId, companyName, companyTypeId, tier, description, status });
-
-    // Set form action
-    const form = document.getElementById('editCompanyForm');
-    form.action = `/company/${companyId}`;
-    
-    currentEditCompanyId = companyId;
-
-    // Set basic fields
-    document.getElementById('edit_company_id').value = companyId || '';
-    document.getElementById('edit_company_name').value = companyName || '';
-    document.getElementById('edit_description').value = description || '';
-    document.getElementById('edit_status').value = status || 'active';
-
-    // Set company type
-    const typeSelect = document.getElementById('edit_company_type_id');
-    for (let opt of typeSelect.options) {
-        opt.selected = (opt.value == companyTypeId);
-    }
-
-    // Set tier
-    const tierSelect = document.getElementById('edit_tier');
-    for (let opt of tierSelect.options) {
-        opt.selected = (opt.value.toLowerCase() === String(tier).toLowerCase());
-    }
-
-    // Show modal
-    document.getElementById('editCompanyModal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    
-    // Initialize address cascade untuk edit form
-    setTimeout(() => {
-        initEditAddressCascade();
-    }, 100);
-    
-    // Load existing PICs
-    await loadEditCompanyPICs(companyId);
-}
-
-function closeEditCompanyModal() {
-    document.getElementById('editCompanyModal').classList.add('hidden');
-    document.body.style.overflow = 'auto';
-    document.getElementById('editCompanyForm').reset();
-    
-    // Reset PIC section
-    document.getElementById('edit-pic-fields-container').innerHTML = '';
-    editPicCounter = 0;
-    currentEditCompanyId = null;
-    
-    const content = document.getElementById('edit-pic-content');
-    const icon = document.getElementById('edit-pic-toggle-icon');
-    const statusText = document.getElementById('edit-pic-status');
-    
-    content.classList.add('hidden');
-    icon.style.transform = 'rotate(0deg)';
-    statusText.textContent = 'Loading...';
-    statusText.style.color = '#6b7280';
-
-    // Clear logo preview
-    clearEditLogoPreview();
-
-    // Destroy cascade instance
-    if (window.editCompanyCascade) {
-        window.editCompanyCascade.destroy();
-        window.editCompanyCascade = null;
-    }
-}
-
-async function loadEditCompanyPICs(companyId) {
-    const container = document.getElementById('edit-pic-fields-container');
-    const statusText = document.getElementById('edit-pic-status');
-    
-    statusText.textContent = 'Loading...';
-    statusText.style.color = '#6b7280';
-    
-    try {
-        const response = await fetch(`/company/${companyId}`);
-        const data = await response.json();
-        
-        console.log('✅ Company data loaded:', data);
-        
-        if (data.success && data.pics) {
-            container.innerHTML = '';
-            editPicCounter = 0;
-            
-            if (data.pics.length > 0) {
-                // Load existing PICs
-                data.pics.forEach(pic => {
-                    editPicCounter++;
-                    const picField = createEditPICField(editPicCounter, pic);
-                    container.appendChild(picField);
-                });
-                
-                statusText.textContent = `${data.pics.length} PIC`;
-                statusText.style.color = '#059669';
-                statusText.style.fontWeight = '500';
-                
-                // Auto expand section jika ada PIC
-                const content = document.getElementById('edit-pic-content');
-                const icon = document.getElementById('edit-pic-toggle-icon');
-                content.classList.remove('hidden');
-                icon.style.transform = 'rotate(180deg)';
-            } else {
-                statusText.textContent = 'Belum ada PIC';
-                statusText.style.color = '#6b7280';
-            }
-        }
-    } catch (error) {
-        console.error('❌ Error loading PICs:', error);
-        statusText.textContent = 'Error loading PICs';
-        statusText.style.color = '#ef4444';
-    }
-}
-
-function createEditPICField(index, picData = null) {
-    const picFieldGroup = document.createElement('div');
-    picFieldGroup.id = `edit-pic-group-${index}`;
-    picFieldGroup.style.cssText = 'background-color: white; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 0.75rem;';
-    
-    const picName = picData?.pic_name || '';
-    const position = picData?.position || '';
-    const phone = picData?.phone || '';
-    const email = picData?.email || '';
-    
-    picFieldGroup.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-            <span style="font-size: 0.75rem; font-weight: 600; color: #4f46e5;">PIC #${index}</span>
-            <button type="button" 
-                    onclick="removeEditPICField(${index})" 
-                    style="background-color: #ef4444; color: white; border: none; border-radius: 0.375rem; padding: 0.25rem 0.5rem; font-size: 0.625rem; cursor: pointer;">
-                <i class="fas fa-trash"></i>
-            </button>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
-            <div style="grid-column: span 2;">
-                <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.25rem;">
-                    Nama PIC <span style="color: #ef4444;">*</span>
-                </label>
-                <input type="text" 
-                       name="pics[${index - 1}][pic_name]" 
-                       value="${picName}"
-                       placeholder="Contoh: John Doe"
-                       style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem; font-size: 0.75rem;"
-                       oninput="checkEditPICCompletion()"
-                       required>
-            </div>
-            
-            <div>
-                <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.25rem;">
-                    Position
-                </label>
-                <input type="text" 
-                       name="pics[${index - 1}][position]" 
-                       value="${position}"
-                       placeholder="Contoh: Manager"
-                       style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem; font-size: 0.75rem;"
-                       oninput="checkEditPICCompletion()">
-            </div>
-            
-            <div>
-                <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.25rem;">
-                    Phone
-                </label>
-                <input type="text" 
-                       name="pics[${index - 1}][phone]" 
-                       value="${phone}"
-                       placeholder="Contoh: 08123456789"
-                       style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem; font-size: 0.75rem;"
-                       oninput="checkEditPICCompletion()">
-            </div>
-            
-            <div style="grid-column: span 2;">
-                <label style="display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.25rem;">
-                    Email
-                </label>
-                <input type="email" 
-                       name="pics[${index - 1}][email]" 
-                       value="${email}"
-                       placeholder="Contoh: john@company.com"
-                       style="width: 100%; background-color: #ffffff; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem; font-size: 0.75rem;"
-                       oninput="checkEditPICCompletion()">
-            </div>
-        </div>
-    `;
-    
-    return picFieldGroup;
-}
-
-function addEditPICField() {
-    editPicCounter++;
-    const container = document.getElementById('edit-pic-fields-container');
-    const picField = createEditPICField(editPicCounter);
-    container.appendChild(picField);
-    checkEditPICCompletion();
-    
-    // Auto-expand section
-    const content = document.getElementById('edit-pic-content');
-    const icon = document.getElementById('edit-pic-toggle-icon');
-    content.classList.remove('hidden');
-    icon.style.transform = 'rotate(180deg)';
-}
-
-function removeEditPICField(picIndex) {
-    const field = document.getElementById(`edit-pic-group-${picIndex}`);
-    if (field) {
-        field.remove();
-        checkEditPICCompletion();
-    }
-}
-
-function toggleEditPICSection() {
-    const content = document.getElementById('edit-pic-content');
-    const icon = document.getElementById('edit-pic-toggle-icon');
-    
-    if (content.classList.contains('hidden')) {
-        content.classList.remove('hidden');
-        icon.style.transform = 'rotate(180deg)';
-    } else {
-        content.classList.add('hidden');
-        icon.style.transform = 'rotate(0deg)';
-    }
-}
-
-function checkEditPICCompletion() {
-    const container = document.getElementById('edit-pic-fields-container');
-    const picGroups = container.querySelectorAll('[id^="edit-pic-group-"]');
-    const statusText = document.getElementById('edit-pic-status');
-    
-    if (picGroups.length === 0) {
-        statusText.textContent = 'Belum ada PIC';
-        statusText.style.color = '#6b7280';
-        statusText.style.fontWeight = 'normal';
-    } else {
-        let filledCount = 0;
-        picGroups.forEach(group => {
-            const nameInput = group.querySelector('input[name*="[pic_name]"]');
-            if (nameInput && nameInput.value.trim() !== '') {
-                filledCount++;
-            }
-        });
-        
-        if (filledCount > 0) {
-            statusText.textContent = `${filledCount} PIC`;
-            statusText.style.color = '#059669';
-            statusText.style.fontWeight = '500';
-        } else {
-            statusText.textContent = `${picGroups.length} PIC (belum diisi)`;
-            statusText.style.color = '#f59e0b';
-            statusText.style.fontWeight = '500';
-        }
-    }
-}
-
-function previewEditLogo(event) {
-    const file = event.target.files[0];
-    if (file) {
-        if (file.size > 5 * 1024 * 1024) {
-            alert('Ukuran file terlalu besar! Maksimal 5MB');
-            document.getElementById('edit_company_logo').value = '';
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('editLogoPreview').src = e.target.result;
-            document.getElementById('editLogoPreviewContainer').style.display = 'block';
-            document.getElementById('editLogoUploadPrompt').style.display = 'none';
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
-function clearEditLogoPreview() {
-    document.getElementById('edit_company_logo').value = '';
-    document.getElementById('editLogoPreviewContainer').style.display = 'none';
-    document.getElementById('editLogoUploadPrompt').style.display = 'block';
-}
-
-function initEditAddressCascade() {
-    console.log('Initializing edit company cascade...');
-    
-    if (window.editCompanyCascade) {
-        window.editCompanyCascade.destroy();
-    }
-
-    window.editCompanyCascade = new AddressCascade({
-        provinceId: 'edit_province',
-        regencyId: 'edit_regency',
-        districtId: 'edit_district',
-        villageId: 'edit_village',
-        baseUrl: '/api/'
-    });
-}
-
-// Drag and drop untuk edit logo
-document.addEventListener('DOMContentLoaded', function() {
-    const dropZone = document.getElementById('editLogoDropZone');
-    if (dropZone) {
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.style.borderColor = '#3b82f6';
-            dropZone.style.backgroundColor = '#eff6ff';
-        });
-
-        dropZone.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            dropZone.style.borderColor = '#d1d5db';
-            dropZone.style.backgroundColor = '#fafafa';
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                document.getElementById('edit_company_logo').files = files;
-                previewEditLogo({ target: { files } });
-            }
-            dropZone.style.borderColor = '#d1d5db';
-            dropZone.style.backgroundColor = '#fafafa';
-        });
-
-        dropZone.addEventListener('click', () => {
-            document.getElementById('edit_company_logo').click();
-        });
-    }
-});
-
-// Close modal when clicking outside
-document.addEventListener('click', function(e) {
-    const modal = document.getElementById('editCompanyModal');
-    if (e.target === modal) {
-        closeEditCompanyModal();
-    }
-});
-
-// Close modal with ESC key
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        const modal = document.getElementById('editCompanyModal');
-        if (modal && !modal.classList.contains('hidden')) {
-            closeEditCompanyModal();
-        }
-    }
-});
-</script>

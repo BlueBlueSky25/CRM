@@ -70,10 +70,12 @@
 </div>
 
 <!-- Modals -->
-<x-company.action.action :types="$types"/>
-<x-company.action.edit :types="$types"/>
+<x-company.action.action :types="$types" :provinces="$provinces"/>
+<x-company.action.edit :types="$types" :provinces="$provinces"/>
 
 @push('scripts')
+<script src="{{ asset('js/address-cascade.js') }}"></script>
+<script src="{{ asset('js/company-modal.js') }}"></script>
 <script src="{{ asset('js/search.js') }}"></script>
 @endpush
 
@@ -103,49 +105,45 @@
 </style>
 
 <script>
-// Function untuk delete company
+// ==================== DELETE FUNCTION ====================
 function deleteCompany(companyId, deleteRoute, csrfToken) {
-    console.log('deleteCompany called:', {companyId, deleteRoute, csrfToken});
+    console.log('🗑️ Delete company:', {companyId, deleteRoute, csrfToken});
     
     deleteRecord(companyId, deleteRoute, csrfToken, (data) => {
-        console.log('Delete success:', data);
-        // Refresh table setelah delete sukses
+        console.log('✅ Delete success:', data);
         if (window.companyTableHandler) {
-            console.log('Refreshing table...');
+            console.log('🔄 Refreshing table...');
             window.companyTableHandler.refresh();
         } else {
-            console.warn('companyTableHandler not found, reloading page');
+            console.warn('⚠️ companyTableHandler not found, reloading page');
             location.reload();
         }
     });
 }
 
-// Initialize setelah DOM siap
+// ==================== TABLE HANDLER INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Company page loaded');
+    console.log('📋 Company page loaded');
     
     if (typeof TableHandler === 'undefined') {
-        console.error('TableHandler class not found. search.js may not be loaded.');
+        console.error('❌ TableHandler class not found. search.js may not be loaded.');
         return;
     }
 
-    console.log('Creating TableHandler instance...');
+    console.log('🎯 Creating TableHandler instance...');
     
     try {
         window.companyTableHandler = new TableHandler({
             tableId: 'companyTable',
             ajaxUrl: '{{ route("company.search") }}',
-            filters: ['type', 'tier', 'status'], // lowercase!
+            filters: ['type', 'tier', 'status'],
             columns: ['number', 'company_name', 'company_type', 'tier', 'description', 'status', 'actions']
         });
         
-        console.log('TableHandler initialized successfully:', window.companyTableHandler);
+        console.log('✅ TableHandler initialized:', window.companyTableHandler);
     } catch (error) {
-        console.error('Error initializing TableHandler:', error);
+        console.error('❌ Error initializing TableHandler:', error);
     }
-
-    console.log('deleteCompany function available:', typeof deleteCompany !== 'undefined');
-    console.log('showNotification function available:', typeof showNotification !== 'undefined');
 });
 </script>
 @endsection
