@@ -13,15 +13,19 @@ class TransaksiController extends Controller
 {
     public function index()
     {
+        // Load sales visits dengan eager load relationships
+        $salesVisits = SalesVisit::with(['company', 'sales', 'user'])
+            ->orderBy('id', 'desc')
+            ->get();
+
         $transaksi = Transaksi::with(['sales', 'company', 'salesVisit'])
             ->orderBy('created_at', 'desc')
             ->get();
         
-        // FIXED: Ambil semua user, biarkan select di frontend filter
+        // Get all users (sales) - tanpa order by dulu untuk cek field
         $sales = User::all();
-        
+
         $companies = Company::all();
-        $salesVisits = SalesVisit::with('company')->get();
         $currentMenuId = 17;
         
         return view('pages.transaksi', compact('transaksi', 'sales', 'companies', 'salesVisits', 'currentMenuId'));
@@ -66,7 +70,7 @@ class TransaksiController extends Controller
 
     public function edit($id)
     {
-        $item = Transaksi::findOrFail($id);
+        $item = Transaksi::with(['sales', 'company', 'salesVisit'])->findOrFail($id);
         return response()->json($item);
     }
 
@@ -130,16 +134,19 @@ class TransaksiController extends Controller
     {
         $search = $request->input('search');
 
-        $transaksi = Transaksi::with(['sales', 'company'])
+        $transaksi = Transaksi::with(['sales', 'company', 'salesVisit'])
             ->where('nama_sales', 'like', "%{$search}%")
             ->orWhere('nama_perusahaan', 'like', "%{$search}%")
             ->orWhere('status', 'like', "%{$search}%")
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $salesVisits = SalesVisit::with(['company', 'sales', 'user'])
+            ->orderBy('id', 'desc')
+            ->get();
+
         $sales = User::all();
         $companies = Company::all();
-        $salesVisits = SalesVisit::with('company')->get();
         $currentMenuId = 17;
 
         return view('pages.transaksi', compact('transaksi', 'sales', 'companies', 'salesVisits', 'currentMenuId'));

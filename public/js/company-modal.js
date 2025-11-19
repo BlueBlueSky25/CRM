@@ -1,4 +1,4 @@
-// ==================== COMPANY MODALS JAVASCRIPT ====================
+// ==================== COMPANY MODALS JAVASCRIPT (FINAL FIX) ====================
 // File: public/js/company-modals.js
 // Dependencies: address-cascade.js (must be loaded first)
 
@@ -88,6 +88,7 @@ function initAddAddressCascade() {
         console.error('❌ Error initializing add company cascade:', error);
     }
 }
+
 // ==================== EDIT COMPANY MODAL ====================
 
 async function openEditCompanyModal(companyId, companyName, companyTypeId, tier, description, status) {
@@ -120,16 +121,19 @@ async function openEditCompanyModal(companyId, companyName, companyTypeId, tier,
     document.getElementById('editCompanyModal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     
-    // Initialize address cascade
-    setTimeout(() => {
+    // ✅ Initialize cascade FIRST, then load data
+    setTimeout(async () => {
         initEditAddressCascade();
+        
+        // Wait a bit for cascade to initialize
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // Load full company data
+        await loadEditCompanyData(companyId);
+        
+        // Load PICs
+        await loadEditCompanyPICs(companyId);
     }, 100);
-    
-    // Load full company data
-    await loadEditCompanyData(companyId);
-    
-    // Load PICs
-    await loadEditCompanyPICs(companyId);
 }
 
 function closeEditCompanyModal() {
@@ -170,14 +174,16 @@ function initEditAddressCascade() {
         window.editCompanyCascade.destroy();
     }
 
-    // 🔥 Using global AddressCascade class
+    // ✅ FIXED: baseUrl harus sesuai dengan route di web.php
     window.editCompanyCascade = new AddressCascade({
-        provinceId: 'edit_province',
-        regencyId: 'edit_regency',
-        districtId: 'edit_district',
-        villageId: 'edit_village',
-        baseUrl: '/api/'
+        provinceId: 'edit-province',
+        regencyId: 'edit-regency',
+        districtId: 'edit-district',
+        villageId: 'edit-village',
+        baseUrl: '/company/' 
     });
+    
+    console.log('✅ Edit cascade initialized');
 }
 
 async function loadEditCompanyData(companyId) {
@@ -186,6 +192,8 @@ async function loadEditCompanyData(companyId) {
     try {
         const response = await fetch(`/company/${companyId}`);
         const data = await response.json();
+        
+        console.log('📦 Company data received:', data);
         
         if (data.success) {
             const c = data.company;
@@ -203,7 +211,7 @@ async function loadEditCompanyData(companyId) {
                 addressField.value = c.address && c.address !== '-' ? c.address : '';
             }
             
-            // 🔥 Load address cascade with values
+            // ✅ FIXED: Load address cascade
             if (window.editCompanyCascade && c.province_id) {
                 console.log('🗺️ Loading cascade with values:', {
                     province_id: c.province_id,
@@ -212,19 +220,45 @@ async function loadEditCompanyData(companyId) {
                     village_id: c.village_id
                 });
                 
-                await window.editCompanyCascade.loadWithValues(
-                    c.province_id,
-                    c.regency_id,
-                    c.district_id,
-                    c.village_id
-                );
+                try {
+                    await window.editCompanyCascade.loadWithValues(
+                        c.province_id,
+                        c.regency_id,
+                        c.district_id,
+                        c.village_id
+                    );
+                    console.log('✅ Address cascade loaded successfully');
+                } catch (cascadeError) {
+                    console.error('❌ Cascade error:', cascadeError);
+                }
+            } else {
+                console.warn('⚠️ No cascade instance or province_id');
             }
             
-            // Show logo preview
-            if (c.company_logo) {
-                document.getElementById('editLogoPreview').src = c.company_logo;
-                document.getElementById('editLogoPreviewContainer').style.display = 'block';
-                document.getElementById('editLogoUploadPrompt').style.display = 'none';
+            // ✅ FIXED: Logo preview with better error handling
+            const logoPreviewContainer = document.getElementById('editLogoPreviewContainer');
+            const logoPreview = document.getElementById('editLogoPreview');
+            const logoUploadPrompt = document.getElementById('editLogoUploadPrompt');
+            
+            if (c.company_logo && c.company_logo !== null && c.company_logo !== '' && c.company_logo !== '-') {
+                console.log('🖼️ Loading logo:', c.company_logo);
+                
+                const testImg = new Image();
+                testImg.onload = function() {
+                    logoPreview.src = c.company_logo;
+                    logoPreviewContainer.style.display = 'block';
+                    logoUploadPrompt.style.display = 'none';
+                    console.log('✅ Logo loaded');
+                };
+                testImg.onerror = function() {
+                    console.error('❌ Logo failed to load');
+                    logoPreviewContainer.style.display = 'none';
+                    logoUploadPrompt.style.display = 'block';
+                };
+                testImg.src = c.company_logo;
+            } else {
+                logoPreviewContainer.style.display = 'none';
+                logoUploadPrompt.style.display = 'block';
             }
             
             console.log('✅ Company data loaded successfully');
@@ -244,9 +278,10 @@ async function loadEditCompanyPICs(companyId) {
     statusText.style.color = '#6b7280';
     
     try {
-        // Gunakan data yang sudah di-load dari loadEditCompanyData
-        const response = await fetch(`/company/${companyId}/pics`); // ✅ Endpoint khusus PIC
+        const response = await fetch(`/company/${companyId}/pics`);
         const data = await response.json();
+        
+        console.log('📦 PICs data:', data);
         
         if (data.success && data.pics) {
             container.innerHTML = '';
@@ -268,6 +303,8 @@ async function loadEditCompanyPICs(companyId) {
                 const icon = document.getElementById('edit-pic-toggle-icon');
                 content.classList.remove('hidden');
                 icon.style.transform = 'rotate(180deg)';
+                
+                console.log('✅ PICs loaded successfully');
             } else {
                 statusText.textContent = 'Belum ada PIC';
                 statusText.style.color = '#6b7280';
@@ -655,4 +692,4 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-console.log('✅ company-modals.js loaded successfully');
+console.log('✅ company-modals.js loaded successfully (FINAL FIX)');

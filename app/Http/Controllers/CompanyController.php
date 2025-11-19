@@ -6,6 +6,9 @@ use App\Models\Company;
 use App\Models\CompanyType;
 use App\Models\CompanyPic;
 use App\Models\Province;
+use App\Models\Regency;
+use App\Models\District;
+use App\Models\Village;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -51,6 +54,101 @@ class CompanyController extends Controller
             'provinces'
         ));
     }
+
+     public function getRegencies($province_id)
+    {
+        try {
+            $regencies = Regency::where('province_id', $province_id)
+                ->orderBy('name', 'asc')
+                ->get(['id', 'name']);
+            
+            return response()->json([
+                'success' => true,
+                'data' => $regencies
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching regencies: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get districts by regency ID
+     */
+    public function getDistricts($regency_id)
+    {
+        try {
+            $districts = District::where('regency_id', $regency_id)
+                ->orderBy('name', 'asc')
+                ->get(['id', 'name']);
+            
+            return response()->json([
+                'success' => true,
+                'data' => $districts
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching districts: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get villages by district ID
+     */
+    public function getVillages($district_id)
+    {
+        try {
+            $villages = Village::where('district_id', $district_id)
+                ->orderBy('name', 'asc')
+                ->get(['id', 'name']);
+            
+            return response()->json([
+                'success' => true,
+                'data' => $villages
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching villages: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get PICs for a company (for edit modal)
+     */
+    public function getCompanyPics($id)
+    {
+        try {
+            $pics = CompanyPIC::where('company_id', $id)
+                ->orderBy('pic_name', 'asc')
+                ->get();
+            
+            return response()->json([
+                'success' => true,
+                'pics' => $pics->map(function($pic) {
+                    return [
+                        'pic_id' => $pic->pic_id,
+                        'pic_name' => $pic->pic_name,
+                        'position' => $pic->position ?? '-',
+                        'phone' => $pic->phone ?? '-',
+                        'email' => $pic->email ?? '-'
+                    ];
+                })
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error loading PICs: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error loading PICs: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
 
     public function search(Request $request)
     {
