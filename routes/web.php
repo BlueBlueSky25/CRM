@@ -14,6 +14,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\SalesVisitController;
 use App\Http\Controllers\PicController;
 use App\Http\Controllers\TransaksiController;
+use App\Http\Controllers\SalesPerformanceController;
 
 
 // ==========================
@@ -219,4 +220,11 @@ Route::middleware(['auth', 'permission'])->group(function () {
         Route::get('/tier/{tier}', [CompanyChartController::class, 'getTierDetailPie']);
         Route::get('/export', [CompanyChartController::class, 'exportGeoDataPie']);
     });
+
+    // ==========================
+    // bar sales CHART ROUTES
+    // ==========================
+    Route::get('/api/sales-performance', [SalesPerformanceController::class, 'getSalesPerformance']);
+    Route::get('/api/sales-performance/{userId}', [SalesPerformanceController::class, 'getSalesDetail']);
+    Route::get('/api/sales-list', [SalesPerformanceController::class, 'getSalesList']);
 });
