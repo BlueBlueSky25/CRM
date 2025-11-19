@@ -30,7 +30,7 @@
                     </td>
                     <td class="px-3 py-2 text-xs text-gray-900">{{ $user->phone ?? '-' }}</td>
                     <td class="px-3 py-2 text-xs text-gray-900">
-                        {{ $user->birth_date ? date('d-m-Y', strtotime($user->birth_date)) : '-' }}
+                        {{ $user->birth_date ? date('d/m/Y', strtotime($user->birth_date)) : '-' }}
                     </td>
                     <td class="px-3 py-2 max-w-xs">
                         <div class="text-xs text-gray-900">

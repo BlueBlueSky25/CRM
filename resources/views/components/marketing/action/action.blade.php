@@ -9,7 +9,7 @@
                     <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
                         <i class="fas fa-user-plus text-white text-lg"></i>
                     </div>
-                    <h3 class="text-xl font-semibold text-white">Tambah Marketing Baru</h3>
+                    <h3 class="text-xl font-semibold text-white">Tambah Sales Baru</h3>
                 </div>
                 <button onclick="closeAddSalesModal()" class="text-white hover:text-gray-200 transition-colors p-2">
                     <i class="fas fa-times text-xl"></i>

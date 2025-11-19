@@ -30,7 +30,7 @@
                         </span>
                     @endif
                 </td>
-                <td style="padding: 0.625rem 0.75rem; color: #6b7280; font-size: 0.75rem;">{{ $item->created_at->format('d M Y') }}</td>
+                <td style="padding: 0.625rem 0.75rem; color: #6b7280; font-size: 0.75rem;">{{ $item->created_at->format('d/m/Y') }}</td>
                 <td style="padding: 0.625rem 0.75rem; text-align: right;">
                     <div style="display: flex; gap: 0.375rem; justify-content: flex-end;">
                         <button onclick="viewTransaksi({{ $item->id }})"
