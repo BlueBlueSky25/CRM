@@ -14,18 +14,31 @@ class TransaksiController extends Controller
     public function index()
     {
         // Load sales visits dengan eager load relationships
-        $salesVisits = SalesVisit::with(['company', 'sales', 'user'])
-            ->orderBy('id', 'desc')
-            ->get();
+        $salesVisits = SalesVisit::with([
+            'company',
+            'sales',
+            'user'
+        ])->orderBy('id', 'desc')->get();
 
-        $transaksi = Transaksi::with(['sales', 'company', 'salesVisit'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        // Load transaksi dengan relationships
+        $transaksi = Transaksi::with([
+            'sales',
+            'company',
+            'salesVisit'
+        ])->orderBy('created_at', 'desc')->get();
         
-        // Get all users (sales) - tanpa order by dulu untuk cek field
+        // Get all users (sales)
         $sales = User::all();
 
-        $companies = Company::all();
+        // Get all companies dengan relationships
+        $companies = Company::with([
+            'province',
+            'regency',
+            'district',
+            'village',
+            'companyType'
+        ])->orderBy('company_name', 'asc')->get();
+
         $currentMenuId = 17;
         
         return view('pages.transaksi', compact('transaksi', 'sales', 'companies', 'salesVisits', 'currentMenuId'));
@@ -146,7 +159,15 @@ class TransaksiController extends Controller
             ->get();
 
         $sales = User::all();
-        $companies = Company::all();
+        
+        $companies = Company::with([
+            'province',
+            'regency',
+            'district',
+            'village',
+            'companyType'
+        ])->orderBy('company_name', 'asc')->get();
+
         $currentMenuId = 17;
 
         return view('pages.transaksi', compact('transaksi', 'sales', 'companies', 'salesVisits', 'currentMenuId'));

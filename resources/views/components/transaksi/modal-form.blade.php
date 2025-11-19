@@ -8,7 +8,10 @@
                 </div>
                 <h3 id="modalTitle" style="color: white; font-weight: 600; margin: 0; font-size: 0.95rem;">Tambah Transaksi Baru</h3>
             </div>
-            <button onclick="closeTransaksiModal()" style="background: none; border: none; color: white; font-size: 1.25rem; cursor: pointer;">×</button>
+            <button onclick="closeTransaksiModal()" 
+                    class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
         </div>
 
         <!-- Form Container dengan 2 Kolom -->
@@ -34,7 +37,7 @@
                             @foreach ($salesVisits as $visit)
                                 @php
                                     $salesName = $visit->sales?->username ?? $visit->user?->username ?? 'N/A';
-                                    $companyName = $visit->company?->nama ?? $visit->company_name ?? 'N/A';
+                                    $companyName = $visit->company?->company_name ?? $visit->company_name ?? 'N/A';
                                     $salesId = $visit->sales_id ?? $visit->user_id;
                                 @endphp
                                 <option value="{{ $visit->id }}" 
@@ -88,26 +91,54 @@
                         </label>
                         <select name="company_id" id="company_id"
                             style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.3rem; font-size: 0.75rem;"
-                            required onchange="updateCompanyName()"
+                            required onchange="updateCompanyInfo()"
                             onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'"
                             onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='none'">
                             <option value="">-- Pilih Perusahaan --</option>
                             @foreach ($companies as $company)
-                                <option value="{{ $company->company_id }}" data-name="{{ $company->nama }}">
-                                    {{ $company->nama }}
+                                <option value="{{ $company->company_id }}" 
+                                    data-name="{{ $company->company_name }}"
+                                    data-type="{{ $company->companyType?->type_name ?? 'N/A' }}"
+                                    data-phone="{{ $company->phone ?? '' }}"
+                                    data-email="{{ $company->email ?? '' }}"
+                                    data-address="{{ $company->full_address ?? $company->address ?? '' }}">
+                                    {{ $company->company_name }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
 
                     <!-- Nama Perusahaan (Auto-filled) -->
-                    <div>
+                    <div style="margin-bottom: 1rem;">
                         <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
                             Nama Perusahaan <span style="color: #dc2626;">*</span>
                         </label>
                         <input type="text" name="nama_perusahaan" id="nama_perusahaan"
                             style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.3rem; font-size: 0.75rem; background-color: #f9fafb; color: #111827;"
                             required readonly>
+                    </div>
+
+                    <!-- Company Info Box -->
+                    <div id="companyInfoBox" style="display: none; background-color: #f3f4f6; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.75rem; margin-bottom: 1rem;">
+                        <p style="margin: 0 0 0.375rem 0; font-size: 0.65rem; color: #6b7280; font-weight: 600;">INFORMASI PERUSAHAAN</p>
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 0.5rem;">
+                            <div>
+                                <p style="margin: 0; font-size: 0.65rem; color: #6b7280;">Tipe:</p>
+                                <p id="companyType" style="margin: 0; font-size: 0.75rem; color: #111827; font-weight: 500;">-</p>
+                            </div>
+                            <div>
+                                <p style="margin: 0; font-size: 0.65rem; color: #6b7280;">Telepon:</p>
+                                <p id="companyPhone" style="margin: 0; font-size: 0.75rem; color: #111827; font-weight: 500;">-</p>
+                            </div>
+                            <div>
+                                <p style="margin: 0; font-size: 0.65rem; color: #6b7280;">Email:</p>
+                                <p id="companyEmail" style="margin: 0; font-size: 0.75rem; color: #111827; font-weight: 500;">-</p>
+                            </div>
+                            <div>
+                                <p style="margin: 0; font-size: 0.65rem; color: #6b7280;">Alamat:</p>
+                                <p id="companyAddress" style="margin: 0; font-size: 0.75rem; color: #111827; font-weight: 500;">-</p>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -264,6 +295,9 @@
             document.getElementById('company_id').value = companyId;
             document.getElementById('nama_perusahaan').value = companyName;
             
+            // Trigger updateCompanyInfo untuk tampilkan info perusahaan
+            updateCompanyInfo();
+            
             // Set Sales
             document.getElementById('sales_id').value = salesId;
             document.getElementById('nama_sales').value = salesName;
@@ -280,6 +314,29 @@
             document.getElementById('nama_sales').value = '';
             document.getElementById('tanggal_mulai_kerja').value = '';
             document.getElementById('tanggal_selesai_kerja').value = '';
+            document.getElementById('companyInfoBox').style.display = 'none';
+        }
+    }
+
+    // Update informasi perusahaan yang detail
+    function updateCompanyInfo() {
+        const select = document.getElementById('company_id');
+        const selected = select.options[select.selectedIndex];
+        
+        if (selected.value) {
+            // Update nama perusahaan
+            document.getElementById('nama_perusahaan').value = selected.getAttribute('data-name') || '';
+            
+            // Update company info box
+            document.getElementById('companyType').textContent = selected.getAttribute('data-type') || '-';
+            document.getElementById('companyPhone').textContent = selected.getAttribute('data-phone') || '-';
+            document.getElementById('companyEmail').textContent = selected.getAttribute('data-email') || '-';
+            document.getElementById('companyAddress').textContent = selected.getAttribute('data-address') || '-';
+            
+            // Tampilkan company info box
+            document.getElementById('companyInfoBox').style.display = 'block';
+        } else {
+            document.getElementById('companyInfoBox').style.display = 'none';
         }
     }
 
@@ -288,13 +345,6 @@
         const select = document.getElementById('sales_id');
         const selected = select.options[select.selectedIndex];
         document.getElementById('nama_sales').value = selected.getAttribute('data-name') || '';
-    }
-
-    // Update nama perusahaan saat dipilih
-    function updateCompanyName() {
-        const select = document.getElementById('company_id');
-        const selected = select.options[select.selectedIndex];
-        document.getElementById('nama_perusahaan').value = selected.getAttribute('data-name') || '';
     }
 
     // Update nama file yang diupload
@@ -437,6 +487,7 @@
         document.getElementById('transaksiId').value = '';
         document.getElementById('submitBtn').innerHTML = '<i class="fas fa-check"></i> Deals';
         document.getElementById('submitBtnFail').innerHTML = '<i class="fas fa-times"></i> Fails';
+        document.getElementById('companyInfoBox').style.display = 'none';
         
         // Reset file names
         document.getElementById('bukti_spk_name').textContent = '';
@@ -464,6 +515,9 @@
                 document.getElementById('tanggal_mulai_kerja').value = data.tanggal_mulai_kerja || '';
                 document.getElementById('tanggal_selesai_kerja').value = data.tanggal_selesai_kerja || '';
                 document.getElementById('keterangan').value = data.keterangan || '';
+                
+                // Trigger updateCompanyInfo untuk tampilkan info
+                updateCompanyInfo();
                 
                 document.getElementById('formMethod').value = 'PUT';
                 document.getElementById('modalTitle').textContent = 'Edit Transaksi';
