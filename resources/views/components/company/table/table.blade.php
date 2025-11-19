@@ -217,10 +217,6 @@
 </div>
 
 <script>
-function closeCompanyDetailModal() {
-    document.getElementById('companyDetailModal').style.display = 'none';
-}
-
 function showCompanyDetail(companyId) {
     const modal = document.getElementById('companyDetailModal');
     modal.style.display = 'flex';
@@ -234,11 +230,12 @@ function showCompanyDetail(companyId) {
     fetch(`/company/${companyId}`)
         .then(response => response.json())
         .then(data => {
-            console.log('Company data:', data);
+            console.log('Company data:', data); // Tambahkan ini untuk debugging
             
             if (data.success) {
                 const c = data.company;
                 
+                // Tambahkan ini untuk debugging logo
                 console.log('Logo data:', c.company_logo);
                 console.log('Full company object:', c);
 
@@ -291,7 +288,7 @@ function showCompanyDetail(companyId) {
                     document.getElementById('detailCompanyInstagram').innerHTML = '<span style="color: #111827;">-</span>';
                 }
 
-                // Logo
+                // Logo - Diperbaiki dengan lebih banyak debugging
                 const logoContainer = document.getElementById('detailLogoContainer');
                 console.log('Checking logo:', c.company_logo);
                 
@@ -301,7 +298,7 @@ function showCompanyDetail(companyId) {
                     logoContainer.innerHTML = `<div style="width: 120px; height: 120px; background-color: #e5e7eb; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center;"><i class="fas fa-image" style="font-size: 2.5rem; color: #9ca3af;"></i></div>`;
                 }
 
-                // PICs
+                // PICs - COMPACT & ROUNDED
                 const picsContainer = document.getElementById('picsContainer');
                 const picCount = document.getElementById('picCount');
                 
