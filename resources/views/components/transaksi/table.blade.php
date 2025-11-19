@@ -5,6 +5,7 @@
             <tr>
                 <th style="padding: 0.625rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 600; color: #4b5563; text-transform: uppercase; letter-spacing: 0.5px;">Nama Sales</th>
                 <th style="padding: 0.625rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 600; color: #4b5563; text-transform: uppercase; letter-spacing: 0.5px;">Perusahaan</th>
+                <th style="padding: 0.625rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 600; color: #4b5563; text-transform: uppercase; letter-spacing: 0.5px;">PIC</th>
                 <th style="padding: 0.625rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 600; color: #4b5563; text-transform: uppercase; letter-spacing: 0.5px;">Nilai Proyek</th>
                 <th style="padding: 0.625rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 600; color: #4b5563; text-transform: uppercase; letter-spacing: 0.5px;">Status</th>
                 <th style="padding: 0.625rem 0.75rem; text-align: left; font-size: 0.7rem; font-weight: 600; color: #4b5563; text-transform: uppercase; letter-spacing: 0.5px;">Tanggal</th>
@@ -18,6 +19,24 @@
                 onmouseout="this.style.backgroundColor='white'">
                 <td style="padding: 0.625rem 0.75rem; font-weight: 500; color: #111827; font-size: 0.8rem;">{{ $item->nama_sales }}</td>
                 <td style="padding: 0.625rem 0.75rem; color: #6b7280; font-size: 0.75rem;">{{ $item->nama_perusahaan }}</td>
+                <td style="padding: 0.625rem 0.75rem; color: #111827; font-size: 0.75rem; font-weight: 500;">
+                    @if($item->pic)
+                        <span style="display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0.5rem; background-color: #e0f2fe; color: #0369a1; border-radius: 0.25rem; font-weight: 600;">
+                            <i class="fas fa-user-tie" style="font-size: 0.65rem;"></i>
+                            {{ $item->pic->pic_name }}
+                        </span>
+                    @elseif($item->pic_name)
+                        <span style="display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0.5rem; background-color: #fef3c7; color: #92400e; border-radius: 0.25rem; font-weight: 600;">
+                            <i class="fas fa-user-tie" style="font-size: 0.65rem;"></i>
+                            {{ $item->pic_name }}
+                        </span>
+                    @else
+                        <span style="display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0.5rem; background-color: #e5e7eb; color: #6b7280; border-radius: 0.25rem; font-weight: 600;">
+                            <i class="fas fa-user-slash" style="font-size: 0.65rem;"></i>
+                            Tidak ada
+                        </span>
+                    @endif
+                </td>
                 <td style="padding: 0.625rem 0.75rem; font-weight: 600; color: #111827; font-size: 0.8rem;">Rp{{ number_format($item->nilai_proyek, 0, ',', '.') }}</td>
                 <td style="padding: 0.625rem 0.75rem;">
                     @if ($item->status === 'Deals')

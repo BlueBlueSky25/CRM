@@ -15,8 +15,10 @@ class Transaksi extends Model
         'sales_visit_id',
         'sales_id',
         'company_id',
+        'pic_id',
         'nama_sales',
         'nama_perusahaan',
+        'pic_name',
         'nilai_proyek',
         'status',
         'bukti_spk',
@@ -49,6 +51,11 @@ class Transaksi extends Model
         return $this->belongsTo(Company::class, 'company_id', 'company_id');
     }
 
+    public function pic()
+    {
+        return $this->belongsTo(CompanyPic::class, 'pic_id', 'pic_id');
+    }
+
     // ============= SCOPES =============
 
     public function scopeDeals($query)
@@ -79,22 +86,16 @@ class Transaksi extends Model
     public function scopeSearchByName($query, $search)
     {
         return $query->where('nama_sales', 'like', "%{$search}%")
-                     ->orWhere('nama_perusahaan', 'like', "%{$search}%");
+                    ->orWhere('nama_perusahaan', 'like', "%{$search}%");
     }
 
     // ============= ACCESSORS =============
 
-    /**
-     * Format nilai proyek ke Rupiah
-     */
     public function getValueFormattedAttribute()
     {
         return 'Rp' . number_format($this->nilai_proyek, 0, ',', '.');
     }
 
-    /**
-     * Get status badge HTML
-     */
     public function getStatusBadgeAttribute()
     {
         if ($this->status === 'Deals') {

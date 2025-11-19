@@ -13,18 +13,20 @@ class TransaksiController extends Controller
 {
     public function index()
     {
-        // Load sales visits dengan eager load relationships
+        // Load sales visits dengan eager load pic + company
         $salesVisits = SalesVisit::with([
             'company',
             'sales',
-            'user'
+            'user',
+            'pic'  // Load PIC langsung dari SalesVisit!
         ])->orderBy('id', 'desc')->get();
 
         // Load transaksi dengan relationships
         $transaksi = Transaksi::with([
             'sales',
             'company',
-            'salesVisit'
+            'salesVisit',
+            'pic'  // Load PIC dari Transaksi
         ])->orderBy('created_at', 'desc')->get();
         
         // Get all users (sales)
@@ -50,8 +52,10 @@ class TransaksiController extends Controller
             'sales_visit_id' => 'nullable|exists:sales_visits,id',
             'sales_id' => 'required|exists:users,user_id',
             'company_id' => 'required|exists:company,company_id',
+            'pic_id' => 'nullable|exists:company_pics,pic_id',
             'nama_sales' => 'required|string|max:255',
             'nama_perusahaan' => 'required|string|max:255',
+            'pic_name' => 'nullable|string|max:255',
             'nilai_proyek' => 'required|numeric|min:0',
             'status' => 'required|in:Deals,Fails',
             'bukti_spk' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:2048',
@@ -77,13 +81,13 @@ class TransaksiController extends Controller
 
     public function show($id)
     {
-        $item = Transaksi::with(['sales', 'company', 'salesVisit'])->findOrFail($id);
+        $item = Transaksi::with(['sales', 'company', 'salesVisit', 'pic'])->findOrFail($id);
         return response()->json($item);
     }
 
     public function edit($id)
     {
-        $item = Transaksi::with(['sales', 'company', 'salesVisit'])->findOrFail($id);
+        $item = Transaksi::with(['sales', 'company', 'salesVisit', 'pic'])->findOrFail($id);
         return response()->json($item);
     }
 
@@ -95,8 +99,10 @@ class TransaksiController extends Controller
             'sales_visit_id' => 'nullable|exists:sales_visits,id',
             'sales_id' => 'required|exists:users,user_id',
             'company_id' => 'required|exists:company,company_id',
+            'pic_id' => 'nullable|exists:company_pics,pic_id',
             'nama_sales' => 'required|string|max:255',
             'nama_perusahaan' => 'required|string|max:255',
+            'pic_name' => 'nullable|string|max:255',
             'nilai_proyek' => 'required|numeric|min:0',
             'status' => 'required|in:Deals,Fails',
             'bukti_spk' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:2048',
@@ -147,14 +153,14 @@ class TransaksiController extends Controller
     {
         $search = $request->input('search');
 
-        $transaksi = Transaksi::with(['sales', 'company', 'salesVisit'])
+        $transaksi = Transaksi::with(['sales', 'company', 'salesVisit', 'pic'])
             ->where('nama_sales', 'like', "%{$search}%")
             ->orWhere('nama_perusahaan', 'like', "%{$search}%")
             ->orWhere('status', 'like', "%{$search}%")
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $salesVisits = SalesVisit::with(['company', 'sales', 'user'])
+        $salesVisits = SalesVisit::with(['company', 'sales', 'user', 'pic'])
             ->orderBy('id', 'desc')
             ->get();
 

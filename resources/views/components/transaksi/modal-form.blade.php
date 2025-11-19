@@ -9,21 +9,21 @@
                 <h3 id="modalTitle" style="color: white; font-weight: 600; margin: 0; font-size: 0.95rem;">Tambah Transaksi Baru</h3>
             </div>
             <button onclick="closeTransaksiModal()" 
-                    class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
-                    <i class="fas fa-times text-lg"></i>
+                    style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0;">
+                    ×
                 </button>
         </div>
 
-        <!-- Form Container dengan 2 Kolom -->
+        <!-- Form Container dengan 3 Kolom -->
         <div style="display: flex; flex: 1; overflow: hidden;">
-            <!-- KOLOM KIRI: Sales Visit, Sales & Perusahaan -->
-            <div style="flex: 0 0 45%; border-right: 1px solid #e5e7eb; overflow-y: auto; padding: 1rem;">
+            <!-- KOLOM KIRI: Sales Visit, Sales & Perusahaan (35%) -->
+            <div style="flex: 0 0 35%; border-right: 1px solid #e5e7eb; overflow-y: auto; padding: 1rem; background-color: #ffffff;">
                 <form id="transaksiForm">
                     @csrf
                     <input type="hidden" id="transaksiId" name="transaksi_id">
                     <input type="hidden" id="formMethod" name="_method" value="POST">
 
-                    <!-- Sales Visit Selection -->
+                    <!-- Sales Visit Selection - Load PIC dari sini! -->
                     <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 0.375rem; padding: 0.75rem; margin-bottom: 1rem;">
                         <label style="display: block; font-size: 0.7rem; font-weight: 500; color: #1e40af; margin-bottom: 0.375rem;">
                             <i class="fas fa-link"></i> Pilih Sales Visit (Opsional)
@@ -39,19 +39,30 @@
                                     $salesName = $visit->sales?->username ?? $visit->user?->username ?? 'N/A';
                                     $companyName = $visit->company?->company_name ?? $visit->company_name ?? 'N/A';
                                     $salesId = $visit->sales_id ?? $visit->user_id;
+                                    // PIC langsung dari relation
+                                    $picName = $visit->pic?->pic_name ?? 'Tidak ada PIC';
+                                    $picId = $visit->pic_id ?? null;
+                                    $picPosition = $visit->pic?->position ?? '';
+                                    $picEmail = $visit->pic?->email ?? '';
+                                    $picPhone = $visit->pic?->phone ?? '';
                                 @endphp
                                 <option value="{{ $visit->id }}" 
                                     data-company-id="{{ $visit->company_id }}"
                                     data-company-name="{{ $companyName }}"
                                     data-sales-id="{{ $salesId }}"
                                     data-sales-name="{{ $salesName }}"
+                                    data-pic-id="{{ $picId }}"
+                                    data-pic-name="{{ $picName }}"
+                                    data-pic-position="{{ $picPosition }}"
+                                    data-pic-email="{{ $picEmail }}"
+                                    data-pic-phone="{{ $picPhone }}"
                                     data-visit-date="{{ $visit->visit_date ?? '' }}">
-                                    {{ $companyName }} - {{ $salesName }} - {{ $visit->visit_date?->format('d M Y') ?? $visit->created_at->format('d M Y') }}
+                                    {{ $companyName }} - {{ $salesName }} ({{ $picName }}) - {{ $visit->visit_date?->format('d M Y') ?? $visit->created_at->format('d M Y') }}
                                 </option>
                             @endforeach
                         </select>
                         <small style="color: #1e40af; font-size: 0.65rem; margin-top: 0.25rem; display: block;">
-                            <i class="fas fa-info-circle"></i> Pilih untuk mengisi otomatis perusahaan, sales, dan tanggal
+                            <i class="fas fa-info-circle"></i> Auto-fill semua data termasuk PIC
                         </small>
                     </div>
 
@@ -119,8 +130,8 @@
                     </div>
 
                     <!-- Company Info Box -->
-                    <div id="companyInfoBox" style="display: none; background-color: #f3f4f6; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.75rem; margin-bottom: 1rem;">
-                        <p style="margin: 0 0 0.375rem 0; font-size: 0.65rem; color: #6b7280; font-weight: 600;">INFORMASI PERUSAHAAN</p>
+                    <div id="companyInfoBox" style="display: none; background-color: #f3f4f6; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.75rem;">
+                        <p style="margin: 0 0 0.375rem 0; font-size: 0.65rem; color: #6b7280; font-weight: 600;">ℹ️ INFO PERUSAHAAN</p>
                         <div style="display: grid; grid-template-columns: 1fr; gap: 0.5rem;">
                             <div>
                                 <p style="margin: 0; font-size: 0.65rem; color: #6b7280;">Tipe:</p>
@@ -143,13 +154,64 @@
                 </form>
             </div>
 
-            <!-- KOLOM KANAN: Nilai, Status, File, Tanggal, Keterangan -->
-            <div style="flex: 0 0 55%; overflow-y: auto; padding: 1rem;">
+            <!-- KOLOM TENGAH: PIC Selection & Info (30%) -->
+            <div style="flex: 0 0 30%; border-right: 1px solid #e5e7eb; overflow-y: auto; padding: 1rem; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);">
+                <form id="transaksiFormMiddle">
+                    <!-- PIC Selection -->
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
+                            👤 Pilih PIC
+                        </label>
+                        <input type="hidden" name="pic_id" id="pic_id">
+                        <input type="text" id="pic_display"
+                            style="width: 100%; padding: 0.5rem; border: 2px solid #bae6fd; border-radius: 0.3rem; font-size: 0.75rem; background-color: #f0f9ff; color: #0c4a6e; font-weight: 500;"
+                            readonly placeholder="PIC akan otomatis terisi">
+                    </div>
+
+                    <!-- PIC Name (Auto-filled) -->
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
+                            Nama PIC
+                        </label>
+                        <input type="text" name="pic_name" id="pic_name"
+                            style="width: 100%; padding: 0.5rem; border: 1px solid #bae6fd; border-radius: 0.3rem; font-size: 0.75rem; background-color: #f0f9ff; color: #0c4a6e; font-weight: 500;"
+                            readonly>
+                    </div>
+
+                    <!-- PIC Info Box - KOMPLEKS -->
+                    <div id="picInfoBox" style="display: none; background: white; border: 2px solid #bae6fd; border-radius: 0.375rem; padding: 0.75rem; box-shadow: 0 4px 6px rgba(2, 132, 199, 0.1);">
+                        <p style="margin: 0 0 0.75rem 0; font-size: 0.7rem; color: #0369a1; font-weight: 700;"><i class="fas fa-id-card"></i> INFORMASI PIC</p>
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 0.6rem;">
+                            <div style="padding: 0.5rem; background-color: #f0f9ff; border-left: 3px solid #0284c7; border-radius: 0.25rem;">
+                                <p style="margin: 0; font-size: 0.6rem; color: #0c4a6e; font-weight: 700; text-transform: uppercase;">Posisi/Jabatan</p>
+                                <p id="picPosition" style="margin: 0.25rem 0 0 0; font-size: 0.8rem; color: #0369a1; font-weight: 600;">-</p>
+                            </div>
+                            <div style="padding: 0.5rem; background-color: #f0f9ff; border-left: 3px solid #0284c7; border-radius: 0.25rem;">
+                                <p style="margin: 0; font-size: 0.6rem; color: #0c4a6e; font-weight: 700; text-transform: uppercase;">Email</p>
+                                <p id="picEmail" style="margin: 0.25rem 0 0 0; font-size: 0.8rem; color: #0369a1; font-weight: 600; word-break: break-all;">-</p>
+                            </div>
+                            <div style="padding: 0.5rem; background-color: #f0f9ff; border-left: 3px solid #0284c7; border-radius: 0.25rem;">
+                                <p style="margin: 0; font-size: 0.6rem; color: #0c4a6e; font-weight: 700; text-transform: uppercase;">Telepon</p>
+                                <p id="picPhone" style="margin: 0.25rem 0 0 0; font-size: 0.8rem; color: #0369a1; font-weight: 600;">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- No PIC Info -->
+                    <div id="noPicBox" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px dashed #fcd34d; border-radius: 0.375rem; padding: 0.75rem; text-align: center;">
+                        <i class="fas fa-inbox" style="color: #f59e0b; font-size: 1.25rem;"></i>
+                        <p style="margin: 0.5rem 0 0 0; font-size: 0.7rem; color: #92400e; font-weight: 600;">Pilih Sales Visit untuk load PIC</p>
+                    </div>
+                </form>
+            </div>
+
+            <!-- KOLOM KANAN: Nilai, Status, File, Tanggal, Keterangan (35%) -->
+            <div style="flex: 0 0 35%; overflow-y: auto; padding: 1rem; background-color: #ffffff;">
                 <form id="transaksiFormRight">
                     <!-- Nilai Proyek -->
                     <div style="margin-bottom: 1rem;">
                         <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
-                            Nilai Proyek (Rp) <span style="color: #dc2626;">*</span>
+                            💰 Nilai Proyek (Rp) <span style="color: #dc2626;">*</span>
                         </label>
                         <input type="number" name="nilai_proyek" id="nilai_proyek"
                             style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.3rem; font-size: 0.75rem;"
@@ -161,7 +223,7 @@
                     <!-- Status -->
                     <div style="margin-bottom: 1rem;">
                         <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
-                            Status <span style="color: #dc2626;">*</span>
+                            📊 Status <span style="color: #dc2626;">*</span>
                         </label>
                         <select name="status" id="status"
                             style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.3rem; font-size: 0.75rem;"
@@ -169,15 +231,15 @@
                             onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'"
                             onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='none'">
                             <option value="">-- Pilih Status --</option>
-                            <option value="Deals">Deals</option>
-                            <option value="Fails">Fails</option>
+                            <option value="Deals">✅ Deals</option>
+                            <option value="Fails">❌ Fails</option>
                         </select>
                     </div>
 
                     <!-- Bukti SPK -->
                     <div style="margin-bottom: 1rem;">
                         <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
-                            <i class="fas fa-file-pdf"></i> Bukti SPK
+                            📄 Bukti SPK
                         </label>
                         <div style="border: 2px dashed #d1d5db; border-radius: 0.375rem; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;"
                             id="drop_spk"
@@ -197,7 +259,7 @@
                     <!-- Bukti DP -->
                     <div style="margin-bottom: 1rem;">
                         <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
-                            <i class="fas fa-file-pdf"></i> Bukti DP
+                            📄 Bukti DP
                         </label>
                         <div style="border: 2px dashed #d1d5db; border-radius: 0.375rem; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s;"
                             id="drop_dp"
@@ -217,7 +279,7 @@
                     <!-- Tanggal Mulai -->
                     <div style="margin-bottom: 1rem;">
                         <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
-                            <i class="fas fa-calendar"></i> Tanggal Mulai Kerja
+                            📅 Tanggal Mulai Kerja
                         </label>
                         <input type="date" name="tanggal_mulai_kerja" id="tanggal_mulai_kerja"
                             style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.3rem; font-size: 0.75rem;"
@@ -228,7 +290,7 @@
                     <!-- Tanggal Selesai -->
                     <div style="margin-bottom: 1rem;">
                         <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
-                            <i class="fas fa-calendar"></i> Tanggal Selesai Kerja
+                            📅 Tanggal Selesai Kerja
                         </label>
                         <input type="date" name="tanggal_selesai_kerja" id="tanggal_selesai_kerja"
                             style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.3rem; font-size: 0.75rem;"
@@ -239,7 +301,7 @@
                     <!-- Keterangan -->
                     <div>
                         <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
-                            <i class="fas fa-sticky-note"></i> Keterangan
+                            📝 Keterangan
                         </label>
                         <textarea name="keterangan" id="keterangan" rows="2"
                             style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.3rem; font-size: 0.75rem; font-family: inherit; resize: vertical;"
@@ -251,7 +313,7 @@
             </div>
         </div>
 
-        <!-- Footer dengan 2 Tombol (Deals & Fails) -->
+        <!-- Footer -->
         <div style="padding: 0.875rem 1rem; border-top: 1px solid #e5e7eb; background-color: #f9fafb; display: flex; gap: 0.75rem; flex-shrink: 0;">
             <button type="button" onclick="closeTransaksiModal()"
                 style="flex: 1; padding: 0.5rem; background-color: #e5e7eb; color: #111827; border: none; border-radius: 0.3rem; font-weight: 500; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;"
@@ -278,7 +340,7 @@
 </div>
 
 <script>
-    // Handle perubahan Sales Visit
+    // Handle perubahan Sales Visit - LANGSUNG LOAD DATA + PIC
     function handleSalesVisitChange() {
         const select = document.getElementById('sales_visit_id');
         const visitId = select.value;
@@ -289,51 +351,75 @@
             const companyName = option.getAttribute('data-company-name');
             const salesId = option.getAttribute('data-sales-id');
             const salesName = option.getAttribute('data-sales-name');
+            const picId = option.getAttribute('data-pic-id');
+            const picName = option.getAttribute('data-pic-name');
+            const picPosition = option.getAttribute('data-pic-position');
+            const picEmail = option.getAttribute('data-pic-email');
+            const picPhone = option.getAttribute('data-pic-phone');
             const visitDate = option.getAttribute('data-visit-date');
             
             // Set Company
             document.getElementById('company_id').value = companyId;
             document.getElementById('nama_perusahaan').value = companyName;
-            
-            // Trigger updateCompanyInfo untuk tampilkan info perusahaan
             updateCompanyInfo();
             
             // Set Sales
             document.getElementById('sales_id').value = salesId;
             document.getElementById('nama_sales').value = salesName;
             
+            // Set PIC - LANGSUNG DARI SALESVISIT!
+            if (picId && picId !== 'null' && picId !== '') {
+                document.getElementById('pic_id').value = picId;
+                document.getElementById('pic_display').value = picName;
+                document.getElementById('pic_name').value = picName;
+                
+                // Update PIC Info Box
+                document.getElementById('picPosition').textContent = picPosition || '-';
+                document.getElementById('picEmail').textContent = picEmail || '-';
+                document.getElementById('picPhone').textContent = picPhone || '-';
+                
+                document.getElementById('picInfoBox').style.display = 'block';
+                document.getElementById('noPicBox').style.display = 'none';
+            } else {
+                document.getElementById('pic_id').value = '';
+                document.getElementById('pic_display').value = '';
+                document.getElementById('pic_name').value = '';
+                document.getElementById('picInfoBox').style.display = 'none';
+                document.getElementById('noPicBox').style.display = 'block';
+            }
+            
             // Set Tanggal Mulai dari visit_date
             if (visitDate) {
                 document.getElementById('tanggal_mulai_kerja').value = visitDate;
             }
         } else {
-            // Clear jika tidak dipilih
+            // Clear semua
             document.getElementById('company_id').value = '';
             document.getElementById('nama_perusahaan').value = '';
             document.getElementById('sales_id').value = '';
             document.getElementById('nama_sales').value = '';
+            document.getElementById('pic_id').value = '';
+            document.getElementById('pic_display').value = '';
+            document.getElementById('pic_name').value = '';
             document.getElementById('tanggal_mulai_kerja').value = '';
             document.getElementById('tanggal_selesai_kerja').value = '';
             document.getElementById('companyInfoBox').style.display = 'none';
+            document.getElementById('picInfoBox').style.display = 'none';
+            document.getElementById('noPicBox').style.display = 'block';
         }
     }
 
-    // Update informasi perusahaan yang detail
+    // Update informasi perusahaan
     function updateCompanyInfo() {
         const select = document.getElementById('company_id');
         const selected = select.options[select.selectedIndex];
         
         if (selected.value) {
-            // Update nama perusahaan
             document.getElementById('nama_perusahaan').value = selected.getAttribute('data-name') || '';
-            
-            // Update company info box
             document.getElementById('companyType').textContent = selected.getAttribute('data-type') || '-';
             document.getElementById('companyPhone').textContent = selected.getAttribute('data-phone') || '-';
             document.getElementById('companyEmail').textContent = selected.getAttribute('data-email') || '-';
             document.getElementById('companyAddress').textContent = selected.getAttribute('data-address') || '-';
-            
-            // Tampilkan company info box
             document.getElementById('companyInfoBox').style.display = 'block';
         } else {
             document.getElementById('companyInfoBox').style.display = 'none';
@@ -366,7 +452,6 @@
             document.getElementById(fieldId).files = files;
             updateFileName(fieldId);
         }
-        // Reset style
         const dropZone = fieldId === 'bukti_spk' ? 'drop_spk' : 'drop_dp';
         document.getElementById(dropZone).style.borderColor = '#d1d5db';
         document.getElementById(dropZone).style.backgroundColor = 'white';
@@ -410,7 +495,9 @@
         const form = document.getElementById('transaksiForm');
         const formData = new FormData(form);
         
-        // Tambahkan field dari kolom kanan
+        // Tambahkan semua field dari ketiga form
+        formData.append('pic_id', document.getElementById('pic_id').value);
+        formData.append('pic_name', document.getElementById('pic_name').value);
         formData.append('nilai_proyek', document.getElementById('nilai_proyek').value);
         formData.append('status', document.getElementById('status').value);
         formData.append('tanggal_mulai_kerja', document.getElementById('tanggal_mulai_kerja').value);
@@ -458,8 +545,6 @@
                         errors = Object.values(data.errors).flat().join('\n');
                     }
                     alert('Terjadi kesalahan:\n' + (errors || 'Coba lagi'));
-                    
-                    // Reset button
                     submitBtn.disabled = false;
                     submitBtnFail.disabled = false;
                     submitBtn.innerHTML = originalText;
@@ -469,8 +554,6 @@
         .catch(error => {
             console.error('Error:', error);
             alert('Terjadi kesalahan: ' + error);
-            
-            // Reset button
             submitBtn.disabled = false;
             submitBtnFail.disabled = false;
             submitBtn.innerHTML = originalText;
@@ -480,16 +563,16 @@
     // Buka modal untuk tambah baru
     function openTransaksiModal() {
         document.getElementById('transaksiModal').classList.add('active');
-        document.getElementById('formMethod').value = 'POST';
         document.getElementById('transaksiForm').reset();
+        document.getElementById('transaksiFormMiddle').reset();
         document.getElementById('transaksiFormRight').reset();
         document.getElementById('modalTitle').textContent = 'Tambah Transaksi Baru';
         document.getElementById('transaksiId').value = '';
         document.getElementById('submitBtn').innerHTML = '<i class="fas fa-check"></i> Deals';
         document.getElementById('submitBtnFail').innerHTML = '<i class="fas fa-times"></i> Fails';
         document.getElementById('companyInfoBox').style.display = 'none';
-        
-        // Reset file names
+        document.getElementById('picInfoBox').style.display = 'none';
+        document.getElementById('noPicBox').style.display = 'block';
         document.getElementById('bukti_spk_name').textContent = '';
         document.getElementById('bukti_dp_name').textContent = '';
     }
@@ -510,16 +593,31 @@
                 document.getElementById('company_id').value = data.company_id;
                 document.getElementById('nama_sales').value = data.nama_sales;
                 document.getElementById('nama_perusahaan').value = data.nama_perusahaan;
+                document.getElementById('pic_id').value = data.pic_id || '';
+                document.getElementById('pic_display').value = data.pic_name || '';
+                document.getElementById('pic_name').value = data.pic_name || '';
                 document.getElementById('nilai_proyek').value = data.nilai_proyek;
                 document.getElementById('status').value = data.status;
                 document.getElementById('tanggal_mulai_kerja').value = data.tanggal_mulai_kerja || '';
                 document.getElementById('tanggal_selesai_kerja').value = data.tanggal_selesai_kerja || '';
                 document.getElementById('keterangan').value = data.keterangan || '';
                 
-                // Trigger updateCompanyInfo untuk tampilkan info
                 updateCompanyInfo();
                 
-                document.getElementById('formMethod').value = 'PUT';
+                if (data.pic_id && data.pic_name) {
+                    // Load PIC info dari relasi
+                    if (data.pic) {
+                        document.getElementById('picPosition').textContent = data.pic.position || '-';
+                        document.getElementById('picEmail').textContent = data.pic.email || '-';
+                        document.getElementById('picPhone').textContent = data.pic.phone || '-';
+                    }
+                    document.getElementById('picInfoBox').style.display = 'block';
+                    document.getElementById('noPicBox').style.display = 'none';
+                } else {
+                    document.getElementById('picInfoBox').style.display = 'none';
+                    document.getElementById('noPicBox').style.display = 'block';
+                }
+                
                 document.getElementById('modalTitle').textContent = 'Edit Transaksi';
                 document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Update Deals';
                 document.getElementById('submitBtnFail').innerHTML = '<i class="fas fa-save"></i> Update Fails';
@@ -531,77 +629,11 @@
             });
     }
 
-    // Lihat detail transaksi
-    function viewTransaksi(id) {
-        fetch(`/transaksi/${id}`)
-            .then(response => response.json())
-            .then(data => {
-                let statusBadge = data.status === 'Deals' 
-                    ? '<span style="display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0.625rem; background-color: #dcfce7; color: #166534; border-radius: 9999px; font-size: 0.7rem; font-weight: 600;"><i class="fas fa-check-circle"></i> Deals</span>'
-                    : '<span style="display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0.625rem; background-color: #fee2e2; color: #991b1b; border-radius: 9999px; font-size: 0.7rem; font-weight: 600;"><i class="fas fa-times-circle"></i> Fails</span>';
-                
-                let html = `
-                    <div style="padding: 1rem;">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                            <div>
-                                <p style="font-size: 0.65rem; color: #6b7280; font-weight: 600; text-transform: uppercase; margin: 0;">Nama Sales</p>
-                                <p style="color: #111827; font-weight: 500; margin: 0.25rem 0 0 0; font-size: 0.875rem;">${data.nama_sales}</p>
-                            </div>
-                            <div>
-                                <p style="font-size: 0.65rem; color: #6b7280; font-weight: 600; text-transform: uppercase; margin: 0;">Perusahaan</p>
-                                <p style="color: #111827; font-weight: 500; margin: 0.25rem 0 0 0; font-size: 0.875rem;">${data.nama_perusahaan}</p>
-                            </div>
-                        </div>
-
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                            <div>
-                                <p style="font-size: 0.65rem; color: #6b7280; font-weight: 600; text-transform: uppercase; margin: 0;">Nilai Proyek</p>
-                                <p style="color: #111827; font-weight: 500; margin: 0.25rem 0 0 0; font-size: 0.875rem;">Rp${new Intl.NumberFormat('id-ID').format(data.nilai_proyek)}</p>
-                            </div>
-                            <div>
-                                <p style="font-size: 0.65rem; color: #6b7280; font-weight: 600; text-transform: uppercase; margin: 0;">Status</p>
-                                <div style="margin: 0.25rem 0 0 0;">${statusBadge}</div>
-                            </div>
-                        </div>
-
-                        ${data.tanggal_mulai_kerja ? `
-                        <div style="margin-bottom: 1rem;">
-                            <p style="font-size: 0.65rem; color: #6b7280; font-weight: 600; text-transform: uppercase; margin: 0;">Tanggal Kerja</p>
-                            <p style="color: #111827; font-weight: 500; margin: 0.25rem 0 0 0; font-size: 0.875rem;">${data.tanggal_mulai_kerja} s/d ${data.tanggal_selesai_kerja || '-'}</p>
-                        </div>
-                        ` : ''}
-                        
-                        ${data.keterangan ? `
-                        <div>
-                            <p style="font-size: 0.65rem; color: #6b7280; font-weight: 600; text-transform: uppercase; margin: 0;">Keterangan</p>
-                            <p style="color: #111827; margin: 0.25rem 0 0 0; font-size: 0.875rem;">${data.keterangan}</p>
-                        </div>
-                        ` : ''}
-                    </div>
-                `;
-                document.getElementById('detailContent').innerHTML = html;
-                document.getElementById('detailModal').classList.add('active');
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Terjadi kesalahan saat mengambil data detail');
-            });
-    }
-
-    // Tutup detail modal
-    function closeDetailModal() {
-        document.getElementById('detailModal').classList.remove('active');
-    }
-
     // Close modal ketika click outside
     window.addEventListener('click', function(event) {
         const modal = document.getElementById('transaksiModal');
-        const detailModal = document.getElementById('detailModal');
         if (event.target === modal) {
             modal.classList.remove('active');
-        }
-        if (event.target === detailModal) {
-            detailModal.classList.remove('active');
         }
     });
 </script>
