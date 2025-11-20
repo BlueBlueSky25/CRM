@@ -312,8 +312,9 @@
     </div>
 </div>
 
-<!-- Add Company Modal -->
-<div id="addCompanyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4 overflow-y-auto" style="height: 100vh; width: 100vw; max-height: 100vh; max-width: 100vw;">
+
+<!-- Add Company Modal - FIXED VERSION -->
+<div id="addCompanyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden animate-modal-in">
         <div style="background: linear-gradient(to right, #4f46e5, #7c3aed); padding: 1rem 1.25rem;">
             <div class="flex justify-between items-center">
@@ -321,7 +322,7 @@
                     <h3 class="text-lg font-semibold text-white">Tambah Perusahaan Baru</h3>
                     <p class="text-xs text-indigo-100 mt-0.5">Lengkapi formulir berikut untuk menambahkan perusahaan</p>
                 </div>
-                <button onclick="closeAddCompanyModal()" 
+                <button type="button" onclick="closeAddCompanyModal()" 
                     class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
                     <i class="fas fa-times text-lg"></i>
                 </button>
@@ -329,8 +330,9 @@
         </div>
 
         <div class="overflow-y-auto max-h-[calc(90vh-120px)]" style="background-color: #f3f4f6; padding: 1rem;">
+            <!-- ✅ IMPORTANT: No action attribute, handled by JavaScript -->
             <form id="addCompanyForm" class="space-y-4">
-                @csrf
+                <input type="hidden" name="_token" value="{{ csrf_token() }}">
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -386,10 +388,12 @@
                 </div>
                 
                 <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                    <!-- ✅ IMPORTANT: type="button" to prevent form submission -->
                     <button type="button" onclick="closeAddCompanyModal()" 
                             class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                         Batal
                     </button>
+                    <!-- ✅ type="submit" will be handled by JavaScript preventDefault -->
                     <button type="submit" 
                             class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors flex items-center gap-2 shadow-lg shadow-indigo-500/30">
                         <i class="fas fa-save"></i>
@@ -401,8 +405,10 @@
     </div>
 </div>
 
-<!-- Add PIC Modal -->
-<div id="addPICModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70] p-4 overflow-y-auto" style="height: 100vh; width: 100vw; max-height: 100vh; max-width: 100vw;">
+
+
+<!-- Add PIC Modal - FIXED VERSION -->
+<div id="addPICModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70] p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-modal-in">
         <div style="background: linear-gradient(to right, #4f46e5, #7c3aed); padding: 1rem 1.25rem;">
             <div class="flex justify-between items-center">
@@ -410,7 +416,7 @@
                     <h3 class="text-lg font-semibold text-white">Tambah PIC Baru</h3>
                     <p class="text-xs text-indigo-100 mt-0.5">Lengkapi formulir berikut untuk menambahkan PIC</p>
                 </div>
-                <button onclick="closeAddPICModal()" 
+                <button type="button" onclick="closeAddPICModal()" 
                     class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
                     <i class="fas fa-times text-lg"></i>
                 </button>
@@ -418,8 +424,9 @@
         </div>
 
         <div class="overflow-y-auto max-h-[calc(90vh-120px)]" style="background-color: #f3f4f6; padding: 1rem;">
+            <!-- ✅ IMPORTANT: No action attribute, handled by JavaScript -->
             <form id="addPICForm" class="space-y-4">
-                @csrf
+                <input type="hidden" name="_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="company_id" id="pic-form-company-id">
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -434,31 +441,33 @@
                     
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-2">Posisi PIC</label>
-                        <input type="text" id="pic_position" name="pic_position" 
+                        <input type="text" name="pic_position" 
                             class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                             placeholder="Contoh: Manager">
                     </div>
                     
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-2">Telepon</label>
-                        <input type="text" id="pic_phone" name="pic_phone" 
+                        <input type="text" name="pic_phone" 
                             class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                             placeholder="Contoh: 08123456789">
                     </div>
                     
                     <div class="md:col-span-2">
                         <label class="block text-xs font-medium text-gray-700 mb-2">Email</label>
-                        <input type="email" id="pic_email" name="pic_email" 
+                        <input type="email" name="pic_email" 
                             class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                             placeholder="Contoh: pic@company.com">
                     </div>
                 </div>
                 
                 <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                    <!-- ✅ IMPORTANT: type="button" to prevent form submission -->
                     <button type="button" onclick="closeAddPICModal()" 
                             class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                         Batal
                     </button>
+                    <!-- ✅ type="submit" will be handled by JavaScript preventDefault -->
                     <button type="submit" 
                             class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-lg shadow-blue-500/30">
                         <i class="fas fa-save"></i>
@@ -471,12 +480,6 @@
 </div>
 
 <style>
-@keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.95) translateY(-20px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
-}
-.animate-fadeIn { animation: fadeIn 0.3s ease-out; }
-
 @keyframes modal-in {
     from { opacity: 0; transform: scale(0.95) translateY(-20px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
@@ -509,71 +512,19 @@ function closeAddPICModal() {
     document.getElementById('addPICForm').reset();
 }
 
-// Handle submit form PIC
-document.getElementById('addPICForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this);
-    const submitButton = this.querySelector('button[type="submit"]');
-    const originalText = submitButton.innerHTML;
-    
-    // Tampilkan loading
-    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-    submitButton.disabled = true;
-    
-    fetch('{{ route("salesvisit.pic.store") }}', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            'Accept': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Tampilkan pesan sukses
-            showNotification('success', data.message);
-            
-            // Tutup modal
-            closeAddPICModal();
-            
-            // Jika ada callback untuk refresh data PIC, panggil di sini
-            if (typeof refreshPICList === 'function') {
-                refreshPICList(data.pic.pic_id);
-            }
-            
-            // Reset form visit jika perlu
-            if (typeof onPICAdded === 'function') {
-                onPICAdded(data.pic);
-            }
-            
-        } else {
-            showNotification('error', data.message || 'Gagal menyimpan PIC');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showNotification('error', 'Terjadi kesalahan saat menyimpan data');
-    })
-    .finally(() => {
-        // Kembalikan tombol ke keadaan semula
-        submitButton.innerHTML = originalText;
-        submitButton.disabled = false;
-    });
-});
+
 
 // Fungsi notifikasi
-function showNotification(type, message) {
+//function showNotification(type, message) {
     // Anda bisa menggunakan notifikasi library atau custom
     // Contoh sederhana dengan alert
-    if (type === 'success') {
-        alert('✅ ' + message);
-    } else {
-        alert('❌ ' + message);
-    }
+    //if (type === 'success') {
+        //alert('✅ ' + message);
+    //} else {
+        //alert('❌ ' + message);
+    //}
     
     // Atau jika menggunakan Toast/Alert library:
     // Toastify({ text: message, className: type }).showToast();
-}
+//}
 </script>

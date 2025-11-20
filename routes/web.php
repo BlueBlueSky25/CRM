@@ -55,6 +55,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/company/get-regencies/{provinceId}', [CompanyController::class, 'getRegencies']);
     Route::get('/company/get-districts/{regencyId}', [CompanyController::class, 'getDistricts']);
     Route::get('/company/get-villages/{districtId}', [CompanyController::class, 'getVillages']);
+
+    Route::post('/company/store-company-ajax', [CompanyController::class, 'storeCompanyAjax']);
+    Route::post('/pics/store-pic-ajax', [PicController::class, 'storePICAjax']);
 }); 
 
 
@@ -77,7 +80,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::delete('/company/{id}', [CompanyController::class, 'destroy'])->name('company.destroy');
     Route::get('/company/search', [CompanyController::class, 'search'])->name('company.search');
     Route::get('/company/get-companies-dropdown', [CompanyController::class, 'getCompaniesForDropdown']);
-    Route::post('/company/store-company-ajax', [CompanyController::class, 'storeCompanyAjax']);
+    
     Route::get('/company/{id}/pics', [CompanyController::class, 'getCompanyPics']);
     Route::get('/company/{id}', [CompanyController::class, 'show'])->name('company.show');
     
@@ -140,7 +143,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::delete('/pic/{id}', [PicController::class, 'destroy'])->name('pics.destroy');
     Route::get('/pic/search', [PicController::class, 'search'])->name('pics.search');
     Route::get('/pics/by-company/{companyId}', [PicController::class, 'getPICsByCompany']);
-    Route::post('/pics/store-pic-ajax', [PicController::class, 'storePICAjax']);
+
 
     // ==========================
     // Calendar Page (React)

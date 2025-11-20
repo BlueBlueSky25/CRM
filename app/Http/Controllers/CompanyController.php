@@ -591,4 +591,64 @@ class CompanyController extends Controller
 
         return $actions;
     }
+
+
+    
+public function storeCompanyAjax(Request $request)
+{
+    // ✅ Force JSON response
+    $request->headers->set('Accept', 'application/json');
+    
+    \Log::info('🔥 AJAX Company Store Request:', $request->all());
+    
+    try {
+        $validated = $request->validate([
+            'company_name' => 'required|string|max:255',
+            'company_type_id' => 'required|exists:company_type,company_type_id',
+            'tier' => 'nullable|in:A,B,C,D',
+            'status' => 'nullable|in:active,inactive',
+            'description' => 'nullable|string',
+        ]);
+
+        $company = Company::create([
+            'company_name' => $validated['company_name'],
+            'company_type_id' => $validated['company_type_id'],
+            'tier' => $validated['tier'] ?? null,
+            'status' => $validated['status'] ?? 'active',
+            'description' => $validated['description'] ?? null,
+            'user_id' => auth()->id(),
+        ]);
+
+        \Log::info('✅ Company created via AJAX:', ['company_id' => $company->company_id]);
+
+        // ✅ EXPLICIT JSON RESPONSE
+        return response()->json([
+            'success' => true,
+            'message' => 'Company berhasil ditambahkan',
+            'company' => [
+                'id' => $company->company_id,
+                'name' => $company->company_name
+            ]
+        ], 200, ['Content-Type' => 'application/json']);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        \Log::error('❌ Validation error:', $e->errors());
+        return response()->json([
+            'success' => false,
+            'message' => 'Validasi gagal',
+            'errors' => $e->errors()
+        ], 422, ['Content-Type' => 'application/json']);
+
+    } catch (\Exception $e) {
+        \Log::error('❌ Error creating company via AJAX:', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ], 500, ['Content-Type' => 'application/json']);
+    }
+}
 }
