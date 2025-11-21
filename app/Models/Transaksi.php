@@ -10,6 +10,9 @@ class Transaksi extends Model
     use SoftDeletes;
 
     protected $table = 'transaksi';
+    protected $primaryKey = 'id';
+    public $incrementing = true;
+    protected $keyType = 'int';
 
     protected $fillable = [
         'sales_visit_id',
@@ -38,7 +41,7 @@ class Transaksi extends Model
 
     public function salesVisit()
     {
-        return $this->belongsTo(SalesVisit::class, 'sales_visit_id');
+        return $this->belongsTo(SalesVisit::class, 'sales_visit_id', 'id');
     }
 
     public function sales()

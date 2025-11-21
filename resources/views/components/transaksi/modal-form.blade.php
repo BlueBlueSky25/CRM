@@ -1,5 +1,5 @@
 <div id="transaksiModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 1200px; display: flex; flex-direction: column; max-height: 90vh;">
         <!-- Header -->
         <div style="padding: 1rem; border-bottom: 1px solid #e5e7eb; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
             <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -9,22 +9,22 @@
                 <h3 id="modalTitle" style="color: white; font-weight: 600; margin: 0; font-size: 0.95rem;">Tambah Transaksi Baru</h3>
             </div>
             <button onclick="closeTransaksiModal()" 
-                    style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0;">
-                    ×
-                </button>
+                    style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                ×
+            </button>
         </div>
 
-        <!-- Form Container dengan 3 Kolom -->
+        <!-- Form Container dengan 2 Kolom -->
         <div style="display: flex; flex: 1; overflow: hidden;">
-            <!-- KOLOM KIRI: Sales Visit, Sales & Perusahaan (35%) -->
-            <div style="flex: 0 0 35%; border-right: 1px solid #e5e7eb; overflow-y: auto; padding: 1rem; background-color: #ffffff;">
+            <!-- KOLOM KIRI: Sales Visit, Sales, Company, PIC Info (40%) -->
+            <div style="flex: 0 0 40%; border-right: 1px solid #e5e7eb; overflow-y: auto; padding: 1.5rem; background-color: #ffffff;">
                 <form id="transaksiForm">
                     @csrf
                     <input type="hidden" id="transaksiId" name="transaksi_id">
                     <input type="hidden" id="formMethod" name="_method" value="POST">
 
-                    <!-- Sales Visit Selection - Load PIC dari sini! -->
-                    <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 0.375rem; padding: 0.75rem; margin-bottom: 1rem;">
+                    <!-- 1. Sales Visit Selection -->
+                    <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 0.375rem; padding: 0.75rem; margin-bottom: 1.25rem;">
                         <label style="display: block; font-size: 0.7rem; font-weight: 500; color: #1e40af; margin-bottom: 0.375rem;">
                             <i class="fas fa-link"></i> Pilih Sales Visit (Opsional)
                         </label>
@@ -39,7 +39,6 @@
                                     $salesName = $visit->sales?->username ?? $visit->user?->username ?? 'N/A';
                                     $companyName = $visit->company?->company_name ?? $visit->company_name ?? 'N/A';
                                     $salesId = $visit->sales_id ?? $visit->user_id;
-                                    // PIC langsung dari relation
                                     $picName = $visit->pic?->pic_name ?? 'Tidak ada PIC';
                                     $picId = $visit->pic_id ?? null;
                                     $picPosition = $visit->pic?->position ?? '';
@@ -66,10 +65,10 @@
                         </small>
                     </div>
 
-                    <!-- Sales -->
-                    <div style="margin-bottom: 1rem;">
+                    <!-- 2. Sales Selection (HANYA SALES) -->
+                    <div style="margin-bottom: 1.25rem;">
                         <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
-                            Nama Sales <span style="color: #dc2626;">*</span>
+                            👤 Nama Sales <span style="color: #dc2626;">*</span>
                         </label>
                         <select name="sales_id" id="sales_id"
                             style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.3rem; font-size: 0.75rem;"
@@ -79,14 +78,14 @@
                             <option value="">-- Pilih Sales --</option>
                             @foreach ($sales as $s)
                                 <option value="{{ $s->user_id }}" data-name="{{ $s->username }}">
-                                    {{ $s->username }}
+                                    {{ $s->username }} ({{ $s->email }})
                                 </option>
                             @endforeach
                         </select>
                     </div>
 
-                    <!-- Nama Sales (Auto-filled) -->
-                    <div style="margin-bottom: 1rem;">
+                    <!-- 3. Nama Sales Lengkap (Auto-filled) -->
+                    <div style="margin-bottom: 1.25rem;">
                         <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
                             Nama Sales Lengkap <span style="color: #dc2626;">*</span>
                         </label>
@@ -95,14 +94,14 @@
                             required readonly>
                     </div>
 
-                    <!-- Company -->
-                    <div style="margin-bottom: 1rem;">
+                    <!-- 4. Company Selection -->
+                    <div style="margin-bottom: 1.25rem;">
                         <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
-                            Perusahaan <span style="color: #dc2626;">*</span>
+                            🏢 Perusahaan <span style="color: #dc2626;">*</span>
                         </label>
                         <select name="company_id" id="company_id"
                             style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.3rem; font-size: 0.75rem;"
-                            required onchange="updateCompanyInfo()"
+                            required onchange="updateCompanyInfo(); loadPicsForCompany()"
                             onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'"
                             onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='none'">
                             <option value="">-- Pilih Perusahaan --</option>
@@ -119,8 +118,8 @@
                         </select>
                     </div>
 
-                    <!-- Nama Perusahaan (Auto-filled) -->
-                    <div style="margin-bottom: 1rem;">
+                    <!-- 5. Nama Perusahaan (Auto-filled) -->
+                    <div style="margin-bottom: 1.25rem;">
                         <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
                             Nama Perusahaan <span style="color: #dc2626;">*</span>
                         </label>
@@ -129,10 +128,10 @@
                             required readonly>
                     </div>
 
-                    <!-- Company Info Box -->
-                    <div id="companyInfoBox" style="display: none; background-color: #f3f4f6; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.75rem;">
-                        <p style="margin: 0 0 0.375rem 0; font-size: 0.65rem; color: #6b7280; font-weight: 600;">ℹ️ INFO PERUSAHAAN</p>
-                        <div style="display: grid; grid-template-columns: 1fr; gap: 0.5rem;">
+                    <!-- 6. Company Info Box -->
+                    <div id="companyInfoBox" style="display: none; background-color: #f3f4f6; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.75rem; margin-bottom: 1.25rem;">
+                        <p style="margin: 0 0 0.5rem 0; font-size: 0.65rem; color: #6b7280; font-weight: 600;">ℹ️ INFO PERUSAHAAN</p>
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 0.375rem;">
                             <div>
                                 <p style="margin: 0; font-size: 0.65rem; color: #6b7280;">Tipe:</p>
                                 <p id="companyType" style="margin: 0; font-size: 0.75rem; color: #111827; font-weight: 500;">-</p>
@@ -147,39 +146,36 @@
                             </div>
                             <div>
                                 <p style="margin: 0; font-size: 0.65rem; color: #6b7280;">Alamat:</p>
-                                <p id="companyAddress" style="margin: 0; font-size: 0.75rem; color: #111827; font-weight: 500;">-</p>
+                                <p id="companyAddress" style="margin: 0; font-size: 0.75rem; color: #111827; font-weight: 500; max-height: 50px; overflow: hidden;">-</p>
                             </div>
                         </div>
                     </div>
-                </form>
-            </div>
 
-            <!-- KOLOM TENGAH: PIC Selection & Info (30%) -->
-            <div style="flex: 0 0 30%; border-right: 1px solid #e5e7eb; overflow-y: auto; padding: 1rem; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);">
-                <form id="transaksiFormMiddle">
-                    <!-- PIC Selection -->
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
-                            👤 Pilih PIC
+                    <!-- 7. PIC Selection -->
+                    <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px solid #bae6fd; border-radius: 0.375rem; padding: 1rem; margin-bottom: 1.25rem;">
+                        <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #0c4a6e; margin-bottom: 0.5rem;">
+                            👤 Pilih PIC (Person In Charge)
                         </label>
-                        <input type="hidden" name="pic_id" id="pic_id">
-                        <input type="text" id="pic_display"
-                            style="width: 100%; padding: 0.5rem; border: 2px solid #bae6fd; border-radius: 0.3rem; font-size: 0.75rem; background-color: #f0f9ff; color: #0c4a6e; font-weight: 500;"
-                            readonly placeholder="PIC akan otomatis terisi">
+                        
+                        <div style="margin-bottom: 0.75rem;">
+                            <select name="pic_id" id="pic_id"
+                                style="width: 100%; padding: 0.5rem; border: 1px solid #bae6fd; border-radius: 0.3rem; font-size: 0.75rem; background-color: #f0f9ff; color: #0c4a6e;"
+                                onchange="handlePicChange()">
+                                <option value="">-- Pilih PIC dari Company --</option>
+                            </select>
+                        </div>
+
+                        <!-- Nama PIC -->
+                        <div>
+                            <label style="display: block; font-size: 0.65rem; font-weight: 600; color: #0c4a6e; margin-bottom: 0.25rem;">Nama PIC</label>
+                            <input type="text" name="pic_name" id="pic_name"
+                                style="width: 100%; padding: 0.5rem; border: 1px solid #bae6fd; border-radius: 0.3rem; font-size: 0.75rem; background-color: #f0f9ff; color: #0c4a6e;"
+                                placeholder="Auto-fill dari PIC yang dipilih">
+                        </div>
                     </div>
 
-                    <!-- PIC Name (Auto-filled) -->
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
-                            Nama PIC
-                        </label>
-                        <input type="text" name="pic_name" id="pic_name"
-                            style="width: 100%; padding: 0.5rem; border: 1px solid #bae6fd; border-radius: 0.3rem; font-size: 0.75rem; background-color: #f0f9ff; color: #0c4a6e; font-weight: 500;"
-                            readonly>
-                    </div>
-
-                    <!-- PIC Info Box - KOMPLEKS -->
-                    <div id="picInfoBox" style="display: none; background: white; border: 2px solid #bae6fd; border-radius: 0.375rem; padding: 0.75rem; box-shadow: 0 4px 6px rgba(2, 132, 199, 0.1);">
+                    <!-- 8. PIC Info Box -->
+                    <div id="picInfoBox" style="display: none; background: white; border: 2px solid #bae6fd; border-radius: 0.375rem; padding: 0.875rem; box-shadow: 0 4px 6px rgba(2, 132, 199, 0.1); margin-bottom: 1.25rem;">
                         <p style="margin: 0 0 0.75rem 0; font-size: 0.7rem; color: #0369a1; font-weight: 700;"><i class="fas fa-id-card"></i> INFORMASI PIC</p>
                         <div style="display: grid; grid-template-columns: 1fr; gap: 0.6rem;">
                             <div style="padding: 0.5rem; background-color: #f0f9ff; border-left: 3px solid #0284c7; border-radius: 0.25rem;">
@@ -188,7 +184,7 @@
                             </div>
                             <div style="padding: 0.5rem; background-color: #f0f9ff; border-left: 3px solid #0284c7; border-radius: 0.25rem;">
                                 <p style="margin: 0; font-size: 0.6rem; color: #0c4a6e; font-weight: 700; text-transform: uppercase;">Email</p>
-                                <p id="picEmail" style="margin: 0.25rem 0 0 0; font-size: 0.8rem; color: #0369a1; font-weight: 600; word-break: break-all;">-</p>
+                                <p id="picEmail" style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: #0369a1; font-weight: 600; word-break: break-all;">-</p>
                             </div>
                             <div style="padding: 0.5rem; background-color: #f0f9ff; border-left: 3px solid #0284c7; border-radius: 0.25rem;">
                                 <p style="margin: 0; font-size: 0.6rem; color: #0c4a6e; font-weight: 700; text-transform: uppercase;">Telepon</p>
@@ -198,18 +194,18 @@
                     </div>
 
                     <!-- No PIC Info -->
-                    <div id="noPicBox" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px dashed #fcd34d; border-radius: 0.375rem; padding: 0.75rem; text-align: center;">
+                    <div id="noPicBox" style="display: block; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px dashed #fcd34d; border-radius: 0.375rem; padding: 0.75rem; text-align: center; margin-bottom: 1.25rem;">
                         <i class="fas fa-inbox" style="color: #f59e0b; font-size: 1.25rem;"></i>
-                        <p style="margin: 0.5rem 0 0 0; font-size: 0.7rem; color: #92400e; font-weight: 600;">Pilih Sales Visit untuk load PIC</p>
+                        <p style="margin: 0.5rem 0 0 0; font-size: 0.7rem; color: #92400e; font-weight: 600;">Pilih Company untuk load PIC</p>
                     </div>
                 </form>
             </div>
 
-            <!-- KOLOM KANAN: Nilai, Status, File, Tanggal, Keterangan (35%) -->
-            <div style="flex: 0 0 35%; overflow-y: auto; padding: 1rem; background-color: #ffffff;">
+            <!-- KOLOM KANAN: Nilai, Status, File, Tanggal, Keterangan (60%) -->
+            <div style="flex: 0 0 60%; overflow-y: auto; padding: 1.5rem; background-color: #ffffff;">
                 <form id="transaksiFormRight">
                     <!-- Nilai Proyek -->
-                    <div style="margin-bottom: 1rem;">
+                    <div style="margin-bottom: 1.25rem;">
                         <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
                             💰 Nilai Proyek (Rp) <span style="color: #dc2626;">*</span>
                         </label>
@@ -221,7 +217,7 @@
                     </div>
 
                     <!-- Status -->
-                    <div style="margin-bottom: 1rem;">
+                    <div style="margin-bottom: 1.25rem;">
                         <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
                             📊 Status <span style="color: #dc2626;">*</span>
                         </label>
@@ -237,7 +233,7 @@
                     </div>
 
                     <!-- Bukti SPK -->
-                    <div style="margin-bottom: 1rem;">
+                    <div style="margin-bottom: 1.25rem;">
                         <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
                             📄 Bukti SPK
                         </label>
@@ -250,14 +246,14 @@
                             <i class="fas fa-cloud-upload-alt" style="font-size: 1.125rem; color: #9ca3af; display: block;"></i>
                             <p style="color: #6b7280; margin: 0.25rem 0 0 0; font-size: 0.7rem; font-weight: 500;">Klik atau drag file</p>
                         </div>
-                        <input type="file" name="bukti_spk" id="bukti_spk" class="hidden"
+                        <input type="file" name="bukti_spk" id="bukti_spk" style="display: none;"
                             accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                             onchange="updateFileName('bukti_spk')">
                         <p id="bukti_spk_name" style="color: #22c55e; font-size: 0.65rem; margin-top: 0.375rem;"></p>
                     </div>
 
                     <!-- Bukti DP -->
-                    <div style="margin-bottom: 1rem;">
+                    <div style="margin-bottom: 1.25rem;">
                         <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
                             📄 Bukti DP
                         </label>
@@ -270,14 +266,14 @@
                             <i class="fas fa-cloud-upload-alt" style="font-size: 1.125rem; color: #9ca3af; display: block;"></i>
                             <p style="color: #6b7280; margin: 0.25rem 0 0 0; font-size: 0.7rem; font-weight: 500;">Klik atau drag file</p>
                         </div>
-                        <input type="file" name="bukti_dp" id="bukti_dp" class="hidden"
+                        <input type="file" name="bukti_dp" id="bukti_dp" style="display: none;"
                             accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                             onchange="updateFileName('bukti_dp')">
                         <p id="bukti_dp_name" style="color: #22c55e; font-size: 0.65rem; margin-top: 0.375rem;"></p>
                     </div>
 
                     <!-- Tanggal Mulai -->
-                    <div style="margin-bottom: 1rem;">
+                    <div style="margin-bottom: 1.25rem;">
                         <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
                             📅 Tanggal Mulai Kerja
                         </label>
@@ -288,7 +284,7 @@
                     </div>
 
                     <!-- Tanggal Selesai -->
-                    <div style="margin-bottom: 1rem;">
+                    <div style="margin-bottom: 1.25rem;">
                         <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
                             📅 Tanggal Selesai Kerja
                         </label>
@@ -299,11 +295,11 @@
                     </div>
 
                     <!-- Keterangan -->
-                    <div>
+                    <div style="margin-bottom: 1.5rem;">
                         <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #111827; margin-bottom: 0.375rem;">
                             📝 Keterangan
                         </label>
-                        <textarea name="keterangan" id="keterangan" rows="2"
+                        <textarea name="keterangan" id="keterangan" rows="3"
                             style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.3rem; font-size: 0.75rem; font-family: inherit; resize: vertical;"
                             placeholder="Catatan tambahan..."
                             onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'"
@@ -313,34 +309,98 @@
             </div>
         </div>
 
-        <!-- Footer -->
-        <div style="padding: 0.875rem 1rem; border-top: 1px solid #e5e7eb; background-color: #f9fafb; display: flex; gap: 0.75rem; flex-shrink: 0;">
+        <!-- Footer dengan tombol yang lebih visible -->
+        <div style="padding: 1rem; border-top: 2px solid #e5e7eb; background-color: #f9fafb; display: flex; gap: 0.75rem; flex-shrink: 0; box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.05);">
             <button type="button" onclick="closeTransaksiModal()"
-                style="flex: 1; padding: 0.5rem; background-color: #e5e7eb; color: #111827; border: none; border-radius: 0.3rem; font-weight: 500; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;"
-                onmouseover="this.style.backgroundColor='#d1d5db'"
-                onmouseout="this.style.backgroundColor='#e5e7eb'">
+                style="flex: 1; padding: 0.625rem 1rem; background-color: #6b7280; color: white; border: none; border-radius: 0.375rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);"
+                onmouseover="this.style.backgroundColor='#4b5563'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(0, 0, 0, 0.15)'"
+                onmouseout="this.style.backgroundColor='#6b7280'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0, 0, 0, 0.1)'">
                 <i class="fas fa-times"></i> Batal
             </button>
             <button type="button" id="submitBtn"
-                style="flex: 1; padding: 0.5rem; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; border: none; border-radius: 0.3rem; font-weight: 500; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;"
+                style="flex: 1; padding: 0.625rem 1rem; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; border: none; border-radius: 0.375rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(34, 197, 94, 0.3);"
                 onclick="submitTransaksiForm(event)"
-                onmouseover="this.style.boxShadow='0 10px 15px rgba(34, 197, 94, 0.3)'"
-                onmouseout="this.style.boxShadow='none'">
-                <i class="fas fa-check"></i> Deals
+                onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(34, 197, 94, 0.4)'"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(34, 197, 94, 0.3)'">
+                <i class="fas fa-check"></i> Simpan Deals
             </button>
             <button type="button" id="submitBtnFail"
-                style="flex: 1; padding: 0.5rem; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 0.3rem; font-weight: 500; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;"
+                style="flex: 1; padding: 0.625rem 1rem; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 0.375rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);"
                 onclick="submitTransaksiFormFails(event)"
-                onmouseover="this.style.boxShadow='0 10px 15px rgba(239, 68, 68, 0.3)'"
-                onmouseout="this.style.boxShadow='none'">
-                <i class="fas fa-times"></i> Fails
+                onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 12px rgba(239, 68, 68, 0.4)'"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(239, 68, 68, 0.3)'">
+                <i class="fas fa-times"></i> Simpan Fails
             </button>
         </div>
     </div>
 </div>
 
 <script>
-    // Handle perubahan Sales Visit - LANGSUNG LOAD DATA + PIC
+    // ✅ Load PIC dari Company yang dipilih
+    function loadPicsForCompany() {
+        const companyId = document.getElementById('company_id').value;
+        const picSelect = document.getElementById('pic_id');
+        
+        if (!companyId) {
+            picSelect.innerHTML = '<option value="">-- Pilih Company terlebih dahulu --</option>';
+            document.getElementById('noPicBox').style.display = 'block';
+            document.getElementById('picInfoBox').style.display = 'none';
+            return;
+        }
+
+        fetch(`/transaksi/pics/by-company/${companyId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.pics.length > 0) {
+                    let options = '<option value="">-- Pilih PIC --</option>';
+                    data.pics.forEach(pic => {
+                        options += `<option value="${pic.pic_id}" 
+                            data-pic-name="${pic.pic_name}" 
+                            data-pic-position="${pic.position || ''}"
+                            data-pic-email="${pic.email || ''}"
+                            data-pic-phone="${pic.phone || ''}">${pic.pic_name}</option>`;
+                    });
+                    picSelect.innerHTML = options;
+                    document.getElementById('noPicBox').style.display = 'block';
+                    document.getElementById('picInfoBox').style.display = 'none';
+                } else {
+                    picSelect.innerHTML = '<option value="">Tidak ada PIC untuk company ini</option>';
+                    document.getElementById('noPicBox').style.display = 'block';
+                    document.getElementById('picInfoBox').style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading PICs:', error);
+                picSelect.innerHTML = '<option value="">Error loading PICs</option>';
+            });
+    }
+
+    // ✅ Handle PIC selection
+    function handlePicChange() {
+        const select = document.getElementById('pic_id');
+        const option = select.options[select.selectedIndex];
+
+        if (select.value) {
+            const picName = option.getAttribute('data-pic-name');
+            const picPosition = option.getAttribute('data-pic-position');
+            const picEmail = option.getAttribute('data-pic-email');
+            const picPhone = option.getAttribute('data-pic-phone');
+
+            document.getElementById('pic_name').value = picName;
+            document.getElementById('picPosition').textContent = picPosition || '-';
+            document.getElementById('picEmail').textContent = picEmail || '-';
+            document.getElementById('picPhone').textContent = picPhone || '-';
+
+            document.getElementById('picInfoBox').style.display = 'block';
+            document.getElementById('noPicBox').style.display = 'none';
+        } else {
+            document.getElementById('pic_name').value = '';
+            document.getElementById('picInfoBox').style.display = 'none';
+            document.getElementById('noPicBox').style.display = 'block';
+        }
+    }
+
+    // Handle Sales Visit change
     function handleSalesVisitChange() {
         const select = document.getElementById('sales_visit_id');
         const visitId = select.value;
@@ -358,48 +418,45 @@
             const picPhone = option.getAttribute('data-pic-phone');
             const visitDate = option.getAttribute('data-visit-date');
             
-            // Set Company
             document.getElementById('company_id').value = companyId;
             document.getElementById('nama_perusahaan').value = companyName;
             updateCompanyInfo();
             
-            // Set Sales
+            setTimeout(() => {
+                loadPicsForCompany();
+            }, 100);
+            
             document.getElementById('sales_id').value = salesId;
             document.getElementById('nama_sales').value = salesName;
             
-            // Set PIC - LANGSUNG DARI SALESVISIT!
             if (picId && picId !== 'null' && picId !== '') {
-                document.getElementById('pic_id').value = picId;
-                document.getElementById('pic_display').value = picName;
-                document.getElementById('pic_name').value = picName;
-                
-                // Update PIC Info Box
-                document.getElementById('picPosition').textContent = picPosition || '-';
-                document.getElementById('picEmail').textContent = picEmail || '-';
-                document.getElementById('picPhone').textContent = picPhone || '-';
-                
-                document.getElementById('picInfoBox').style.display = 'block';
-                document.getElementById('noPicBox').style.display = 'none';
+                setTimeout(() => {
+                    document.getElementById('pic_id').value = picId;
+                    document.getElementById('pic_name').value = picName;
+                    
+                    document.getElementById('picPosition').textContent = picPosition || '-';
+                    document.getElementById('picEmail').textContent = picEmail || '-';
+                    document.getElementById('picPhone').textContent = picPhone || '-';
+                    
+                    document.getElementById('picInfoBox').style.display = 'block';
+                    document.getElementById('noPicBox').style.display = 'none';
+                }, 200);
             } else {
                 document.getElementById('pic_id').value = '';
-                document.getElementById('pic_display').value = '';
                 document.getElementById('pic_name').value = '';
                 document.getElementById('picInfoBox').style.display = 'none';
                 document.getElementById('noPicBox').style.display = 'block';
             }
             
-            // Set Tanggal Mulai dari visit_date
             if (visitDate) {
                 document.getElementById('tanggal_mulai_kerja').value = visitDate;
             }
         } else {
-            // Clear semua
             document.getElementById('company_id').value = '';
             document.getElementById('nama_perusahaan').value = '';
             document.getElementById('sales_id').value = '';
             document.getElementById('nama_sales').value = '';
             document.getElementById('pic_id').value = '';
-            document.getElementById('pic_display').value = '';
             document.getElementById('pic_name').value = '';
             document.getElementById('tanggal_mulai_kerja').value = '';
             document.getElementById('tanggal_selesai_kerja').value = '';
@@ -409,7 +466,6 @@
         }
     }
 
-    // Update informasi perusahaan
     function updateCompanyInfo() {
         const select = document.getElementById('company_id');
         const selected = select.options[select.selectedIndex];
@@ -426,14 +482,12 @@
         }
     }
 
-    // Update nama sales saat dipilih
     function updateSalesName() {
         const select = document.getElementById('sales_id');
         const selected = select.options[select.selectedIndex];
         document.getElementById('nama_sales').value = selected.getAttribute('data-name') || '';
     }
 
-    // Update nama file yang diupload
     function updateFileName(fieldId) {
         const input = document.getElementById(fieldId);
         const nameDisplay = document.getElementById(fieldId + '_name');
@@ -444,7 +498,6 @@
         }
     }
 
-    // Handle drag & drop file
     function handleDrop(e, fieldId) {
         e.preventDefault();
         const files = e.dataTransfer.files;
@@ -457,23 +510,19 @@
         document.getElementById(dropZone).style.backgroundColor = 'white';
     }
 
-    // Submit form dengan status Deals
     function submitTransaksiForm(e) {
         e.preventDefault();
         document.getElementById('status').value = 'Deals';
         submitForm();
     }
 
-    // Submit form dengan status Fails
     function submitTransaksiFormFails(e) {
         e.preventDefault();
         document.getElementById('status').value = 'Fails';
         submitForm();
     }
 
-    // Fungsi submit utama
     function submitForm() {
-        // Validasi field wajib
         if (!document.getElementById('sales_id').value) {
             alert('Silakan pilih Sales terlebih dahulu!');
             return;
@@ -495,7 +544,6 @@
         const form = document.getElementById('transaksiForm');
         const formData = new FormData(form);
         
-        // Tambahkan semua field dari ketiga form
         formData.append('pic_id', document.getElementById('pic_id').value);
         formData.append('pic_name', document.getElementById('pic_name').value);
         formData.append('nilai_proyek', document.getElementById('nilai_proyek').value);
@@ -504,7 +552,6 @@
         formData.append('tanggal_selesai_kerja', document.getElementById('tanggal_selesai_kerja').value);
         formData.append('keterangan', document.getElementById('keterangan').value);
         
-        // Tambahkan file jika ada
         if (document.getElementById('bukti_spk').files.length > 0) {
             formData.append('bukti_spk', document.getElementById('bukti_spk').files[0]);
         }
@@ -512,21 +559,17 @@
             formData.append('bukti_dp', document.getElementById('bukti_dp').files[0]);
         }
 
-        const url = transaksiId 
-            ? `/transaksi/${transaksiId}`
-            : '/transaksi';
+        const url = transaksiId ? `/transaksi/${transaksiId}` : '/transaksi';
+        if (transaksiId) formData.append('_method', 'PUT');
 
-        if (transaksiId) {
-            formData.append('_method', 'PUT');
-        }
-
-        // Tampilkan loading state
         const submitBtn = document.getElementById('submitBtn');
         const submitBtnFail = document.getElementById('submitBtnFail');
         const originalText = submitBtn.innerHTML;
+        const originalTextFail = submitBtnFail.innerHTML;
         submitBtn.disabled = true;
         submitBtnFail.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+        submitBtnFail.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
 
         fetch(url, {
             method: 'POST',
@@ -548,6 +591,7 @@
                     submitBtn.disabled = false;
                     submitBtnFail.disabled = false;
                     submitBtn.innerHTML = originalText;
+                    submitBtnFail.innerHTML = originalTextFail;
                 });
             }
         })
@@ -557,32 +601,30 @@
             submitBtn.disabled = false;
             submitBtnFail.disabled = false;
             submitBtn.innerHTML = originalText;
+            submitBtnFail.innerHTML = originalTextFail;
         });
     }
 
-    // Buka modal untuk tambah baru
     function openTransaksiModal() {
         document.getElementById('transaksiModal').classList.add('active');
         document.getElementById('transaksiForm').reset();
-        document.getElementById('transaksiFormMiddle').reset();
         document.getElementById('transaksiFormRight').reset();
         document.getElementById('modalTitle').textContent = 'Tambah Transaksi Baru';
         document.getElementById('transaksiId').value = '';
-        document.getElementById('submitBtn').innerHTML = '<i class="fas fa-check"></i> Deals';
-        document.getElementById('submitBtnFail').innerHTML = '<i class="fas fa-times"></i> Fails';
+        document.getElementById('submitBtn').innerHTML = '<i class="fas fa-check"></i> Simpan Deals';
+        document.getElementById('submitBtnFail').innerHTML = '<i class="fas fa-times"></i> Simpan Fails';
         document.getElementById('companyInfoBox').style.display = 'none';
         document.getElementById('picInfoBox').style.display = 'none';
         document.getElementById('noPicBox').style.display = 'block';
         document.getElementById('bukti_spk_name').textContent = '';
         document.getElementById('bukti_dp_name').textContent = '';
+        document.getElementById('pic_id').innerHTML = '<option value="">-- Pilih Company terlebih dahulu --</option>';
     }
 
-    // Tutup modal
     function closeTransaksiModal() {
         document.getElementById('transaksiModal').classList.remove('active');
     }
 
-    // Edit transaksi
     function editTransaksi(id) {
         fetch(`/transaksi/${id}/edit`)
             .then(response => response.json())
@@ -593,9 +635,6 @@
                 document.getElementById('company_id').value = data.company_id;
                 document.getElementById('nama_sales').value = data.nama_sales;
                 document.getElementById('nama_perusahaan').value = data.nama_perusahaan;
-                document.getElementById('pic_id').value = data.pic_id || '';
-                document.getElementById('pic_display').value = data.pic_name || '';
-                document.getElementById('pic_name').value = data.pic_name || '';
                 document.getElementById('nilai_proyek').value = data.nilai_proyek;
                 document.getElementById('status').value = data.status;
                 document.getElementById('tanggal_mulai_kerja').value = data.tanggal_mulai_kerja || '';
@@ -604,19 +643,13 @@
                 
                 updateCompanyInfo();
                 
-                if (data.pic_id && data.pic_name) {
-                    // Load PIC info dari relasi
-                    if (data.pic) {
-                        document.getElementById('picPosition').textContent = data.pic.position || '-';
-                        document.getElementById('picEmail').textContent = data.pic.email || '-';
-                        document.getElementById('picPhone').textContent = data.pic.phone || '-';
-                    }
-                    document.getElementById('picInfoBox').style.display = 'block';
-                    document.getElementById('noPicBox').style.display = 'none';
-                } else {
-                    document.getElementById('picInfoBox').style.display = 'none';
-                    document.getElementById('noPicBox').style.display = 'block';
-                }
+                setTimeout(() => {
+                    loadPicsForCompany();
+                    setTimeout(() => {
+                        document.getElementById('pic_id').value = data.pic_id || '';
+                        handlePicChange();
+                    }, 200);
+                }, 100);
                 
                 document.getElementById('modalTitle').textContent = 'Edit Transaksi';
                 document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Update Deals';
@@ -629,7 +662,6 @@
             });
     }
 
-    // Close modal ketika click outside
     window.addEventListener('click', function(event) {
         const modal = document.getElementById('transaksiModal');
         if (event.target === modal) {

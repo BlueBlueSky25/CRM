@@ -13,8 +13,10 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\SalesVisitController;
 use App\Http\Controllers\PicController;
-use App\Http\Controllers\TransaksiController;
+use App\Http\Controllers\TransaksiController; // ✅ TAMBAH INI
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SalesPerformanceController;
+
 
 
 // ==========================
@@ -43,6 +45,12 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
+
+    //public
+Route::get('/aboutus', [ProfileController::class, 'aboutUs'])->name('aboutus');
+
+
+
 
 // ==========================
 // CASCADE DROPDOWN ROUTES
@@ -124,16 +132,25 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::post('/sales-visit/pic', [SalesVisitController::class, 'storePic'])->name('salesvisit.pic.store');
 
     // ==========================
-    // TRANSAKSI ROUTES (NEW)
+    // TRANSAKSI ROUTES (NEW) ✅
     // ==========================
-    Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi');
-    Route::post('/transaksi', [TransaksiController::class, 'store'])->name('transaksi.store');
-    Route::get('/transaksi/{id}', [TransaksiController::class, 'show'])->name('transaksi.show');
-    Route::get('/transaksi/{id}/edit', [TransaksiController::class, 'edit'])->name('transaksi.edit');
-    Route::put('/transaksi/{id}', [TransaksiController::class, 'update'])->name('transaksi.update');
-    Route::delete('/transaksi/{id}', [TransaksiController::class, 'destroy'])->name('transaksi.destroy');
-    Route::get('/transaksi/search', [TransaksiController::class, 'search'])->name('transaksi.search');
-
+    Route::prefix('transaksi')->name('transaksi.')->group(function () {
+        // Main CRUD routes
+        Route::get('/', [TransaksiController::class, 'index'])->name('index');
+        Route::post('/', [TransaksiController::class, 'store'])->name('store');
+        Route::get('/search', [TransaksiController::class, 'search'])->name('search');
+        
+        // ✅ API Routes - HARUS SEBELUM {id} parameter!
+        Route::get('/api/sales', [TransaksiController::class, 'getSalesUsers'])->name('api.sales');
+        Route::get('/pics/by-company/{companyId}', [TransaksiController::class, 'getPicsByCompany'])->name('pics.bycompany');
+        
+        // Single item routes
+        Route::get('/{id}', [TransaksiController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [TransaksiController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [TransaksiController::class, 'update'])->name('update');
+        Route::delete('/{id}', [TransaksiController::class, 'destroy'])->name('destroy');
+    });
+    
     // ==========================
     // PIC Management
     // ==========================

@@ -206,4 +206,11 @@
     function closeDetailModal() {
         document.getElementById('detailModal').classList.remove('active');
     }
+
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('detailModal');
+        if (event.target === modal) {
+            modal.classList.remove('active');
+        }
+    });
 </script>
