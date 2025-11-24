@@ -2,71 +2,194 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Pipeline;
-use App\Models\PipelineStage;
-use Illuminate\View\View;
+use App\Models\Customer;
+use App\Models\SalesVisit;
+use App\Models\Transaksi;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
 
 class PipelineController extends Controller
 {
     public function index(): View
     {
-        // Dummy data untuk table
-        $pipelines = [
-            [
-                'id' => 1,
-                'nama' => 'PT Maju Jaya',
-                'email' => 'contact@majujaya.com',
-                'phone' => '081234567890',
-                'value' => 500000000,
-                'date' => '2025-11-20',
-                'notes' => 'Leads potensial'
-            ],
-            [
-                'id' => 2,
-                'nama' => 'CV Sukses Bersama',
-                'email' => 'info@suksesbersama.com',
-                'phone' => '082345678901',
-                'value' => 750000000,
-                'date' => '2025-11-21',
-                'notes' => 'Follow up minggu depan'
-            ],
-            [
-                'id' => 3,
-                'nama' => 'PT Teknologi Indonesia',
-                'email' => 'sales@tekindo.com',
-                'phone' => '083456789012',
-                'value' => 1000000000,
-                'date' => '2025-11-22',
-                'notes' => 'Menunggu approval'
-            ],
-            [
-                'id' => 4,
-                'nama' => 'Toko Barokah',
-                'email' => 'toko@barokah.com',
-                'phone' => '084567890123',
-                'value' => 250000000,
-                'date' => '2025-11-23',
-                'notes' => 'Sudah bertemu'
-            ],
-        ];
-
-        return view('pages.pipeline', compact('pipelines'));
+        $user = Auth::user();
+        
+        // 1️⃣ LEAD - dari Customer dengan status 'Lead'
+        $leadQuery = Customer::with(['province', 'regency', 'user'])
+            ->where('status', 'Lead');
+        
+        // Role-based filtering untuk Lead
+        if ($user->role_id == 1) {
+            // superadmin - lihat semua
+        } elseif (in_array($user->role_id, [7, 11])) {
+            $leadQuery->whereHas('user', function ($q) {
+                $q->where('role_id', 12);
+            });
+        } elseif ($user->role_id == 12) {
+            $leadQuery->where('user_id', $user->user_id);
+        } else {
+            $leadQuery->whereNull('id');
+        }
+        
+        $leads = $leadQuery->orderBy('created_at', 'desc')->get();
+        
+        // 2️⃣ VISIT - dari SalesVisit
+        $visitQuery = SalesVisit::with(['sales', 'company', 'province', 'regency', 'pic']);
+        
+        if ($user->role_id == 1) {
+            // superadmin
+        } elseif (in_array($user->role_id, [7, 11])) {
+            $visitQuery->whereHas('sales', function ($q) {
+                $q->where('role_id', 12);
+            });
+        } elseif ($user->role_id == 12) {
+            $visitQuery->where('sales_id', $user->user_id);
+        } else {
+            $visitQuery->whereNull('id');
+        }
+        
+        $visits = $visitQuery->orderBy('visit_date', 'desc')->get();
+        
+        // 3️⃣ PENAWARAN - dari Transaksi
+        $penawaranQuery = Transaksi::with(['sales', 'company', 'pic']);
+        
+        if ($user->role_id == 1) {
+            // superadmin
+        } elseif (in_array($user->role_id, [7, 11])) {
+            $penawaranQuery->whereHas('sales', function ($q) {
+                $q->where('role_id', 12);
+            });
+        } elseif ($user->role_id == 12) {
+            $penawaranQuery->where('sales_id', $user->user_id);
+        } else {
+            $penawaranQuery->whereNull('id');
+        }
+        
+        $penawaran = $penawaranQuery->orderBy('created_at', 'desc')->get();
+        
+        // 4️⃣ FOLLOW UP - dari SalesVisit dengan is_follow_up = true
+        $followUpQuery = SalesVisit::with(['sales', 'company', 'province', 'regency', 'pic'])
+            ->where('is_follow_up', true);
+        
+        if ($user->role_id == 1) {
+            // superadmin
+        } elseif (in_array($user->role_id, [7, 11])) {
+            $followUpQuery->whereHas('sales', function ($q) {
+                $q->where('role_id', 12);
+            });
+        } elseif ($user->role_id == 12) {
+            $followUpQuery->where('sales_id', $user->user_id);
+        } else {
+            $followUpQuery->whereNull('id');
+        }
+        
+        $followUps = $followUpQuery->orderBy('visit_date', 'desc')->get();
+        
+        $currentMenuId = 17;
+        
+        return view('pages.pipeline', compact('leads', 'visits', 'penawaran', 'followUps', 'currentMenuId'));
     }
 
-    public function show($id): View
+    // Detail untuk Lead
+    public function showLead($id)
     {
-        // Dummy show detail
-        $pipeline = [
-            'id' => $id,
-            'nama' => 'PT Maju Jaya',
-            'email' => 'contact@majujaya.com',
-            'phone' => '081234567890',
-            'value' => 500000000,
-            'date' => '2025-11-20',
-            'notes' => 'Leads potensial yang sangat menjanjikan'
-        ];
+        $lead = Customer::with(['province', 'regency', 'district', 'village', 'user'])
+            ->findOrFail($id);
+        
+        return response()->json([
+            'success' => true,
+            'type' => 'lead',
+            'data' => [
+                'id' => $lead->id,
+                'nama' => $lead->name,
+                'email' => $lead->email,
+                'phone' => $lead->phone,
+                'pic' => $lead->pic,
+                'address' => $lead->address,
+                'location' => collect([
+                    optional($lead->province)->name,
+                    optional($lead->regency)->name,
+                    optional($lead->district)->name,
+                    optional($lead->village)->name
+                ])->filter()->implode(', '),
+                'status' => $lead->status,
+                'source' => $lead->source,
+                'notes' => $lead->notes,
+                'contact_person_name' => $lead->contact_person_name,
+                'contact_person_email' => $lead->contact_person_email,
+                'contact_person_phone' => $lead->contact_person_phone,
+                'created_at' => $lead->created_at->format('d M Y H:i'),
+                'created_by' => optional($lead->user)->username ?? '-'
+            ]
+        ]);
+    }
 
-        return view('components.pipeline.show', compact('pipeline'));
+    // Detail untuk Visit
+    public function showVisit($id)
+    {
+        $visit = SalesVisit::with(['sales', 'company', 'province', 'regency', 'district', 'village', 'pic'])
+            ->findOrFail($id);
+        
+        return response()->json([
+            'success' => true,
+            'type' => 'visit',
+            'data' => [
+                'id' => $visit->id,
+                'company' => optional($visit->company)->company_name ?? '-',
+                'pic_name' => $visit->pic_name,
+                'pic_phone' => optional($visit->pic)->phone ?? '-',
+                'pic_email' => optional($visit->pic)->email ?? '-',
+                'pic_position' => optional($visit->pic)->position ?? '-',
+                'sales_name' => optional($visit->sales)->username ?? '-',
+                'sales_email' => optional($visit->sales)->email ?? '-',
+                'visit_date' => $visit->visit_date->format('d M Y'),
+                'location' => collect([
+                    optional($visit->province)->name,
+                    optional($visit->regency)->name,
+                    optional($visit->district)->name,
+                    optional($visit->village)->name
+                ])->filter()->implode(', '),
+                'address' => $visit->address ?? '-',
+                'visit_purpose' => $visit->visit_purpose,
+                'is_follow_up' => $visit->is_follow_up,
+                'created_at' => $visit->created_at->format('d M Y H:i')
+            ]
+        ]);
+    }
+
+    // Detail untuk Penawaran
+    public function showPenawaran($id)
+    {
+        $transaksi = Transaksi::with(['sales', 'company', 'pic', 'salesVisit'])
+            ->findOrFail($id);
+        
+        return response()->json([
+            'success' => true,
+            'type' => 'penawaran',
+            'data' => [
+                'id' => $transaksi->id,
+                'nama_perusahaan' => $transaksi->nama_perusahaan,
+                'pic_name' => $transaksi->pic_name,
+                'pic_phone' => optional($transaksi->pic)->phone ?? '-',
+                'pic_email' => optional($transaksi->pic)->email ?? '-',
+                'nama_sales' => $transaksi->nama_sales,
+                'sales_email' => optional($transaksi->sales)->email ?? '-',
+                'nilai_proyek' => 'Rp ' . number_format($transaksi->nilai_proyek, 0, ',', '.'),
+                'status' => $transaksi->status,
+                'tanggal_mulai_kerja' => $transaksi->tanggal_mulai_kerja ? \Carbon\Carbon::parse($transaksi->tanggal_mulai_kerja)->format('d M Y') : '-',
+                'tanggal_selesai_kerja' => $transaksi->tanggal_selesai_kerja ? \Carbon\Carbon::parse($transaksi->tanggal_selesai_kerja)->format('d M Y') : '-',
+                'keterangan' => $transaksi->keterangan ?? '-',
+                'bukti_spk' => $transaksi->bukti_spk,
+                'bukti_dp' => $transaksi->bukti_dp,
+                'created_at' => $transaksi->created_at->format('d M Y H:i')
+            ]
+        ]);
+    }
+
+    // Detail untuk Follow Up (sama seperti visit tapi khusus yang follow up)
+    public function showFollowUp($id)
+    {
+        return $this->showVisit($id);
     }
 }
