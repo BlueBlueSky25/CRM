@@ -8,15 +8,13 @@
                 </div>
                 <h3 id="modalTitle" style="color: white; font-weight: 600; margin: 0; font-size: 0.95rem;">Tambah Transaksi Baru</h3>
             </div>
-            <button onclick="closeTransaksiModal()" 
-                    style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
-                ×
+            <button onclick="closeTransaksiModal()" class="text-white hover:text-gray-200 transition-colors p-2">
+                <i class="fas fa-times text-xl"></i>
             </button>
         </div>
 
         <!-- Form Container dengan 2 Kolom -->
         <div style="display: flex; flex: 1; overflow: hidden;">
-            <!-- KOLOM KIRI: Sales Visit, Sales, Company, PIC Info (40%) -->
             <div style="flex: 0 0 40%; border-right: 1px solid #e5e7eb; overflow-y: auto; padding: 1.5rem; background-color: #ffffff;">
                 <form id="transaksiForm">
                     @csrf

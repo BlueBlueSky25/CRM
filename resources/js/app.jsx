@@ -228,8 +228,8 @@ function showSalesDetailModal(userId, salesName) {
                                                 <div class="p-2 bg-white rounded shadow-sm">
                                                     <div class="flex justify-between items-center">
                                                         <span class="font-medium text-gray-800">${company.company_name || 'Unknown'}</span>
-                                                        <span class="text-xs ${company.dummy_status_color === 'green' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'} px-2 py-1 rounded">
-                                                            ${company.dummy_status || '-'}
+                                                        <span class="text-xs ${company.status_color === 'green' ? 'bg-green-100 text-green-700' : company.status_color === 'red' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'} px-2 py-1 rounded">
+                                                            ${company.status || 'Pending'}
                                                         </span>
                                                     </div>
                                                     <div class="flex justify-between text-xs text-gray-500 mt-1">
@@ -292,7 +292,7 @@ function showSalesDetailModal(userId, salesName) {
                                     </div>
                                     
                                     <p class="text-xs text-center text-gray-500 italic mt-4">
-                                        * Deal/Fails status are dummy data
+                                        * Real data from transaksi table
                                     </p>
                                 </div>
                             </div>
@@ -346,45 +346,6 @@ window.closeSalesModal = function() {
         modal.style.opacity = '0';
         setTimeout(() => modal.remove(), 200);
     }
-}
-
-// =======================
-//  CHART 2: PROPOSAL (EXISTING)
-// =======================
-const proposal = document.getElementById("proposal");
-if (proposal) {
-    new Chart(proposal, {
-        type: "bar",
-        data: {
-            labels: ["Sukses", "Menunggu", "Ditolak", "Dipantau"],
-            datasets: [
-                {
-                    label: "Jumlah Customer",
-                    data: [88, 11, 55, 77],
-                    backgroundColor: [
-                        "rgba(255, 99, 132, 0.6)",
-                        "rgba(54, 162, 235, 0.6)",
-                        "rgba(255, 206, 86, 0.6)",
-                        "rgba(75, 192, 192, 0.6)",
-                        "rgba(153, 102, 255, 0.6)",
-                    ],
-                    borderColor: [
-                        "rgb(255, 99, 132)",
-                        "rgb(54, 162, 235)",
-                        "rgb(255, 206, 86)",
-                        "rgb(75, 192, 192)",
-                        "rgb(153, 102, 255)",
-                    ],
-                    borderWidth: 1,
-                },
-            ],
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { position: "bottom" } },
-        },
-    });
 }
 
 // =======================

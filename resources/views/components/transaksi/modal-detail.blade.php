@@ -5,23 +5,16 @@
             <h3 style="color: white; font-weight: 600; margin: 0; font-size: 0.95rem;">
                 <i class="fas fa-info-circle"></i> Detail Transaksi
             </h3>
-            <button onclick="closeDetailModal()" style="background: none; border: none; color: white; font-size: 1.25rem; cursor: pointer; padding: 0; width: auto; height: auto;">×</button>
+            <button onclick="closeDetailModal()" class="text-white hover:text-gray-200 transition-colors p-2">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
         </div>
 
         <!-- Content -->
         <div id="detailContent" style="padding: 1.5rem; max-height: calc(90vh - 150px); overflow-y: auto; background-color: #fafbfc;">
             <!-- akan diisi oleh JavaScript -->
         </div>
-
-        <!-- Footer/Close Button -->
-        <div style="padding: 0.75rem 1rem; border-top: 1px solid #e5e7eb; background-color: #f9fafb; display: flex; justify-content: flex-end; flex-shrink: 0;">
-            <button onclick="closeDetailModal()"
-                style="padding: 0.5rem 1rem; background-color: #e5e7eb; color: #111827; border: none; border-radius: 0.3rem; font-weight: 500; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;"
-                onmouseover="this.style.backgroundColor='#d1d5db'"
-                onmouseout="this.style.backgroundColor='#e5e7eb'">
-                <i class="fas fa-times"></i> Tutup
-            </button>
-        </div>
+        
     </div>
 </div>
 
