@@ -55,6 +55,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/company/get-regencies/{provinceId}', [CompanyController::class, 'getRegencies']);
     Route::get('/company/get-districts/{regencyId}', [CompanyController::class, 'getDistricts']);
     Route::get('/company/get-villages/{districtId}', [CompanyController::class, 'getVillages']);
+
+    // ✅ AJAX Routes - Dipindahkan ke sini
+    Route::post('/company/store-company-ajax', [CompanyController::class, 'storeCompanyAjax']);
+    Route::post('/pics/store-pic-ajax', [PicController::class, 'storePICAjax']);
 }); 
 
 
@@ -77,7 +81,6 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::delete('/company/{id}', [CompanyController::class, 'destroy'])->name('company.destroy');
     Route::get('/company/search', [CompanyController::class, 'search'])->name('company.search');
     Route::get('/company/get-companies-dropdown', [CompanyController::class, 'getCompaniesForDropdown']);
-    Route::post('/company/store-company-ajax', [CompanyController::class, 'storeCompanyAjax']);
     Route::get('/company/{id}/pics', [CompanyController::class, 'getCompanyPics']);
     Route::get('/company/{id}', [CompanyController::class, 'show'])->name('company.show');
     
@@ -92,23 +95,17 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/customers/get-regencies/{provinceId}', [CustomerController::class, 'getRegencies']);
     Route::get('/customers/get-districts/{regencyId}', [CustomerController::class, 'getDistricts']);
     Route::get('/customers/get-villages/{districtId}', [CustomerController::class, 'getVillages']);
+    Route::get('/customers/search', [CustomerController::class, 'search'])->name('customers.search');
     Route::get('/customers/{id}', [CustomerController::class, 'show'])->name('customers.show');
     Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
     Route::put('/customers/{id}', [CustomerController::class, 'update'])->name('customers.update');
     Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('customers.destroy');
-    Route::get('/customers/search', [CustomerController::class, 'search'])->name('customers.search');
 
     // ==========================
     // SALES VISIT ROUTES 
     // ==========================
     Route::get('/salesvisit', [SalesVisitController::class, 'index'])->name('salesvisit');
     Route::get('/salesvisit/get-sales', [SalesVisitController::class, 'getSalesUsers'])->name('salesvisit.sales');
-    Route::post('/salesvisit', [SalesVisitController::class, 'store'])->name('salesvisit.store');
-    Route::get('/salesvisit/{id}/edit', [SalesVisitController::class, 'edit'])->name('salesvisit.edit');
-    // 🔥 NEW: Show visit detail with PIC
-    Route::get('/salesvisit/{id}', [SalesVisitController::class, 'show'])->name('salesvisit.show');
-    Route::put('/salesvisit/{id}', [SalesVisitController::class, 'update'])->name('salesvisit.update');
-    Route::delete('/salesvisit/{id}', [SalesVisitController::class, 'destroy'])->name('salesvisit.destroy');
     Route::get('/salesvisit/search', [SalesVisitController::class, 'search'])->name('salesvisit.search');
     Route::get('/salesvisit/get-provinces', [SalesVisitController::class, 'getProvinces'])->name('salesvisit.provinces.list');
     Route::get('/salesvisit/regencies/{provinceId}', [SalesVisitController::class, 'getRegencies'])->name('salesvisit.regencies');
@@ -119,28 +116,38 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/salesvisit/get-companies', [CompanyController::class, 'getCompaniesForDropdown']);
     Route::post('/salesvisit/store-company', [CompanyController::class, 'storeCompanyAjax']);
     Route::post('/sales-visit/pic', [SalesVisitController::class, 'storePic'])->name('salesvisit.pic.store');
+    Route::post('/salesvisit', [SalesVisitController::class, 'store'])->name('salesvisit.store');
+    Route::get('/salesvisit/{id}/edit', [SalesVisitController::class, 'edit'])->name('salesvisit.edit');
+    Route::get('/salesvisit/{id}', [SalesVisitController::class, 'show'])->name('salesvisit.show');
+    Route::put('/salesvisit/{id}', [SalesVisitController::class, 'update'])->name('salesvisit.update');
+    Route::delete('/salesvisit/{id}', [SalesVisitController::class, 'destroy'])->name('salesvisit.destroy');
 
     // ==========================
-    // TRANSAKSI ROUTES (NEW)
+    // TRANSAKSI ROUTES (FIXED) ✅
     // ==========================
     Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi');
+    Route::get('/transaksi/search', [TransaksiController::class, 'search'])->name('transaksi.search');
+    
+    // ✅ API Routes - HARUS DI ATAS {id}!
+    Route::get('/transaksi/api/sales', [TransaksiController::class, 'getSalesUsers'])->name('transaksi.api.sales');
+    Route::get('/transaksi/pics/by-company/{companyId}', [TransaksiController::class, 'getPicsByCompany'])->name('transaksi.pics.bycompany');
+    
+    // CRUD routes dengan {id} - TARUH DI BAWAH
     Route::post('/transaksi', [TransaksiController::class, 'store'])->name('transaksi.store');
     Route::get('/transaksi/{id}', [TransaksiController::class, 'show'])->name('transaksi.show');
     Route::get('/transaksi/{id}/edit', [TransaksiController::class, 'edit'])->name('transaksi.edit');
     Route::put('/transaksi/{id}', [TransaksiController::class, 'update'])->name('transaksi.update');
     Route::delete('/transaksi/{id}', [TransaksiController::class, 'destroy'])->name('transaksi.destroy');
-    Route::get('/transaksi/search', [TransaksiController::class, 'search'])->name('transaksi.search');
 
     // ==========================
     // PIC Management
     // ==========================
     Route::get('/pic', [PicController::class, 'index'])->name('pic');
+    Route::get('/pic/search', [PicController::class, 'search'])->name('pics.search');
+    Route::get('/pics/by-company/{companyId}', [PicController::class, 'getPICsByCompany']);
     Route::post('/pic', [PicController::class, 'store'])->name('pics.store');
     Route::put('/pic/{id}', [PicController::class, 'update'])->name('pics.update');
     Route::delete('/pic/{id}', [PicController::class, 'destroy'])->name('pics.destroy');
-    Route::get('/pic/search', [PicController::class, 'search'])->name('pics.search');
-    Route::get('/pics/by-company/{companyId}', [PicController::class, 'getPICsByCompany']);
-    Route::post('/pics/store-pic-ajax', [PicController::class, 'storePICAjax']);
 
     // ==========================
     // Calendar Page (React)
@@ -222,7 +229,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     });
 
     // ==========================
-    // bar sales CHART ROUTES
+    // SALES PERFORMANCE CHART ROUTES
     // ==========================
     Route::get('/api/sales-performance', [SalesPerformanceController::class, 'getSalesPerformance']);
     Route::get('/api/sales-performance/{userId}', [SalesPerformanceController::class, 'getSalesDetail']);
