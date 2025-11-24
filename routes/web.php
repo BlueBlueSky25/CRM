@@ -15,18 +15,15 @@ use App\Http\Controllers\SalesVisitController;
 use App\Http\Controllers\PicController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\SalesPerformanceController;
-use App\Http\Controllers\PipelineController;
 
 
 // ==========================
 // Public Routes (Login / Logout / Password Reset)
 // ==========================
 Route::middleware('guest')->group(function () {
-    // Login
     Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.process');
     
-    // Password Reset - Pakai PasswordResetController
     Route::get('/forgot-password', [PasswordResetController::class, 'showForgotPasswordForm'])
         ->name('password.request');
     
@@ -40,7 +37,6 @@ Route::middleware('guest')->group(function () {
         ->name('password.update');
 });
 
-// Logout (requires authentication)
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
@@ -57,10 +53,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/company/get-districts/{regencyId}', [CompanyController::class, 'getDistricts']);
     Route::get('/company/get-villages/{districtId}', [CompanyController::class, 'getVillages']);
 
-    // ✅ AJAX Routes
     Route::post('/company/store-company-ajax', [CompanyController::class, 'storeCompanyAjax']);
     Route::post('/pics/store-pic-ajax', [PicController::class, 'storePICAjax']);
-}); 
+});
 
 
 // ==========================
@@ -72,18 +67,6 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // Dashboard
     // ==========================
     Route::get('/dashboard', [CompanyChartController::class, 'index'])->name('dashboard');
-
-    // ==========================
-    // PIPELINE MANAGEMENT ROUTES
-    // ==========================
-    Route::get('/pipeline', [PipelineController::class, 'index'])->name('pipeline');
-    Route::get('/pipeline/create', [PipelineController::class, 'create'])->name('pipeline.create');
-    Route::post('/pipeline', [PipelineController::class, 'store'])->name('pipeline.store');
-    Route::get('/pipeline/stage/{id}', [PipelineController::class, 'getByStage'])->name('pipeline.getByStage');
-    Route::get('/pipeline/{id}', [PipelineController::class, 'show'])->name('pipeline.show');
-    Route::get('/pipeline/{id}/edit', [PipelineController::class, 'edit'])->name('pipeline.edit');
-    Route::put('/pipeline/{id}', [PipelineController::class, 'update'])->name('pipeline.update');
-    Route::delete('/pipeline/{id}', [PipelineController::class, 'destroy'])->name('pipeline.destroy');
 
     // ==========================
     // Company Management
@@ -136,16 +119,12 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::delete('/salesvisit/{id}', [SalesVisitController::class, 'destroy'])->name('salesvisit.destroy');
 
     // ==========================
-    // TRANSAKSI ROUTES (FIXED) ✅
+    // TRANSAKSI ROUTES
     // ==========================
     Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi');
     Route::get('/transaksi/search', [TransaksiController::class, 'search'])->name('transaksi.search');
-    
-    // ✅ API Routes - HARUS DI ATAS {id}!
     Route::get('/transaksi/api/sales', [TransaksiController::class, 'getSalesUsers'])->name('transaksi.api.sales');
     Route::get('/transaksi/pics/by-company/{companyId}', [TransaksiController::class, 'getPicsByCompany'])->name('transaksi.pics.bycompany');
-    
-    // CRUD routes dengan {id} - TARUH DI BAWAH
     Route::post('/transaksi', [TransaksiController::class, 'store'])->name('transaksi.store');
     Route::get('/transaksi/{id}', [TransaksiController::class, 'show'])->name('transaksi.show');
     Route::get('/transaksi/{id}/edit', [TransaksiController::class, 'edit'])->name('transaksi.edit');
