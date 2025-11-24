@@ -15,7 +15,7 @@ use App\Http\Controllers\SalesVisitController;
 use App\Http\Controllers\PicController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\SalesPerformanceController;
-
+use App\Http\Controllers\PipelineController;
 
 // ==========================
 // Public Routes (Login / Logout / Password Reset)
@@ -140,6 +140,13 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::post('/pic', [PicController::class, 'store'])->name('pics.store');
     Route::put('/pic/{id}', [PicController::class, 'update'])->name('pics.update');
     Route::delete('/pic/{id}', [PicController::class, 'destroy'])->name('pics.destroy');
+
+    // ==========================
+    // PIPELINE MANAGEMENT ROUTES
+    // ==========================
+    Route::get('/pipeline', [PipelineController::class, 'index'])->name('pipeline');
+    Route::get('/pipeline/search', [PipelineController::class, 'search'])->name('pipeline.search');
+    Route::get('/pipeline/{id}', [PipelineController::class, 'show'])->name('pipeline.show');
 
     // ==========================
     // Calendar Page (React)
