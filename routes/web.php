@@ -15,6 +15,7 @@ use App\Http\Controllers\SalesVisitController;
 use App\Http\Controllers\PicController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\SalesPerformanceController;
+use App\Http\Controllers\PipelineController;
 
 
 // ==========================
@@ -56,7 +57,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/company/get-districts/{regencyId}', [CompanyController::class, 'getDistricts']);
     Route::get('/company/get-villages/{districtId}', [CompanyController::class, 'getVillages']);
 
-    // ✅ AJAX Routes - Dipindahkan ke sini
+    // ✅ AJAX Routes
     Route::post('/company/store-company-ajax', [CompanyController::class, 'storeCompanyAjax']);
     Route::post('/pics/store-pic-ajax', [PicController::class, 'storePICAjax']);
 }); 
@@ -71,6 +72,18 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // Dashboard
     // ==========================
     Route::get('/dashboard', [CompanyChartController::class, 'index'])->name('dashboard');
+
+    // ==========================
+    // PIPELINE MANAGEMENT ROUTES
+    // ==========================
+    Route::get('/pipeline', [PipelineController::class, 'index'])->name('pipeline');
+    Route::get('/pipeline/create', [PipelineController::class, 'create'])->name('pipeline.create');
+    Route::post('/pipeline', [PipelineController::class, 'store'])->name('pipeline.store');
+    Route::get('/pipeline/stage/{id}', [PipelineController::class, 'getByStage'])->name('pipeline.getByStage');
+    Route::get('/pipeline/{id}', [PipelineController::class, 'show'])->name('pipeline.show');
+    Route::get('/pipeline/{id}/edit', [PipelineController::class, 'edit'])->name('pipeline.edit');
+    Route::put('/pipeline/{id}', [PipelineController::class, 'update'])->name('pipeline.update');
+    Route::delete('/pipeline/{id}', [PipelineController::class, 'destroy'])->name('pipeline.destroy');
 
     // ==========================
     // Company Management

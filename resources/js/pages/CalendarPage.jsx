@@ -394,6 +394,7 @@ export default function CalendarPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+
         try {
             if (selectedEvent) {
                 const response = await axios.put(

@@ -53,7 +53,6 @@ class TransaksiController extends Controller
     public function store(Request $request)
     {
         try {
-            // ✅ PERBAIKAN: Lebih ketat dalam validasi
             $validated = $request->validate([
                 'sales_visit_id' => 'nullable|integer|exists:sales_visits,id',
                 'sales_id' => 'required|integer|exists:users,user_id',
