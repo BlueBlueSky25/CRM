@@ -98,7 +98,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('customers.destroy');
 
     // ==========================
-    // SALES VISIT ROUTES 
+    // SALES VISIT ROUTES
     // ==========================
     Route::get('/salesvisit', [SalesVisitController::class, 'index'])->name('salesvisit');
     Route::get('/salesvisit/get-sales', [SalesVisitController::class, 'getSalesUsers'])->name('salesvisit.sales');
@@ -146,7 +146,12 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // ==========================
     Route::get('/pipeline', [PipelineController::class, 'index'])->name('pipeline');
     Route::get('/pipeline/search', [PipelineController::class, 'search'])->name('pipeline.search');
-    Route::get('/pipeline/{id}', [PipelineController::class, 'show'])->name('pipeline.show');
+
+    // ROUTES UNTUK DETAIL (TAMBAHKAN INI)
+    Route::get('/pipeline/lead/{id}', [PipelineController::class, 'showLead'])->name('pipeline.lead.show');
+    Route::get('/pipeline/visit/{id}', [PipelineController::class, 'showVisit'])->name('pipeline.visit.show');
+    Route::get('/pipeline/penawaran/{id}', [PipelineController::class, 'showPenawaran'])->name('pipeline.penawaran.show');
+    Route::get('/pipeline/follow-up/{id}', [PipelineController::class, 'showFollowUp'])->name('pipeline.followup.show');
 
     // ==========================
     // Calendar Page (React)

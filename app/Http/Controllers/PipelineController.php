@@ -91,103 +91,124 @@ class PipelineController extends Controller
         return view('pages.pipeline', compact('leads', 'visits', 'penawaran', 'followUps', 'currentMenuId'));
     }
 
-    // Detail untuk Lead
+    // ========== DETAIL UNTUK LEAD ==========
     public function showLead($id)
     {
-        $lead = Customer::with(['province', 'regency', 'district', 'village', 'user'])
-            ->findOrFail($id);
-        
-        return response()->json([
-            'success' => true,
-            'type' => 'lead',
-            'data' => [
-                'id' => $lead->id,
-                'nama' => $lead->name,
-                'email' => $lead->email,
-                'phone' => $lead->phone,
-                'pic' => $lead->pic,
-                'address' => $lead->address,
-                'location' => collect([
-                    optional($lead->province)->name,
-                    optional($lead->regency)->name,
-                    optional($lead->district)->name,
-                    optional($lead->village)->name
-                ])->filter()->implode(', '),
-                'status' => $lead->status,
-                'source' => $lead->source,
-                'notes' => $lead->notes,
-                'contact_person_name' => $lead->contact_person_name,
-                'contact_person_email' => $lead->contact_person_email,
-                'contact_person_phone' => $lead->contact_person_phone,
-                'created_at' => $lead->created_at->format('d M Y H:i'),
-                'created_by' => optional($lead->user)->username ?? '-'
-            ]
-        ]);
+        try {
+            $lead = Customer::with(['province', 'regency', 'district', 'village', 'user'])
+                ->findOrFail($id);
+            
+            return response()->json([
+                'success' => true,
+                'type' => 'lead',
+                'data' => [
+                    'id' => $lead->id,
+                    'nama' => $lead->name,
+                    'email' => $lead->email,
+                    'phone' => $lead->phone,
+                    'pic' => $lead->pic ?? '-',
+                    'address' => $lead->address ?? '-',
+                    'location' => collect([
+                        optional($lead->province)->name,
+                        optional($lead->regency)->name,
+                        optional($lead->district)->name,
+                        optional($lead->village)->name
+                    ])->filter()->implode(', ') ?: '-',
+                    'status' => $lead->status,
+                    'source' => $lead->source ?? '-',
+                    'notes' => $lead->notes ?? '-',
+                    'contact_person_name' => $lead->contact_person_name ?? '-',
+                    'contact_person_email' => $lead->contact_person_email ?? '-',
+                    'contact_person_phone' => $lead->contact_person_phone ?? '-',
+                    'created_at' => $lead->created_at->format('d M Y H:i'),
+                    'created_by' => optional($lead->user)->username ?? '-'
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan: ' . $e->getMessage()
+            ], 404);
+        }
     }
 
-    // Detail untuk Visit
+    // ========== DETAIL UNTUK VISIT ==========
     public function showVisit($id)
     {
-        $visit = SalesVisit::with(['sales', 'company', 'province', 'regency', 'district', 'village', 'pic'])
-            ->findOrFail($id);
-        
-        return response()->json([
-            'success' => true,
-            'type' => 'visit',
-            'data' => [
-                'id' => $visit->id,
-                'company' => optional($visit->company)->company_name ?? '-',
-                'pic_name' => $visit->pic_name,
-                'pic_phone' => optional($visit->pic)->phone ?? '-',
-                'pic_email' => optional($visit->pic)->email ?? '-',
-                'pic_position' => optional($visit->pic)->position ?? '-',
-                'sales_name' => optional($visit->sales)->username ?? '-',
-                'sales_email' => optional($visit->sales)->email ?? '-',
-                'visit_date' => $visit->visit_date->format('d M Y'),
-                'location' => collect([
-                    optional($visit->province)->name,
-                    optional($visit->regency)->name,
-                    optional($visit->district)->name,
-                    optional($visit->village)->name
-                ])->filter()->implode(', '),
-                'address' => $visit->address ?? '-',
-                'visit_purpose' => $visit->visit_purpose,
-                'is_follow_up' => $visit->is_follow_up,
-                'created_at' => $visit->created_at->format('d M Y H:i')
-            ]
-        ]);
+        try {
+            $visit = SalesVisit::with(['sales', 'company', 'province', 'regency', 'district', 'village', 'pic'])
+                ->findOrFail($id);
+            
+            return response()->json([
+                'success' => true,
+                'type' => 'visit',
+                'data' => [
+                    'id' => $visit->id,
+                    'company' => optional($visit->company)->company_name ?? '-',
+                    'pic_name' => $visit->pic_name ?? '-',
+                    'pic_phone' => optional($visit->pic)->phone ?? '-',
+                    'pic_email' => optional($visit->pic)->email ?? '-',
+                    'pic_position' => optional($visit->pic)->position ?? '-',
+                    'sales_name' => optional($visit->sales)->username ?? '-',
+                    'sales_email' => optional($visit->sales)->email ?? '-',
+                    'visit_date' => $visit->visit_date->format('d M Y'),
+                    'location' => collect([
+                        optional($visit->province)->name,
+                        optional($visit->regency)->name,
+                        optional($visit->district)->name,
+                        optional($visit->village)->name
+                    ])->filter()->implode(', ') ?: '-',
+                    'address' => $visit->address ?? '-',
+                    'visit_purpose' => $visit->visit_purpose ?? '-',
+                    'is_follow_up' => $visit->is_follow_up ? 'Ya' : 'Tidak',
+                    'created_at' => $visit->created_at->format('d M Y H:i')
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan: ' . $e->getMessage()
+            ], 404);
+        }
     }
 
-    // Detail untuk Penawaran
+    // ========== DETAIL UNTUK PENAWARAN ==========
     public function showPenawaran($id)
     {
-        $transaksi = Transaksi::with(['sales', 'company', 'pic', 'salesVisit'])
-            ->findOrFail($id);
-        
-        return response()->json([
-            'success' => true,
-            'type' => 'penawaran',
-            'data' => [
-                'id' => $transaksi->id,
-                'nama_perusahaan' => $transaksi->nama_perusahaan,
-                'pic_name' => $transaksi->pic_name,
-                'pic_phone' => optional($transaksi->pic)->phone ?? '-',
-                'pic_email' => optional($transaksi->pic)->email ?? '-',
-                'nama_sales' => $transaksi->nama_sales,
-                'sales_email' => optional($transaksi->sales)->email ?? '-',
-                'nilai_proyek' => 'Rp ' . number_format($transaksi->nilai_proyek, 0, ',', '.'),
-                'status' => $transaksi->status,
-                'tanggal_mulai_kerja' => $transaksi->tanggal_mulai_kerja ? \Carbon\Carbon::parse($transaksi->tanggal_mulai_kerja)->format('d M Y') : '-',
-                'tanggal_selesai_kerja' => $transaksi->tanggal_selesai_kerja ? \Carbon\Carbon::parse($transaksi->tanggal_selesai_kerja)->format('d M Y') : '-',
-                'keterangan' => $transaksi->keterangan ?? '-',
-                'bukti_spk' => $transaksi->bukti_spk,
-                'bukti_dp' => $transaksi->bukti_dp,
-                'created_at' => $transaksi->created_at->format('d M Y H:i')
-            ]
-        ]);
+        try {
+            $transaksi = Transaksi::with(['sales', 'company', 'pic', 'salesVisit'])
+                ->findOrFail($id);
+            
+            return response()->json([
+                'success' => true,
+                'type' => 'penawaran',
+                'data' => [
+                    'id' => $transaksi->id,
+                    'nama_perusahaan' => $transaksi->nama_perusahaan,
+                    'pic_name' => $transaksi->pic_name ?? '-',
+                    'pic_phone' => optional($transaksi->pic)->phone ?? '-',
+                    'pic_email' => optional($transaksi->pic)->email ?? '-',
+                    'nama_sales' => $transaksi->nama_sales,
+                    'sales_email' => optional($transaksi->sales)->email ?? '-',
+                    'nilai_proyek' => 'Rp ' . number_format($transaksi->nilai_proyek, 0, ',', '.'),
+                    'status' => $transaksi->status,
+                    'tanggal_mulai_kerja' => $transaksi->tanggal_mulai_kerja ? \Carbon\Carbon::parse($transaksi->tanggal_mulai_kerja)->format('d M Y') : '-',
+                    'tanggal_selesai_kerja' => $transaksi->tanggal_selesai_kerja ? \Carbon\Carbon::parse($transaksi->tanggal_selesai_kerja)->format('d M Y') : '-',
+                    'keterangan' => $transaksi->keterangan ?? '-',
+                    'bukti_spk' => $transaksi->bukti_spk ?? null,
+                    'bukti_dp' => $transaksi->bukti_dp ?? null,
+                    'created_at' => $transaksi->created_at->format('d M Y H:i')
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan: ' . $e->getMessage()
+            ], 404);
+        }
     }
 
-    // Detail untuk Follow Up (sama seperti visit tapi khusus yang follow up)
+    // ========== DETAIL UNTUK FOLLOW UP ==========
     public function showFollowUp($id)
     {
         return $this->showVisit($id);

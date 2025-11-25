@@ -2,417 +2,449 @@
 @section('title','Pipeline Management')
 
 @section('content')
+<style>
+    .pipeline-item {
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+
+    .pipeline-item:hover {
+        background-color: #f9fafb;
+        border-left-color: #3b82f6;
+        transform: translateX(4px);
+    }
+
+    .detail-label {
+        font-size: 0.7rem;
+        color: #6b7280;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+        display: block;
+    }
+
+    .detail-value {
+        font-size: 0.9rem;
+        color: #111827;
+        margin-bottom: 0.75rem;
+    }
+
+    .detail-info-box {
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 1rem;
+    }
+
+    .badge-status {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .badge-success { background-color: #d1fae5; color: #065f46; }
+    .badge-danger { background-color: #fee2e2; color: #991b1b; }
+    .badge-warning { background-color: #fef3c7; color: #92400e; }
+</style>
+
 <div class="container-expanded mx-auto px-6 lg:px-8 py-8 pt-[60px] mt-4">
-    
-    <!-- Card -->
-    <div style="background-color: #ffffff; border-radius: 0.5rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); border: 1px solid #e5e7eb; overflow: hidden;">
-        
-        <!-- Header -->
-        <div style="padding: 1.5rem; border-bottom: 1px solid #e5e7eb;">
-            <h3 style="font-size: 1.125rem; font-weight: 600; color: #111827; margin: 0;">Pipeline Management</h3>
-            <p style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">Track your leads, visits, proposals, and follow-ups</p>
+    <div style="background:#fff;border-radius:0.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);border:1px solid #e5e7eb;overflow:hidden;">
+        <div style="padding:1.5rem;border-bottom:1px solid #e5e7eb;">
+            <h3 style="font-size:1.125rem;font-weight:600;color:#111827;margin:0;">Pipeline Management</h3>
+            <p style="font-size:0.875rem;color:#6b7280;margin-top:0.25rem;">Track your leads, visits, proposals, and follow-ups</p>
         </div>
 
-        <!-- Kanban Board Container -->
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; min-height: 500px;">
-            
-            <!-- LEADS COLUMN -->
-            <div style="border-right: 1px solid #e5e7eb;">
-                <!-- Header -->
-                <div style="padding: 1rem; font-weight: 600; color: #374151; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);min-height:500px;">
+            {{-- LEADS --}}
+            <div style="border-right:1px solid #e5e7eb;">
+                <div style="padding:1rem;font-weight:600;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;display:flex;justify-content:space-between;">
                     <span><i class="fas fa-user-plus"></i> Leads</span>
-                    <span style="background-color: rgba(255,255,255,0.2); padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">{{ $leads->count() }}</span>
+                    <span style="background:rgba(255,255,255,0.2);padding:0.25rem 0.5rem;border-radius:0.25rem;font-size:0.75rem;">{{ $leads->count() }}</span>
                 </div>
-                
-                <!-- Data Items -->
-                <div style="max-height: 600px; overflow-y: auto;">
+                <div style="max-height:600px;overflow-y:auto;">
                     @forelse($leads as $lead)
-                    <div style="padding: 1rem; border-bottom: 1px solid #e5e7eb; cursor: pointer; transition: background-color 0.2s;" 
-                         onmouseover="this.style.backgroundColor='#f9fafb'" 
-                         onmouseout="this.style.backgroundColor='#ffffff'"
-                         onclick="showDetail('lead', {{ $lead->id }})">
-                        <h4 style="margin: 0; font-weight: 600; color: #111827; font-size: 0.9rem;">{{ $lead->name }}</h4>
-                        <small style="color: #6b7280; display: block; margin-top: 0.5rem;">
-                            <i class="fas fa-envelope" style="width: 14px;"></i> {{ $lead->email }}
+                    <div class="pipeline-item" onclick="openModal('lead', {{ $lead->id }})">
+                        <h4 style="margin:0;font-weight:600;color:#111827;font-size:0.9rem;">{{ $lead->name }}</h4>
+                        <small style="color:#6b7280;display:block;margin-top:0.5rem;">
+                            <i class="fas fa-envelope" style="width:14px;"></i> {{ $lead->email }}
                         </small>
-                        <small style="color: #6b7280; display: block; margin-top: 0.25rem;">
-                            <i class="fas fa-phone" style="width: 14px;"></i> {{ $lead->phone }}
+                        <small style="color:#6b7280;display:block;margin-top:0.25rem;">
+                            <i class="fas fa-phone" style="width:14px;"></i> {{ $lead->phone }}
                         </small>
-                        <small style="color: #6b7280; display: block; margin-top: 0.25rem;">
-                            <i class="fas fa-user" style="width: 14px;"></i> PIC: {{ $lead->pic }}
-                        </small>
-                        @if($lead->province)
-                        <small style="color: #6b7280; display: block; margin-top: 0.25rem;">
-                            <i class="fas fa-map-marker-alt" style="width: 14px;"></i> {{ $lead->province->name }}
-                        </small>
-                        @endif
-                        <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #9ca3af;">
+                        <div style="margin-top:0.5rem;font-size:0.75rem;color:#9ca3af;">
                             <i class="fas fa-clock"></i> {{ $lead->created_at->diffForHumans() }}
                         </div>
                     </div>
                     @empty
-                    <div style="padding: 2rem; text-align: center; color: #9ca3af;">
-                        <i class="fas fa-inbox" style="font-size: 2rem; opacity: 0.3;"></i>
-                        <p style="margin-top: 0.5rem; font-size: 0.875rem;">Tidak ada leads</p>
-                    </div>
+                    <div style="padding:2rem;text-align:center;color:#9ca3af;">Tidak ada leads</div>
                     @endforelse
                 </div>
             </div>
 
-            <!-- VISIT COLUMN -->
-            <div style="border-right: 1px solid #e5e7eb;">
-                <!-- Header -->
-                <div style="padding: 1rem; font-weight: 600; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+            {{-- VISIT --}}
+            <div style="border-right:1px solid #e5e7eb;">
+                <div style="padding:1rem;font-weight:600;background:linear-gradient(135deg,#10b981,#059669);color:#fff;display:flex;justify-content:space-between;">
                     <span><i class="fas fa-handshake"></i> Visit</span>
-                    <span style="background-color: rgba(255,255,255,0.2); padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">{{ $visits->count() }}</span>
+                    <span style="background:rgba(255,255,255,0.2);padding:0.25rem 0.5rem;border-radius:0.25rem;font-size:0.75rem;">{{ $visits->count() }}</span>
                 </div>
-                
-                <!-- Data Items -->
-                <div style="max-height: 600px; overflow-y: auto;">
+                <div style="max-height:600px;overflow-y:auto;">
                     @forelse($visits as $visit)
-                    <div style="padding: 1rem; border-bottom: 1px solid #e5e7eb; cursor: pointer; transition: background-color 0.2s;" 
-                         onmouseover="this.style.backgroundColor='#f9fafb'" 
-                         onmouseout="this.style.backgroundColor='#ffffff'"
-                         onclick="showDetail('visit', {{ $visit->id }})">
-                        <h4 style="margin: 0; font-weight: 600; color: #111827; font-size: 0.9rem;">
-                            {{ $visit->company->company_name ?? 'No Company' }}
-                        </h4>
-                        <small style="color: #6b7280; display: block; margin-top: 0.5rem;">
-                            <i class="fas fa-user" style="width: 14px;"></i> PIC: {{ $visit->pic_name }}
+                    <div class="pipeline-item" onclick="openModal('visit', {{ $visit->id }})">
+                        <h4 style="margin:0;font-weight:600;color:#111827;font-size:0.9rem;">{{ $visit->company->company_name ?? '-' }}</h4>
+                        <small style="color:#6b7280;display:block;margin-top:0.5rem;">
+                            <i class="fas fa-user" style="width:14px;"></i> PIC: {{ $visit->pic_name }}
                         </small>
-                        <small style="color: #6b7280; display: block; margin-top: 0.25rem;">
-                            <i class="fas fa-user-tie" style="width: 14px;"></i> Sales: {{ $visit->sales->username ?? '-' }}
+                        <small style="color:#6b7280;display:block;margin-top:0.25rem;">
+                            <i class="fas fa-calendar" style="width:14px;"></i> {{ $visit->visit_date->format('d M Y') }}
                         </small>
-                        @if($visit->province)
-                        <small style="color: #6b7280; display: block; margin-top: 0.25rem;">
-                            <i class="fas fa-map-marker-alt" style="width: 14px;"></i> {{ $visit->province->name }}
-                        </small>
-                        @endif
-                        <small style="color: #6b7280; display: block; margin-top: 0.25rem;">
-                            <i class="fas fa-calendar" style="width: 14px;"></i> {{ $visit->visit_date->format('d M Y') }}
-                        </small>
-                        @if($visit->is_follow_up)
-                        <span style="display: inline-block; margin-top: 0.5rem; background-color: #fef3c7; color: #92400e; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem; font-weight: 600;">
-                            Follow Up
-                        </span>
-                        @endif
                     </div>
                     @empty
-                    <div style="padding: 2rem; text-align: center; color: #9ca3af;">
-                        <i class="fas fa-inbox" style="font-size: 2rem; opacity: 0.3;"></i>
-                        <p style="margin-top: 0.5rem; font-size: 0.875rem;">Tidak ada visit</p>
-                    </div>
+                    <div style="padding:2rem;text-align:center;color:#9ca3af;">Tidak ada visit</div>
                     @endforelse
                 </div>
             </div>
 
-            <!-- PENAWARAN COLUMN -->
-            <div style="border-right: 1px solid #e5e7eb;">
-                <!-- Header -->
-                <div style="padding: 1rem; font-weight: 600; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+            {{-- PENAWARAN --}}
+            <div style="border-right:1px solid #e5e7eb;">
+                <div style="padding:1rem;font-weight:600;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;display:flex;justify-content:space-between;">
                     <span><i class="fas fa-file-invoice-dollar"></i> Penawaran</span>
-                    <span style="background-color: rgba(255,255,255,0.2); padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">{{ $penawaran->count() }}</span>
+                    <span style="background:rgba(255,255,255,0.2);padding:0.25rem 0.5rem;border-radius:0.25rem;font-size:0.75rem;">{{ $penawaran->count() }}</span>
                 </div>
-                
-                <!-- Data Items -->
-                <div style="max-height: 600px; overflow-y: auto;">
+                <div style="max-height:600px;overflow-y:auto;">
                     @forelse($penawaran as $item)
-                    <div style="padding: 1rem; border-bottom: 1px solid #e5e7eb; cursor: pointer; transition: background-color 0.2s;" 
-                         onmouseover="this.style.backgroundColor='#f9fafb'" 
-                         onmouseout="this.style.backgroundColor='#ffffff'"
-                         onclick="showDetail('penawaran', {{ $item->id }})">
-                        <h4 style="margin: 0; font-weight: 600; color: #111827; font-size: 0.9rem;">{{ $item->nama_perusahaan }}</h4>
-                        <small style="color: #6b7280; display: block; margin-top: 0.5rem;">
-                            <i class="fas fa-user" style="width: 14px;"></i> PIC: {{ $item->pic_name ?? '-' }}
+                    <div class="pipeline-item" onclick="openModal('penawaran', {{ $item->id }})">
+                        <h4 style="margin:0;font-weight:600;color:#111827;font-size:0.9rem;">{{ $item->nama_perusahaan }}</h4>
+                        <small style="color:#6b7280;display:block;margin-top:0.5rem;">
+                            <i class="fas fa-money-bill-wave"></i> Rp {{ number_format($item->nilai_proyek,0,',','.') }}
                         </small>
-                        <small style="color: #6b7280; display: block; margin-top: 0.25rem;">
-                            <i class="fas fa-user-tie" style="width: 14px;"></i> Sales: {{ $item->nama_sales }}
-                        </small>
-                        <div style="margin-top: 0.5rem; font-weight: 600; color: #059669; font-size: 0.85rem;">
-                            <i class="fas fa-money-bill-wave"></i> Rp {{ number_format($item->nilai_proyek, 0, ',', '.') }}
-                        </div>
-                        <span style="display: inline-block; margin-top: 0.5rem; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem; font-weight: 600; {{ $item->status == 'Deals' ? 'background-color: #d1fae5; color: #065f46;' : 'background-color: #fee2e2; color: #991b1b;' }}">
+                        <span class="badge-status {{ $item->status == 'Deals' ? 'badge-success' : 'badge-danger' }}" style="margin-top:0.5rem;">
                             {{ $item->status }}
                         </span>
-                        <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #9ca3af;">
-                            <i class="fas fa-clock"></i> {{ $item->created_at->diffForHumans() }}
-                        </div>
                     </div>
                     @empty
-                    <div style="padding: 2rem; text-align: center; color: #9ca3af;">
-                        <i class="fas fa-inbox" style="font-size: 2rem; opacity: 0.3;"></i>
-                        <p style="margin-top: 0.5rem; font-size: 0.875rem;">Tidak ada penawaran</p>
-                    </div>
+                    <div style="padding:2rem;text-align:center;color:#9ca3af;">Tidak ada penawaran</div>
                     @endforelse
                 </div>
             </div>
 
-            <!-- FOLLOW UP COLUMN -->
+            {{-- FOLLOW UP --}}
             <div>
-                <!-- Header -->
-                <div style="padding: 1rem; font-weight: 600; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+                <div style="padding:1rem;font-weight:600;background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff;display:flex;justify-content:space-between;">
                     <span><i class="fas fa-redo"></i> Follow Up</span>
-                    <span style="background-color: rgba(255,255,255,0.2); padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">{{ $followUps->count() }}</span>
+                    <span style="background:rgba(255,255,255,0.2);padding:0.25rem 0.5rem;border-radius:0.25rem;font-size:0.75rem;">{{ $followUps->count() }}</span>
                 </div>
-                
-                <!-- Data Items -->
-                <div style="max-height: 600px; overflow-y: auto;">
+                <div style="max-height:600px;overflow-y:auto;">
                     @forelse($followUps as $followUp)
-                    <div style="padding: 1rem; border-bottom: 1px solid #e5e7eb; cursor: pointer; transition: background-color 0.2s;" 
-                         onmouseover="this.style.backgroundColor='#f9fafb'" 
-                         onmouseout="this.style.backgroundColor='#ffffff'"
-                         onclick="showDetail('followup', {{ $followUp->id }})">
-                        <h4 style="margin: 0; font-weight: 600; color: #111827; font-size: 0.9rem;">
-                            {{ $followUp->company->company_name ?? 'No Company' }}
-                        </h4>
-                        <small style="color: #6b7280; display: block; margin-top: 0.5rem;">
-                            <i class="fas fa-user" style="width: 14px;"></i> PIC: {{ $followUp->pic_name }}
+                    <div class="pipeline-item" onclick="openModal('followup', {{ $followUp->id }})">
+                        <h4 style="margin:0;font-weight:600;color:#111827;font-size:0.9rem;">{{ optional($followUp->company)->company_name ?? '-' }}</h4>
+                        <small style="color:#6b7280;display:block;margin-top:0.5rem;">
+                            <i class="fas fa-user" style="width:14px;"></i> PIC: {{ $followUp->pic_name }}
                         </small>
-                        <small style="color: #6b7280; display: block; margin-top: 0.25rem;">
-                            <i class="fas fa-user-tie" style="width: 14px;"></i> Sales: {{ $followUp->sales->username ?? '-' }}
-                        </small>
-                        @if($followUp->province)
-                        <small style="color: #6b7280; display: block; margin-top: 0.25rem;">
-                            <i class="fas fa-map-marker-alt" style="width: 14px;"></i> {{ $followUp->province->name }}
-                        </small>
-                        @endif
-                        <small style="color: #6b7280; display: block; margin-top: 0.25rem;">
-                            <i class="fas fa-calendar" style="width: 14px;"></i> {{ $followUp->visit_date->format('d M Y') }}
-                        </small>
-                        <small style="color: #6b7280; display: block; margin-top: 0.25rem; font-size: 0.75rem;">
-                            {{ \Illuminate\Support\Str::limit($followUp->visit_purpose, 50) }}
+                        <small style="color:#6b7280;display:block;margin-top:0.25rem;">
+                            <i class="fas fa-calendar" style="width:14px;"></i> {{ $followUp->visit_date->format('d M Y') }}
                         </small>
                     </div>
                     @empty
-                    <div style="padding: 2rem; text-align: center; color: #9ca3af;">
-                        <i class="fas fa-inbox" style="font-size: 2rem; opacity: 0.3;"></i>
-                        <p style="margin-top: 0.5rem; font-size: 0.875rem;">Tidak ada follow up</p>
-                    </div>
+                    <div style="padding:2rem;text-align:center;color:#9ca3af;">Tidak ada follow up</div>
                     @endforelse
                 </div>
             </div>
-
         </div>
     </div>
 </div>
 
-<!-- Modal Detail -->
-<div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="detailModalLabel">Detail</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+{{-- MODAL SIMPLE - TANPA LOADING, TANPA ABU-ABU --}}
+<div id="detailModal" 
+     style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:9999; background:rgba(0,0,0,0.5);"
+     onclick="closeModal(event)">
+    
+    <div style="display:flex; align-items:center; justify-content:center; min-height:100vh; padding:1rem;">
+        <div onclick="event.stopPropagation()" 
+             style="background:white; border-radius:0.5rem; max-width:1000px; width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 25px -5px rgba(0,0,0,0.3);">
+            
+            {{-- Header --}}
+            <div style="background:linear-gradient(135deg,#3b82f6,#2563eb); padding:1.5rem; display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="color:white; font-size:1.25rem; font-weight:600; margin:0;">Detail</h3>
+                <button onclick="closeModal()" style="color:white; background:none; border:none; cursor:pointer; font-size:1.5rem;">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="modal-body" id="detailModalBody">
-                <div style="text-align: center; padding: 3rem;">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
-            </div>
+
+            {{-- Body --}}
+            <div id="modalContent" style="padding:1.5rem;"></div>
         </div>
     </div>
 </div>
 
 <script>
-function showDetail(type, id) {
-    const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+function openModal(type, id) {
     const routes = {
-        'lead': '/pipeline/lead/' + id,
-        'visit': '/pipeline/visit/' + id,
-        'penawaran': '/pipeline/penawaran/' + id,
-        'followup': '/pipeline/follow-up/' + id
+        lead: `/pipeline/lead/${id}`,
+        visit: `/pipeline/visit/${id}`,
+        penawaran: `/pipeline/penawaran/${id}`,
+        followup: `/pipeline/follow-up/${id}`
     };
     
-    modal.show();
+    const modal = document.getElementById('detailModal');
+    const content = document.getElementById('modalContent');
     
+    // Tampilkan modal langsung
+    modal.style.display = 'block';
+    content.innerHTML = '<div style="text-align:center; padding:3rem; color:#6b7280;">Memuat data...</div>';
+    
+    // Fetch data
     fetch(routes[type])
-        .then(response => response.json())
+        .then(res => {
+            if (!res.ok) throw new Error('Network error: ' + res.status);
+            return res.json();
+        })
         .then(data => {
-            if (data.success) {
-                renderDetail(data.type, data.data);
+            console.log('Data received:', data);
+            if(data.success) {
+                content.innerHTML = renderDetail(data.type, data.data);
+            } else {
+                content.innerHTML = showError(data.message || 'Gagal memuat data');
             }
         })
-        .catch(error => {
-            document.getElementById('detailModalBody').innerHTML = 
-                '<div class="alert alert-danger">Error loading data</div>';
+        .catch(err => {
+            console.error('Error:', err);
+            content.innerHTML = showError('Terjadi kesalahan: ' + err.message);
         });
 }
 
-function renderDetail(type, data) {
-    let html = '';
-    
-    if (type === 'lead') {
-        html = `
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="mb-4">
-                        <label class="form-label text-muted small">NAMA</label>
-                        <h4 class="fw-bold mb-0">${data.nama}</h4>
-                    </div>
+function closeModal(event) {
+    const modal = document.getElementById('detailModal');
+    modal.style.display = 'none';
+}
 
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label text-muted small">EMAIL</label>
-                            <p class="mb-0"><a href="mailto:${data.email}">${data.email}</a></p>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-muted small">TELEPON</label>
-                            <p class="mb-0"><a href="tel:${data.phone}">${data.phone}</a></p>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label text-muted small">PIC</label>
-                        <p class="mb-0">${data.pic}</p>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label text-muted small">ALAMAT</label>
-                        <p class="mb-0">${data.address || '-'}</p>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label text-muted small">LOKASI</label>
-                        <p class="mb-0">${data.location}</p>
-                    </div>
-
-                    ${data.notes ? `
-                    <div class="mb-4">
-                        <label class="form-label text-muted small">CATATAN</label>
-                        <p class="mb-0">${data.notes}</p>
-                    </div>
-                    ` : ''}
-                </div>
-
-                <div class="col-md-4">
-                    <div class="card" style="background-color: #f9fafb; border: 1px solid #e5e7eb;">
-                        <div class="card-body">
-                            <h6 class="card-title mb-3"><i class="fas fa-info-circle"></i> Informasi</h6>
-                            <small class="d-block mb-2"><strong>Status:</strong> ${data.status}</small>
-                            ${data.source ? `<small class="d-block mb-2"><strong>Source:</strong> ${data.source}</small>` : ''}
-                            <small class="d-block mb-2"><strong>Dibuat:</strong> ${data.created_at}</small>
-                            <small class="d-block"><strong>Oleh:</strong> ${data.created_by}</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    } else if (type === 'visit' || type === 'followup') {
-        html = `
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="mb-4">
-                        <label class="form-label text-muted small">PERUSAHAAN</label>
-                        <h4 class="fw-bold mb-0">${data.company}</h4>
-                    </div>
-
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label text-muted small">PIC</label>
-                            <p class="mb-0">${data.pic_name}</p>
-                            <small class="text-muted">${data.pic_position}</small><br>
-                            <small>${data.pic_phone} | ${data.pic_email}</small>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-muted small">SALES</label>
-                            <p class="mb-0">${data.sales_name}</p>
-                            <small>${data.sales_email}</small>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label text-muted small">TANGGAL VISIT</label>
-                        <p class="mb-0"><i class="fas fa-calendar"></i> ${data.visit_date}</p>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label text-muted small">LOKASI</label>
-                        <p class="mb-0">${data.location}</p>
-                        <small class="text-muted">${data.address}</small>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label text-muted small">TUJUAN KUNJUNGAN</label>
-                        <p class="mb-0">${data.visit_purpose}</p>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="card" style="background-color: #f9fafb; border: 1px solid #e5e7eb;">
-                        <div class="card-body">
-                            <h6 class="card-title mb-3"><i class="fas fa-info-circle"></i> Informasi</h6>
-                            <small class="d-block mb-2"><strong>Follow Up:</strong> ${data.is_follow_up ? 'Ya' : 'Tidak'}</small>
-                            <small class="d-block"><strong>Dibuat:</strong> ${data.created_at}</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    } else if (type === 'penawaran') {
-        html = `
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="mb-4">
-                        <label class="form-label text-muted small">PERUSAHAAN</label>
-                        <h4 class="fw-bold mb-0">${data.nama_perusahaan}</h4>
-                    </div>
-
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label text-muted small">PIC</label>
-                            <p class="mb-0">${data.pic_name}</p>
-                            <small>${data.pic_phone} | ${data.pic_email}</small>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-muted small">SALES</label>
-                            <p class="mb-0">${data.nama_sales}</p>
-                            <small>${data.sales_email}</small>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label text-muted small">NILAI PROYEK</label>
-                        <h4 class="fw-bold mb-0" style="color: #10b981;">${data.nilai_proyek}</h4>
-                    </div>
-
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label text-muted small">MULAI KERJA</label>
-                            <p class="mb-0">${data.tanggal_mulai_kerja}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-muted small">SELESAI KERJA</label>
-                            <p class="mb-0">${data.tanggal_selesai_kerja}</p>
-                        </div>
-                    </div>
-
-                    ${data.keterangan !== '-' ? `
-                    <div class="mb-4">
-                        <label class="form-label text-muted small">KETERANGAN</label>
-                        <p class="mb-0">${data.keterangan}</p>
-                    </div>
-                    ` : ''}
-                </div>
-
-                <div class="col-md-4">
-                    <div class="card" style="background-color: #f9fafb; border: 1px solid #e5e7eb;">
-                        <div class="card-body">
-                            <h6 class="card-title mb-3"><i class="fas fa-info-circle"></i> Informasi</h6>
-                            <small class="d-block mb-2"><strong>Status:</strong> 
-                                <span class="badge ${data.status == 'Deals' ? 'bg-success' : 'bg-danger'}">${data.status}</span>
-                            </small>
-                            <small class="d-block"><strong>Dibuat:</strong> ${data.created_at}</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+// Close dengan ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeModal();
     }
-    
-    document.getElementById('detailModalBody').innerHTML = html;
+});
+
+function renderDetail(type, data) {
+    if (type === 'lead') return renderLead(data);
+    else if (type === 'visit' || type === 'followup') return renderVisit(data);
+    else if (type === 'penawaran') return renderPenawaran(data);
+}
+
+function renderLead(d) {
+    return `
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="md:col-span-2 space-y-3">
+        <div>
+          <span class="detail-label"><i class="fas fa-user text-blue-600"></i> Nama</span>
+          <div class="text-lg font-bold text-gray-900">${h(d.nama)}</div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <span class="detail-label"><i class="fas fa-envelope text-green-600"></i> Email</span>
+            <div class="detail-value"><a href="mailto:${h(d.email)}" class="text-blue-600 hover:underline">${h(d.email)}</a></div>
+          </div>
+          <div>
+            <span class="detail-label"><i class="fas fa-phone text-yellow-600"></i> Telepon</span>
+            <div class="detail-value"><a href="tel:${h(d.phone)}" class="text-blue-600 hover:underline">${h(d.phone)}</a></div>
+          </div>
+        </div>
+        <div>
+          <span class="detail-label"><i class="fas fa-user-circle text-purple-600"></i> PIC</span>
+          <div class="detail-value">${h(d.pic)}</div>
+        </div>
+        <div>
+          <span class="detail-label"><i class="fas fa-home text-pink-600"></i> Alamat</span>
+          <div class="detail-value">${h(d.address)}</div>
+        </div>
+        <div>
+          <span class="detail-label"><i class="fas fa-map-marker-alt text-red-600"></i> Lokasi</span>
+          <div class="detail-value">${h(d.location)}</div>
+        </div>
+        ${d.notes && d.notes !== '-' ? `
+        <div>
+          <span class="detail-label"><i class="fas fa-sticky-note text-teal-600"></i> Catatan</span>
+          <div class="bg-green-50 border-l-4 border-green-500 p-2 rounded text-sm">${h(d.notes)}</div>
+        </div>
+        ` : ''}
+      </div>
+      <div>
+        <div class="detail-info-box">
+          <h6 class="font-semibold mb-3 text-gray-900 text-sm"><i class="fas fa-info-circle text-blue-600"></i> Informasi</h6>
+          <div class="space-y-3">
+            <div class="pb-3 border-b">
+              <small class="text-gray-600 font-medium block text-xs">Status</small>
+              <span class="badge-status badge-warning mt-1">${h(d.status)}</span>
+            </div>
+            ${d.source && d.source !== '-' ? `
+            <div class="pb-3 border-b">
+              <small class="text-gray-600 font-medium block text-xs">Source</small>
+              <small class="text-gray-900 block mt-1 text-sm">${h(d.source)}</small>
+            </div>
+            ` : ''}
+            <div class="pb-3 border-b">
+              <small class="text-gray-600 font-medium block text-xs">Dibuat</small>
+              <small class="text-gray-900 block mt-1 text-sm">${h(d.created_at)}</small>
+            </div>
+            <div>
+              <small class="text-gray-600 font-medium block text-xs">Oleh</small>
+              <small class="text-gray-900 block mt-1 text-sm">${h(d.created_by)}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderVisit(d) {
+    return `
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="md:col-span-2 space-y-3">
+        <div>
+          <span class="detail-label"><i class="fas fa-building text-blue-600"></i> Perusahaan</span>
+          <div class="text-lg font-bold text-gray-900">${h(d.company)}</div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <span class="detail-label"><i class="fas fa-user text-green-600"></i> PIC</span>
+            <div>
+              <div class="font-semibold text-sm">${h(d.pic_name)}</div>
+              <small class="text-gray-600 text-xs">${h(d.pic_position)}</small><br>
+              <small class="text-gray-600 text-xs">${h(d.pic_phone)} | ${h(d.pic_email)}</small>
+            </div>
+          </div>
+          <div>
+            <span class="detail-label"><i class="fas fa-user-tie text-yellow-600"></i> Sales</span>
+            <div>
+              <div class="font-semibold text-sm">${h(d.sales_name)}</div>
+              <small class="text-gray-600 text-xs">${h(d.sales_email)}</small>
+            </div>
+          </div>
+        </div>
+        <div>
+          <span class="detail-label"><i class="fas fa-calendar text-purple-600"></i> Tanggal Visit</span>
+          <div class="detail-value">${h(d.visit_date)}</div>
+        </div>
+        <div>
+          <span class="detail-label"><i class="fas fa-map-marker-alt text-pink-600"></i> Lokasi</span>
+          <div class="detail-value">${h(d.location)}<br><small class="text-gray-600 text-xs">${h(d.address)}</small></div>
+        </div>
+        <div>
+          <span class="detail-label"><i class="fas fa-lightbulb text-yellow-600"></i> Tujuan Kunjungan</span>
+          <div class="bg-gray-100 border-l-4 border-blue-600 p-2 rounded text-sm">${h(d.visit_purpose)}</div>
+        </div>
+      </div>
+      <div>
+        <div class="detail-info-box">
+          <h6 class="font-semibold mb-3 text-gray-900 text-sm"><i class="fas fa-info-circle text-blue-600"></i> Informasi</h6>
+          <div class="space-y-3">
+            <div class="pb-3 border-b">
+              <small class="text-gray-600 font-medium block text-xs">Follow Up</small>
+              <span class="badge-status ${d.is_follow_up === 'Ya' ? 'badge-success' : 'badge-danger'} mt-1">${h(d.is_follow_up)}</span>
+            </div>
+            <div>
+              <small class="text-gray-600 font-medium block text-xs">Dibuat</small>
+              <small class="text-gray-900 block mt-1 text-sm">${h(d.created_at)}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderPenawaran(d) {
+    return `
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="md:col-span-2 space-y-3">
+        <div>
+          <span class="detail-label"><i class="fas fa-building text-blue-600"></i> Perusahaan</span>
+          <div class="text-lg font-bold text-gray-900">${h(d.nama_perusahaan)}</div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <span class="detail-label"><i class="fas fa-user text-green-600"></i> PIC</span>
+            <div>
+              <div class="font-semibold text-sm">${h(d.pic_name)}</div>
+              <small class="text-gray-600 text-xs">${h(d.pic_phone)} | ${h(d.pic_email)}</small>
+            </div>
+          </div>
+          <div>
+            <span class="detail-label"><i class="fas fa-user-tie text-yellow-600"></i> Sales</span>
+            <div>
+              <div class="font-semibold text-sm">${h(d.nama_sales)}</div>
+              <small class="text-gray-600 text-xs">${h(d.sales_email)}</small>
+            </div>
+          </div>
+        </div>
+        <div>
+          <span class="detail-label"><i class="fas fa-money-bill-wave text-green-600"></i> Nilai Proyek</span>
+          <div class="text-xl font-bold text-green-600">${h(d.nilai_proyek)}</div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <span class="detail-label"><i class="fas fa-calendar-check text-blue-600"></i> Mulai Kerja</span>
+            <div class="detail-value">${h(d.tanggal_mulai_kerja)}</div>
+          </div>
+          <div>
+            <span class="detail-label"><i class="fas fa-calendar-times text-red-600"></i> Selesai Kerja</span>
+            <div class="detail-value">${h(d.tanggal_selesai_kerja)}</div>
+          </div>
+        </div>
+        ${d.keterangan && d.keterangan !== '-' ? `
+        <div>
+          <span class="detail-label"><i class="fas fa-sticky-note text-teal-600"></i> Keterangan</span>
+          <div class="bg-green-50 border-l-4 border-green-500 p-2 rounded text-sm">${h(d.keterangan)}</div>
+        </div>
+        ` : ''}
+      </div>
+      <div>
+        <div class="detail-info-box">
+          <h6 class="font-semibold mb-3 text-gray-900 text-sm"><i class="fas fa-info-circle text-blue-600"></i> Informasi</h6>
+          <div class="space-y-3">
+            <div class="pb-3 border-b">
+              <small class="text-gray-600 font-medium block text-xs">Status</small>
+              <span class="badge-status ${d.status === 'Deals' ? 'badge-success' : 'badge-danger'} mt-1">${h(d.status)}</span>
+            </div>
+            <div>
+              <small class="text-gray-600 font-medium block text-xs">Dibuat</small>
+              <small class="text-gray-900 block mt-1 text-sm">${h(d.created_at)}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function showError(msg) {
+    return `
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+      <div class="flex items-center gap-4">
+        <i class="fas fa-exclamation-circle text-red-500 text-3xl"></i>
+        <div>
+          <h5 class="font-semibold text-red-900">Gagal Memuat Data</h5>
+          <p class="text-red-700 text-sm mt-1">${h(msg)}</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function h(t) {
+    if (!t) return '';
+    const m = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
+    return String(t).replace(/[&<>"']/g, c => m[c]);
 }
 </script>
+
+<style>
+[x-cloak] { display: none !important; }
+</style>
 
 @endsection
