@@ -238,4 +238,6 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/api/sales-performance', [SalesPerformanceController::class, 'getSalesPerformance']);
     Route::get('/api/sales-performance/{userId}', [SalesPerformanceController::class, 'getSalesDetail']);
     Route::get('/api/sales-list', [SalesPerformanceController::class, 'getSalesList']);
+
+    
 });

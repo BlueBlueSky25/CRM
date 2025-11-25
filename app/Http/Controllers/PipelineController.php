@@ -120,7 +120,7 @@ class PipelineController extends Controller
                     'contact_person_name' => $lead->contact_person_name ?? '-',
                     'contact_person_email' => $lead->contact_person_email ?? '-',
                     'contact_person_phone' => $lead->contact_person_phone ?? '-',
-                    'created_at' => $lead->created_at->format('d M Y H:i'),
+                    'created_at' => $lead->created_at->format('d/m/Y H:i'),
                     'created_by' => optional($lead->user)->username ?? '-'
                 ]
             ]);
@@ -151,7 +151,7 @@ class PipelineController extends Controller
                     'pic_position' => optional($visit->pic)->position ?? '-',
                     'sales_name' => optional($visit->sales)->username ?? '-',
                     'sales_email' => optional($visit->sales)->email ?? '-',
-                    'visit_date' => $visit->visit_date->format('d M Y'),
+                    'visit_date' => $visit->visit_date->format('d/mY'),
                     'location' => collect([
                         optional($visit->province)->name,
                         optional($visit->regency)->name,
@@ -161,7 +161,7 @@ class PipelineController extends Controller
                     'address' => $visit->address ?? '-',
                     'visit_purpose' => $visit->visit_purpose ?? '-',
                     'is_follow_up' => $visit->is_follow_up ? 'Ya' : 'Tidak',
-                    'created_at' => $visit->created_at->format('d M Y H:i')
+                    'created_at' => $visit->created_at->format('d/m/Y H:i')
                 ]
             ]);
         } catch (\Exception $e) {
@@ -192,12 +192,12 @@ class PipelineController extends Controller
                     'sales_email' => optional($transaksi->sales)->email ?? '-',
                     'nilai_proyek' => 'Rp ' . number_format($transaksi->nilai_proyek, 0, ',', '.'),
                     'status' => $transaksi->status,
-                    'tanggal_mulai_kerja' => $transaksi->tanggal_mulai_kerja ? \Carbon\Carbon::parse($transaksi->tanggal_mulai_kerja)->format('d M Y') : '-',
-                    'tanggal_selesai_kerja' => $transaksi->tanggal_selesai_kerja ? \Carbon\Carbon::parse($transaksi->tanggal_selesai_kerja)->format('d M Y') : '-',
+                    'tanggal_mulai_kerja' => $transaksi->tanggal_mulai_kerja ? \Carbon\Carbon::parse($transaksi->tanggal_mulai_kerja)->format('d/m/Y') : '-',
+                    'tanggal_selesai_kerja' => $transaksi->tanggal_selesai_kerja ? \Carbon\Carbon::parse($transaksi->tanggal_selesai_kerja)->format('d/m/Y') : '-',
                     'keterangan' => $transaksi->keterangan ?? '-',
                     'bukti_spk' => $transaksi->bukti_spk ?? null,
                     'bukti_dp' => $transaksi->bukti_dp ?? null,
-                    'created_at' => $transaksi->created_at->format('d M Y H:i')
+                    'created_at' => $transaksi->created_at->format('d/m/Y H:i')
                 ]
             ]);
         } catch (\Exception $e) {

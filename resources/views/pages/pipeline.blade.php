@@ -100,7 +100,7 @@
                             <i class="fas fa-user" style="width:14px;"></i> PIC: {{ $visit->pic_name }}
                         </small>
                         <small style="color:#6b7280;display:block;margin-top:0.25rem;">
-                            <i class="fas fa-calendar" style="width:14px;"></i> {{ $visit->visit_date->format('d M Y') }}
+                            <i class="fas fa-calendar" style="width:14px;"></i> {{ $visit->visit_date->format('d/m/Y') }}
                         </small>
                     </div>
                     @empty
@@ -146,7 +146,7 @@
                             <i class="fas fa-user" style="width:14px;"></i> PIC: {{ $followUp->pic_name }}
                         </small>
                         <small style="color:#6b7280;display:block;margin-top:0.25rem;">
-                            <i class="fas fa-calendar" style="width:14px;"></i> {{ $followUp->visit_date->format('d M Y') }}
+                            <i class="fas fa-calendar" style="width:14px;"></i> {{ $followUp->visit_date->format('d/m/Y') }}
                         </small>
                     </div>
                     @empty
