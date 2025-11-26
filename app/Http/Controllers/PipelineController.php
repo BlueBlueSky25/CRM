@@ -8,6 +8,7 @@ use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class PipelineController extends Controller
 {
@@ -98,6 +99,11 @@ class PipelineController extends Controller
             $lead = Customer::with(['province', 'regency', 'district', 'village', 'user'])
                 ->findOrFail($id);
             
+            // Get last visit untuk lead ini
+            $lastVisit = SalesVisit::where('company_id', $lead->id)
+                ->latest('visit_date')
+                ->first();
+            
             return response()->json([
                 'success' => true,
                 'type' => 'lead',
@@ -120,8 +126,9 @@ class PipelineController extends Controller
                     'contact_person_name' => $lead->contact_person_name ?? '-',
                     'contact_person_email' => $lead->contact_person_email ?? '-',
                     'contact_person_phone' => $lead->contact_person_phone ?? '-',
-                    'created_at' => $lead->created_at->format('d/m/Y H:i'),
-                    'created_by' => optional($lead->user)->username ?? '-'
+                    'created_at' => $lead->created_at->format('d/m/Y'),
+                    'created_by' => optional($lead->user)->username ?? '-',
+                    'last_visit' => $lastVisit ? $lastVisit->visit_date->format('d/m/Y') : '-'
                 ]
             ]);
         } catch (\Exception $e) {
@@ -151,7 +158,7 @@ class PipelineController extends Controller
                     'pic_position' => optional($visit->pic)->position ?? '-',
                     'sales_name' => optional($visit->sales)->username ?? '-',
                     'sales_email' => optional($visit->sales)->email ?? '-',
-                    'visit_date' => $visit->visit_date->format('d/mY'),
+                    'visit_date' => $visit->visit_date->format('d/m/Y'),
                     'location' => collect([
                         optional($visit->province)->name,
                         optional($visit->regency)->name,
@@ -161,7 +168,7 @@ class PipelineController extends Controller
                     'address' => $visit->address ?? '-',
                     'visit_purpose' => $visit->visit_purpose ?? '-',
                     'is_follow_up' => $visit->is_follow_up ? 'Ya' : 'Tidak',
-                    'created_at' => $visit->created_at->format('d/m/Y H:i')
+                    'created_at' => $visit->created_at->format('d/m/Y')
                 ]
             ]);
         } catch (\Exception $e) {
@@ -179,6 +186,17 @@ class PipelineController extends Controller
             $transaksi = Transaksi::with(['sales', 'company', 'pic', 'salesVisit'])
                 ->findOrFail($id);
             
+            // Calculate work duration
+            $workDuration = $this->calculateWorkDuration(
+                $transaksi->tanggal_mulai_kerja,
+                $transaksi->tanggal_selesai_kerja
+            );
+            
+            // Get last visit untuk perusahaan ini
+            $lastVisit = SalesVisit::where('company_id', $transaksi->company_id)
+                ->latest('visit_date')
+                ->first();
+            
             return response()->json([
                 'success' => true,
                 'type' => 'penawaran',
@@ -192,12 +210,14 @@ class PipelineController extends Controller
                     'sales_email' => optional($transaksi->sales)->email ?? '-',
                     'nilai_proyek' => 'Rp ' . number_format($transaksi->nilai_proyek, 0, ',', '.'),
                     'status' => $transaksi->status,
-                    'tanggal_mulai_kerja' => $transaksi->tanggal_mulai_kerja ? \Carbon\Carbon::parse($transaksi->tanggal_mulai_kerja)->format('d/m/Y') : '-',
-                    'tanggal_selesai_kerja' => $transaksi->tanggal_selesai_kerja ? \Carbon\Carbon::parse($transaksi->tanggal_selesai_kerja)->format('d/m/Y') : '-',
+                    'tanggal_mulai_kerja' => $transaksi->tanggal_mulai_kerja ? Carbon::parse($transaksi->tanggal_mulai_kerja)->format('d/m/Y') : '-',
+                    'tanggal_selesai_kerja' => $transaksi->tanggal_selesai_kerja ? Carbon::parse($transaksi->tanggal_selesai_kerja)->format('d/m/Y') : '-',
+                    'work_duration' => $workDuration,
                     'keterangan' => $transaksi->keterangan ?? '-',
                     'bukti_spk' => $transaksi->bukti_spk ?? null,
                     'bukti_dp' => $transaksi->bukti_dp ?? null,
-                    'created_at' => $transaksi->created_at->format('d/m/Y H:i')
+                    'created_at' => $transaksi->created_at->format('d/m/Y'),
+                    'last_visit' => $lastVisit ? $lastVisit->visit_date->format('d/m/Y') : '-'
                 ]
             ]);
         } catch (\Exception $e) {
@@ -212,5 +232,33 @@ class PipelineController extends Controller
     public function showFollowUp($id)
     {
         return $this->showVisit($id);
+    }
+
+    // ========== HELPER: Calculate Work Duration ==========
+    private function calculateWorkDuration($startDate, $endDate)
+    {
+        if (!$startDate || !$endDate) {
+            return '-';
+        }
+
+        try {
+            $start = Carbon::parse($startDate);
+            $end = Carbon::parse($endDate);
+            
+            $days = $start->diffInDays($end);
+            $hours = $start->diffInHours($end) % 24;
+            
+            if ($days > 0 && $hours > 0) {
+                return "$days hari $hours jam";
+            } elseif ($days > 0) {
+                return "$days hari";
+            } elseif ($hours > 0) {
+                return "$hours jam";
+            } else {
+                return "0 jam";
+            }
+        } catch (\Exception $e) {
+            return '-';
+        }
     }
 }

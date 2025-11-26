@@ -16,6 +16,7 @@ use App\Http\Controllers\PicController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\SalesPerformanceController;
 use App\Http\Controllers\PipelineController;
+use App\http\Controllers\SalesVisitTrendController;
 
 // ==========================
 // Public Routes (Login / Logout / Password Reset)
@@ -239,5 +240,11 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/api/sales-performance/{userId}', [SalesPerformanceController::class, 'getSalesDetail']);
     Route::get('/api/sales-list', [SalesPerformanceController::class, 'getSalesList']);
 
-    
+    // ===================================
+    // VISIT TREND ROUTES
+    // ===================================
+    // Get visit trend data with period filter
+    Route::get('/api/visit-trend', [SalesVisitTrendController::class, 'getVisitTrend'])
+        ->name('api.visit.trend');
+
 });

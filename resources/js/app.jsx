@@ -349,7 +349,286 @@ window.closeSalesModal = function() {
 }
 
 // =======================
-//  CHART 3: TREND (EXISTING)
+//  CHART: VISIT TREND (UPDATED)
+// =======================
+const visitTrendCanvas = document.getElementById("visitTrend");
+let visitTrendChart = null;
+let currentPeriod = 'monthly';
+
+if (visitTrendCanvas) {
+    // Initial load
+    loadVisitTrend('monthly');
+    
+    // Setup filter buttons
+    setupTrendFilters();
+    
+    // Setup date range picker
+    setupDateRangePicker();
+}
+
+/**
+ * Load visit trend data
+ */
+function loadVisitTrend(period, startDate = null, endDate = null) {
+    if (!visitTrendCanvas) return;
+    
+    currentPeriod = period;
+    
+    // Show loading
+    const loadingDiv = document.getElementById('visitTrendLoading');
+    if (loadingDiv) loadingDiv.style.display = 'flex';
+    
+    // Build URL
+    let url = `/api/visit-trend?period=${period}`;
+    if (startDate && endDate) {
+        url += `&start_date=${startDate}&end_date=${endDate}`;
+    }
+    
+    // Fetch data
+    fetch(url)
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(result => {
+            if (result.success) {
+                updateVisitTrendChart(result);
+                updateVisitTrendStats(result.stats);
+                
+                // Hide loading
+                if (loadingDiv) loadingDiv.style.display = 'none';
+            } else {
+                throw new Error(result.message || 'Failed to load data');
+            }
+        })
+        .catch(error => {
+            console.error('Visit trend error:', error);
+            if (loadingDiv) loadingDiv.style.display = 'none';
+            
+            // Show error
+            alert('Failed to load visit trend: ' + error.message);
+        });
+}
+
+/**
+ * Update chart with new data
+ */
+function updateVisitTrendChart(result) {
+    const { data } = result;
+    
+    // Destroy old chart
+    if (visitTrendChart) {
+        visitTrendChart.destroy();
+    }
+    
+    // Create new chart - HANYA KUNJUNGAN (TANPA AKUMULASI)
+    visitTrendChart = new Chart(visitTrendCanvas, {
+        type: 'line',
+        data: {
+            labels: data.labels,
+            datasets: [
+                {
+                    label: 'Kunjungan',
+                    data: data.visits,
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    backgroundColor: function(context) {
+                        const ctx = context.chart.ctx;
+                        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
+                        gradient.addColorStop(1, 'rgba(59, 130, 246, 0.05)');
+                        return gradient;
+                    },
+                    tension: 0.4,  // Smooth curve (0 = straight, 1 = very curved)
+                    fill: true,
+                    borderWidth: 3,
+                    pointRadius: 4,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointHoverBackgroundColor: 'rgba(59, 130, 246, 1)',
+                    pointHoverBorderColor: '#fff',
+                    pointHoverBorderWidth: 3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            plugins: {
+                legend: {
+                    display: false  // Hide legend karena cuma 1 line
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: { size: 13, weight: 'bold' },
+                    bodyFont: { size: 12 },
+                    cornerRadius: 8,
+                    displayColors: false,
+                    callbacks: {
+                        title: function(context) {
+                            return context[0].label;
+                        },
+                        label: function(context) {
+                            return context.parsed.y + ' kunjungan';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { 
+                        display: false,
+                        drawBorder: false
+                    },
+                    ticks: { 
+                        font: { size: 10 },
+                        maxRotation: 45,
+                        minRotation: 0,
+                        color: '#6B7280'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: { 
+                        stepSize: 1,
+                        font: { size: 11 },
+                        color: '#6B7280',
+                        callback: function(value) {
+                            return Number.isInteger(value) ? value : '';
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawBorder: false
+                    }
+                }
+            },
+            animation: {
+                duration: 1000,
+                easing: 'easeInOutCubic'
+            }
+        }
+    });
+}
+
+/**
+ * Update statistics
+ */
+function updateVisitTrendStats(stats) {
+    const totalEl = document.getElementById('totalVisits');
+    const averageEl = document.getElementById('averageVisits');
+    const periodEl = document.getElementById('periodLabel');
+    
+    if (totalEl) totalEl.textContent = stats.total_visits || 0;
+    if (averageEl) {
+        const avgText = currentPeriod === 'daily' ? 'Per Hari' : 
+                       currentPeriod === 'weekly' ? 'Per Minggu' : 
+                       currentPeriod === 'monthly' ? 'Per Bulan' : 'Per Tahun';
+        averageEl.textContent = (stats.average_per_day || stats.average_per_week || stats.average_per_month || stats.average_per_year || 0) + ' / ' + avgText;
+    }
+    if (periodEl) periodEl.textContent = stats.period_label || '';
+}
+
+/**
+ * Setup filter buttons
+ */
+function setupTrendFilters() {
+    const filterButtons = document.querySelectorAll('[data-trend-period]');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const period = this.getAttribute('data-trend-period');
+            
+            // Update active state
+            filterButtons.forEach(btn => {
+                btn.classList.remove('bg-blue-500', 'text-white');
+                btn.classList.add('bg-white', 'text-gray-700');
+            });
+            
+            this.classList.remove('bg-white', 'text-gray-700');
+            this.classList.add('bg-blue-500', 'text-white');
+            
+            // Hide date range picker
+            const dateRangePicker = document.getElementById('dateRangePicker');
+            if (dateRangePicker) dateRangePicker.classList.add('hidden');
+            
+            // Load new data
+            loadVisitTrend(period);
+        });
+    });
+}
+
+/**
+ * Setup date range picker
+ */
+function setupDateRangePicker() {
+    const customRangeBtn = document.getElementById('customRangeBtn');
+    const dateRangePicker = document.getElementById('dateRangePicker');
+    const applyBtn = document.getElementById('applyDateRange');
+    const cancelBtn = document.getElementById('cancelDateRange');
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    
+    // Set default dates (last 30 days)
+    const today = new Date();
+    const last30Days = new Date(today);
+    last30Days.setDate(today.getDate() - 30);
+    
+    if (endDateInput) endDateInput.valueAsDate = today;
+    if (startDateInput) startDateInput.valueAsDate = last30Days;
+    
+    // Toggle date range picker
+    if (customRangeBtn && dateRangePicker) {
+        customRangeBtn.addEventListener('click', function() {
+            dateRangePicker.classList.toggle('hidden');
+            
+            // Remove active state from period buttons
+            const filterButtons = document.querySelectorAll('[data-trend-period]');
+            filterButtons.forEach(btn => {
+                btn.classList.remove('bg-blue-500', 'text-white');
+                btn.classList.add('bg-white', 'text-gray-700');
+            });
+        });
+    }
+    
+    // Apply custom range
+    if (applyBtn) {
+        applyBtn.addEventListener('click', function() {
+            const startDate = startDateInput.value;
+            const endDate = endDateInput.value;
+            
+            if (!startDate || !endDate) {
+                alert('Please select both start and end dates');
+                return;
+            }
+            
+            if (new Date(startDate) > new Date(endDate)) {
+                alert('Start date must be before end date');
+                return;
+            }
+            
+            // Load custom range data
+            loadVisitTrend('custom', startDate, endDate);
+            dateRangePicker.classList.add('hidden');
+        });
+    }
+    
+    // Cancel
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() {
+            dateRangePicker.classList.add('hidden');
+        });
+    }
+}
+
+// =======================
+//  CHART 3: TREND (EXISTING - KEEP FOR BACKWARD COMPATIBILITY)
 // =======================
 const trend = document.getElementById("trend");
 if (trend) {
