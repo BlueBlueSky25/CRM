@@ -14,36 +14,19 @@ class TransaksiController extends Controller
 {
     public function index()
     {
-        // Load sales visits dengan eager load pic + company
-        $salesVisits = SalesVisit::with([
-            'company',
-            'sales',
-            'user',
-            'pic'
-        ])->orderBy('id', 'desc')->get();
+        $salesVisits = SalesVisit::with(['company', 'sales', 'user', 'pic'])
+            ->orderBy('id', 'desc')->get();
 
-        // Load transaksi dengan relationships
-        $transaksi = Transaksi::with([
-            'sales',
-            'company',
-            'salesVisit',
-            'pic'
-        ])->orderBy('created_at', 'desc')->get();
+        $transaksi = Transaksi::with(['sales', 'company', 'salesVisit', 'pic'])
+            ->orderBy('created_at', 'desc')->get();
         
-        // ✅ PERBAIKAN: Get only sales users (role_id = 12)
         $sales = User::where('role_id', 12)
             ->select('user_id', 'username', 'email')
             ->orderBy('username')
             ->get();
 
-        // Get all companies dengan relationships
-        $companies = Company::with([
-            'province',
-            'regency',
-            'district',
-            'village',
-            'companyType'
-        ])->orderBy('company_name', 'asc')->get();
+        $companies = Company::with(['province', 'regency', 'district', 'village', 'companyType'])
+            ->orderBy('company_name', 'asc')->get();
 
         $currentMenuId = 17;
         
@@ -70,7 +53,6 @@ class TransaksiController extends Controller
                 'keterangan' => 'nullable|string|max:1000',
             ]);
 
-            // Handle file uploads
             if ($request->hasFile('bukti_spk')) {
                 $validated['bukti_spk'] = $request->file('bukti_spk')->store('transaksi/spk', 'public');
             }
@@ -82,12 +64,12 @@ class TransaksiController extends Controller
             Transaksi::create($validated);
 
             return redirect()->route('transaksi')
-                ->with('success', 'Transaksi berhasil ditambahkan!');
+                ->with('success', 'Transaksi berhasil ditambahkan! ');
         } catch (\Illuminate\Validation\ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->errors())
                 ->withInput()
-                ->with('error', 'Validasi gagal. Periksa kembali data Anda.');
+                ->with('error', 'Validasi gagal.  Periksa kembali data Anda.');
         } catch (\Exception $e) {
             \Log::error('Error creating transaksi: ' . $e->getMessage());
             return redirect()->back()
@@ -210,19 +192,13 @@ class TransaksiController extends Controller
                 ->orderBy('id', 'desc')
                 ->get();
 
-            // ✅ PERBAIKAN: Get only sales users (role_id = 12)
             $sales = User::where('role_id', 12)
                 ->select('user_id', 'username', 'email')
                 ->orderBy('username')
                 ->get();
             
-            $companies = Company::with([
-                'province',
-                'regency',
-                'district',
-                'village',
-                'companyType'
-            ])->orderBy('company_name', 'asc')->get();
+            $companies = Company::with(['province', 'regency', 'district', 'village', 'companyType'])
+                ->orderBy('company_name', 'asc')->get();
 
             $currentMenuId = 17;
 
@@ -234,7 +210,6 @@ class TransaksiController extends Controller
         }
     }
 
-    // ✅ API route untuk ambil PIC berdasarkan company_id
     public function getPicsByCompany($companyId)
     {
         try {
@@ -257,7 +232,6 @@ class TransaksiController extends Controller
         }
     }
 
-    // ✅ Get only sales users (role_id = 12)
     public function getSalesUsers()
     {
         try {
@@ -271,7 +245,7 @@ class TransaksiController extends Controller
                 'sales' => $sales
             ], 200);
         } catch (\Exception $e) {
-            \Log::error('Error fetching sales users: ' . $e->getMessage());
+            \Log::error('Error fetching sales users: ' .  $e->getMessage());
             return response()->json([
                 'success' => false,
                 'error' => 'Failed to load sales',

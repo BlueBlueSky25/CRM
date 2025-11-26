@@ -16,30 +16,30 @@ class PipelineController extends Controller
     {
         $user = Auth::user();
         
-        // 1️⃣ LEAD - dari Customer dengan status 'Lead'
-        $leadQuery = Customer::with(['province', 'regency', 'user'])
-            ->where('status', 'Lead');
+        // 1️⃣ LEAD - dari SalesVisit yang BUKAN follow up (Initial Visit)
+        $leadQuery = SalesVisit::with(['sales', 'company', 'province', 'regency', 'pic'])
+            ->where('is_follow_up', false);
         
         // Role-based filtering untuk Lead
         if ($user->role_id == 1) {
             // superadmin - lihat semua
         } elseif (in_array($user->role_id, [7, 11])) {
-            $leadQuery->whereHas('user', function ($q) {
+            $leadQuery->whereHas('sales', function ($q) {
                 $q->where('role_id', 12);
             });
         } elseif ($user->role_id == 12) {
-            $leadQuery->where('user_id', $user->user_id);
+            $leadQuery->where('sales_id', $user->user_id);
         } else {
             $leadQuery->whereNull('id');
         }
         
-        $leads = $leadQuery->orderBy('created_at', 'desc')->get();
+        $leads = $leadQuery->orderBy('visit_date', 'desc')->get();
         
-        // 2️⃣ VISIT - dari SalesVisit
-        $visitQuery = SalesVisit::with(['sales', 'company', 'province', 'regency', 'pic']);
+        // 2️⃣ VISIT - sama seperti lead (non-follow-up)
+        $visitQuery = SalesVisit::with(['sales', 'company', 'province', 'regency', 'pic'])
+            ->where('is_follow_up', false);
         
         if ($user->role_id == 1) {
-            // superadmin
         } elseif (in_array($user->role_id, [7, 11])) {
             $visitQuery->whereHas('sales', function ($q) {
                 $q->where('role_id', 12);
@@ -52,29 +52,11 @@ class PipelineController extends Controller
         
         $visits = $visitQuery->orderBy('visit_date', 'desc')->get();
         
-        // 3️⃣ PENAWARAN - dari Transaksi
-        $penawaranQuery = Transaksi::with(['sales', 'company', 'pic']);
-        
-        if ($user->role_id == 1) {
-            // superadmin
-        } elseif (in_array($user->role_id, [7, 11])) {
-            $penawaranQuery->whereHas('sales', function ($q) {
-                $q->where('role_id', 12);
-            });
-        } elseif ($user->role_id == 12) {
-            $penawaranQuery->where('sales_id', $user->user_id);
-        } else {
-            $penawaranQuery->whereNull('id');
-        }
-        
-        $penawaran = $penawaranQuery->orderBy('created_at', 'desc')->get();
-        
-        // 4️⃣ FOLLOW UP - dari SalesVisit dengan is_follow_up = true
+        // 3️⃣ FOLLOW UP - dari SalesVisit dengan is_follow_up = true
         $followUpQuery = SalesVisit::with(['sales', 'company', 'province', 'regency', 'pic'])
             ->where('is_follow_up', true);
         
         if ($user->role_id == 1) {
-            // superadmin
         } elseif (in_array($user->role_id, [7, 11])) {
             $followUpQuery->whereHas('sales', function ($q) {
                 $q->where('role_id', 12);
@@ -87,48 +69,55 @@ class PipelineController extends Controller
         
         $followUps = $followUpQuery->orderBy('visit_date', 'desc')->get();
         
+        // 4️⃣ TRANSAKSI - dari Transaksi
+        $transaksiQuery = Transaksi::with(['sales', 'company', 'pic']);
+        
+        if ($user->role_id == 1) {
+        } elseif (in_array($user->role_id, [7, 11])) {
+            $transaksiQuery->whereHas('sales', function ($q) {
+                $q->where('role_id', 12);
+            });
+        } elseif ($user->role_id == 12) {
+            $transaksiQuery->where('sales_id', $user->user_id);
+        } else {
+            $transaksiQuery->whereNull('id');
+        }
+        
+        $transaksi = $transaksiQuery->orderBy('created_at', 'desc')->get();
+        
         $currentMenuId = 17;
         
-        return view('pages.pipeline', compact('leads', 'visits', 'penawaran', 'followUps', 'currentMenuId'));
+        return view('pages.pipeline', compact('leads', 'visits', 'followUps', 'transaksi', 'currentMenuId'));
     }
 
-    // ========== DETAIL UNTUK LEAD ==========
     public function showLead($id)
     {
         try {
-            $lead = Customer::with(['province', 'regency', 'district', 'village', 'user'])
+            $lead = SalesVisit::with(['sales', 'company', 'province', 'regency', 'district', 'village', 'pic'])
                 ->findOrFail($id);
-            
-            // Get last visit untuk lead ini
-            $lastVisit = SalesVisit::where('company_id', $lead->id)
-                ->latest('visit_date')
-                ->first();
             
             return response()->json([
                 'success' => true,
                 'type' => 'lead',
                 'data' => [
                     'id' => $lead->id,
-                    'nama' => $lead->name,
-                    'email' => $lead->email,
-                    'phone' => $lead->phone,
-                    'pic' => $lead->pic ?? '-',
-                    'address' => $lead->address ?? '-',
+                    'company' => $lead->company->company_name ??  '-',
+                    'pic_name' => $lead->pic_name ?? '-',
+                    'pic_phone' => optional($lead->pic)->phone ?? '-',
+                    'pic_email' => optional($lead->pic)->email ?? '-',
+                    'pic_position' => optional($lead->pic)->position ?? '-',
+                    'sales_name' => optional($lead->sales)->username ?? '-',
+                    'sales_email' => optional($lead->sales)->email ?? '-',
+                    'visit_date' => $lead->visit_date->format('d/m/Y'),
                     'location' => collect([
                         optional($lead->province)->name,
                         optional($lead->regency)->name,
                         optional($lead->district)->name,
                         optional($lead->village)->name
                     ])->filter()->implode(', ') ?: '-',
-                    'status' => $lead->status,
-                    'source' => $lead->source ?? '-',
-                    'notes' => $lead->notes ?? '-',
-                    'contact_person_name' => $lead->contact_person_name ?? '-',
-                    'contact_person_email' => $lead->contact_person_email ?? '-',
-                    'contact_person_phone' => $lead->contact_person_phone ?? '-',
-                    'created_at' => $lead->created_at->format('d/m/Y'),
-                    'created_by' => optional($lead->user)->username ?? '-',
-                    'last_visit' => $lastVisit ? $lastVisit->visit_date->format('d/m/Y') : '-'
+                    'address' => $lead->address ?? '-',
+                    'visit_purpose' => $lead->visit_purpose ?? '-',
+                    'created_at' => $lead->created_at->format('d/m/Y')
                 ]
             ]);
         } catch (\Exception $e) {
@@ -139,7 +128,6 @@ class PipelineController extends Controller
         }
     }
 
-    // ========== DETAIL UNTUK VISIT ==========
     public function showVisit($id)
     {
         try {
@@ -167,57 +155,52 @@ class PipelineController extends Controller
                     ])->filter()->implode(', ') ?: '-',
                     'address' => $visit->address ?? '-',
                     'visit_purpose' => $visit->visit_purpose ?? '-',
-                    'is_follow_up' => $visit->is_follow_up ? 'Ya' : 'Tidak',
+                    'is_follow_up' => $visit->is_follow_up ?  'Ya' : 'Tidak',
                     'created_at' => $visit->created_at->format('d/m/Y')
                 ]
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Data tidak ditemukan: ' . $e->getMessage()
+                'message' => 'Data tidak ditemukan: ' .  $e->getMessage()
             ], 404);
         }
     }
 
-    // ========== DETAIL UNTUK PENAWARAN ==========
-    public function showPenawaran($id)
+    public function showFollowUp($id)
+    {
+        return $this->showVisit($id);
+    }
+
+    public function showTransaksi($id)
     {
         try {
             $transaksi = Transaksi::with(['sales', 'company', 'pic', 'salesVisit'])
                 ->findOrFail($id);
             
-            // Calculate work duration
             $workDuration = $this->calculateWorkDuration(
                 $transaksi->tanggal_mulai_kerja,
                 $transaksi->tanggal_selesai_kerja
             );
             
-            // Get last visit untuk perusahaan ini
-            $lastVisit = SalesVisit::where('company_id', $transaksi->company_id)
-                ->latest('visit_date')
-                ->first();
-            
             return response()->json([
                 'success' => true,
-                'type' => 'penawaran',
+                'type' => 'transaksi',
                 'data' => [
                     'id' => $transaksi->id,
                     'nama_perusahaan' => $transaksi->nama_perusahaan,
-                    'pic_name' => $transaksi->pic_name ?? '-',
+                    'pic_name' => $transaksi->pic_name ??  '-',
                     'pic_phone' => optional($transaksi->pic)->phone ?? '-',
                     'pic_email' => optional($transaksi->pic)->email ?? '-',
                     'nama_sales' => $transaksi->nama_sales,
                     'sales_email' => optional($transaksi->sales)->email ?? '-',
-                    'nilai_proyek' => 'Rp ' . number_format($transaksi->nilai_proyek, 0, ',', '.'),
+                    'nilai_proyek' => 'Rp ' . number_format($transaksi->nilai_proyek, 0, ',', '. '),
                     'status' => $transaksi->status,
-                    'tanggal_mulai_kerja' => $transaksi->tanggal_mulai_kerja ? Carbon::parse($transaksi->tanggal_mulai_kerja)->format('d/m/Y') : '-',
+                    'tanggal_mulai_kerja' => $transaksi->tanggal_mulai_kerja ?  Carbon::parse($transaksi->tanggal_mulai_kerja)->format('d/m/Y') : '-',
                     'tanggal_selesai_kerja' => $transaksi->tanggal_selesai_kerja ? Carbon::parse($transaksi->tanggal_selesai_kerja)->format('d/m/Y') : '-',
                     'work_duration' => $workDuration,
                     'keterangan' => $transaksi->keterangan ?? '-',
-                    'bukti_spk' => $transaksi->bukti_spk ?? null,
-                    'bukti_dp' => $transaksi->bukti_dp ?? null,
-                    'created_at' => $transaksi->created_at->format('d/m/Y'),
-                    'last_visit' => $lastVisit ? $lastVisit->visit_date->format('d/m/Y') : '-'
+                    'created_at' => $transaksi->created_at->format('d/m/Y')
                 ]
             ]);
         } catch (\Exception $e) {
@@ -228,16 +211,9 @@ class PipelineController extends Controller
         }
     }
 
-    // ========== DETAIL UNTUK FOLLOW UP ==========
-    public function showFollowUp($id)
-    {
-        return $this->showVisit($id);
-    }
-
-    // ========== HELPER: Calculate Work Duration ==========
     private function calculateWorkDuration($startDate, $endDate)
     {
-        if (!$startDate || !$endDate) {
+        if (! $startDate || !$endDate) {
             return '-';
         }
 

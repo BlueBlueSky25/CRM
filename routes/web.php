@@ -125,12 +125,12 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi');
     Route::get('/transaksi/search', [TransaksiController::class, 'search'])->name('transaksi.search');
     Route::get('/transaksi/api/sales', [TransaksiController::class, 'getSalesUsers'])->name('transaksi.api.sales');
-    Route::get('/transaksi/pics/by-company/{companyId}', [TransaksiController::class, 'getPicsByCompany'])->name('transaksi.pics.bycompany');
+    Route::get('/transaksi/pics/by-company/{companyId}', [TransaksiController::class, 'getPicsByCompany'])->name('transaksi.pics. bycompany');
     Route::post('/transaksi', [TransaksiController::class, 'store'])->name('transaksi.store');
     Route::get('/transaksi/{id}', [TransaksiController::class, 'show'])->name('transaksi.show');
     Route::get('/transaksi/{id}/edit', [TransaksiController::class, 'edit'])->name('transaksi.edit');
     Route::put('/transaksi/{id}', [TransaksiController::class, 'update'])->name('transaksi.update');
-    Route::delete('/transaksi/{id}', [TransaksiController::class, 'destroy'])->name('transaksi.destroy');
+    Route::delete('/transaksi/{id}', [TransaksiController::class, 'destroy'])->name('transaksi. destroy');
 
     // ==========================
     // PIC Management
@@ -148,11 +148,11 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/pipeline', [PipelineController::class, 'index'])->name('pipeline');
     Route::get('/pipeline/search', [PipelineController::class, 'search'])->name('pipeline.search');
 
-    // ROUTES UNTUK DETAIL (TAMBAHKAN INI)
-    Route::get('/pipeline/lead/{id}', [PipelineController::class, 'showLead'])->name('pipeline.lead.show');
+    // ROUTES UNTUK DETAIL
+    Route::get('/pipeline/lead/{id}', [PipelineController::class, 'showLead'])->name('pipeline. lead. show');
     Route::get('/pipeline/visit/{id}', [PipelineController::class, 'showVisit'])->name('pipeline.visit.show');
-    Route::get('/pipeline/penawaran/{id}', [PipelineController::class, 'showPenawaran'])->name('pipeline.penawaran.show');
     Route::get('/pipeline/follow-up/{id}', [PipelineController::class, 'showFollowUp'])->name('pipeline.followup.show');
+    Route::get('/pipeline/transaksi/{id}', [PipelineController::class, 'showTransaksi'])->name('pipeline. transaksi.show');
 
     // ==========================
     // Calendar Page (React)
