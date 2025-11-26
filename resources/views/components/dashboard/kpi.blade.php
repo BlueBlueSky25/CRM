@@ -26,15 +26,15 @@
         </div>
     </div>
 
-    <!-- Proposal Terkirim -->
-    <div class="bg-white rounded-lg shadow-sm p-3 border-l-4 border-purple-500">
+    <!-- Follow UP -->
+    <div class="bg-white rounded-lg shadow-sm p-3 border-l-4 border-green-500">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-[10px] font-medium text-gray-600 uppercase">Proposal Terkirim</p>
+                <p class="text-[10px] font-medium text-gray-600 uppercase">Follow UP</p>
                 <p id="proposalSent" class="text-xl font-bold text-gray-900 mt-1">308</p>
             </div>
             <div class="bg-purple-100 p-2 rounded-full">
-                <i class="fas fa-file-alt text-purple-600 text-sm"></i>
+                <i class="fas fa-file-alt text-green-600 text-sm"></i>
             </div>
         </div>
     </div>

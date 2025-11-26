@@ -1,4 +1,4 @@
-{{-- kategoriindustri.blade.php --}}
+{{-- distribusi perusahaan --}}
 
 <div class="bg-white rounded-xl shadow-lg p-6 card-hover fade-in">
     <div class="flex items-center justify-between mb-6">

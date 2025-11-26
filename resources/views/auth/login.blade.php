@@ -255,26 +255,5 @@
     });
 </script>
 
-@viteReactRefresh
-<script type="module">
-    import React from "react";
-    import ReactDOM from "react-dom/client";
-    import ElectricBorder from "@/components/ui/electric-border";
-
-    const loginRoot = document.getElementById("electric-login");
-    if (loginRoot) {
-        ReactDOM.createRoot(loginRoot).render(
-            <ElectricBorder borderWidth={3} borderRadius={16} color="indigo" glow />
-        );
-    }
-
-    const imageRoot = document.getElementById("electric-image");
-    if (imageRoot) {
-        ReactDOM.createRoot(imageRoot).render(
-            <ElectricBorder borderWidth={3} borderRadius={16} color="blue" glow />
-        );
-    }
-</script>
-
 </body>
 </html>

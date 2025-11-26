@@ -178,7 +178,7 @@
             <div>
                 <div style="padding:0.875rem;font-weight:600;font-size:0.95rem;background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff;display:flex;justify-content:space-between;align-items:center;">
                     <span><i class="fas fa-redo"></i> Follow Up</span>
-                    <span style="background:rgba(255,255,255,0.2);padding:0.2rem 0.45rem;border-radius:0.25rem;font-size:0.7rem;">{{ $followUps->count() }}</span>
+                    <span style="background:rgba(2, 2, 2, 0.2);padding:0.2rem 0.45rem;border-radius:0.25rem;font-size:0.7rem;">{{ $followUps->count() }}</span>
                 </div>
                 <div style="max-height:600px;overflow-y:auto;">
                     @forelse($followUps as $followUp)
