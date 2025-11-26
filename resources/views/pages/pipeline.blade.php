@@ -242,7 +242,7 @@ function renderDetail(type, data) {
 function renderLead(d) {
     return `
     <div style="display:flex;flex-direction:column;gap:1rem;">
-      <div style="background:linear-gradient(135deg,#3b82f6,#2563eb);padding:1rem;border-radius:0.5rem;margin:-1.5rem -1.5rem 0;">
+      <div style="background:linear-gradient(135deg,#3b82f6,#2563eb);padding:1rem;border-radius:0.5rem;margin:-0.25rem -0.25rem 0;">
         <span style="font-size:0.65rem;color:rgba(255,255,255,0.85);font-weight:600;text-transform:uppercase;display:block;margin-bottom:0.25rem;letter-spacing:0.5px;"><i class="fas fa-building"></i> Lead - Perusahaan</span>
         <div style="font-size:1.1rem;font-weight:700;color:#fff;line-height:1.3;">${h(d.company)}</div>
       </div>
@@ -285,7 +285,7 @@ function renderLead(d) {
 function renderVisit(d) {
     return `
     <div style="display:flex;flex-direction:column;gap:1rem;">
-      <div style="background:linear-gradient(135deg,#10b981,#059669);padding:1rem;border-radius:0.5rem;margin:-1.5rem -1.5rem 0;">
+      <div style="background:linear-gradient(135deg,#10b981,#059669);padding:1rem;border-radius:0.5rem;margin:-0.25rem -0.25rem 0;">
         <span style="font-size:0.65rem;color:rgba(255,255,255,0.85);font-weight:600;text-transform:uppercase;display:block;margin-bottom:0.25rem;letter-spacing:0.5px;"><i class="fas fa-building"></i> Perusahaan</span>
         <div style="font-size:1.1rem;font-weight:700;color:#fff;line-height:1.3;">${h(d.company)}</div>
       </div>
@@ -340,7 +340,7 @@ function renderVisit(d) {
 function renderTransaksi(d) {
     return `
     <div style="display:flex;flex-direction:column;gap:1rem;">
-      <div style="background:linear-gradient(135deg,#f59e0b,#d97706);padding:1rem;border-radius:0.5rem;margin:-1.5rem -1.5rem 0;">
+      <div style="background:linear-gradient(135deg,#f59e0b,#d97706);padding:1rem;border-radius:0.5rem;margin: -0.25rem -0.25rem 0;">
         <span style="font-size:0.65rem;color:rgba(255,255,255,0.85);font-weight:600;text-transform:uppercase;display:block;margin-bottom:0.25rem;letter-spacing:0.5px;"><i class="fas fa-file-invoice-dollar"></i> Transaksi</span>
         <div style="font-size:1.1rem;font-weight:700;color:#fff;line-height:1.3;">${h(d.nama_perusahaan)}</div>
       </div>
