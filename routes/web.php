@@ -130,7 +130,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/transaksi/{id}', [TransaksiController::class, 'show'])->name('transaksi.show');
     Route::get('/transaksi/{id}/edit', [TransaksiController::class, 'edit'])->name('transaksi.edit');
     Route::put('/transaksi/{id}', [TransaksiController::class, 'update'])->name('transaksi.update');
-    Route::delete('/transaksi/{id}', [TransaksiController::class, 'destroy'])->name('transaksi. destroy');
+    Route::delete('/transaksi/{id}', [TransaksiController::class, 'destroy'])->name('transaksi.destroy');
 
     // ==========================
     // PIC Management

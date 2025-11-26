@@ -104,7 +104,7 @@
             <!-- VISIT STAGE -->
             <div style="border-right:1px solid #e5e7eb;">
                 <div style="padding:0.875rem;font-weight:600;font-size:0.95rem;background:linear-gradient(135deg,#10b981,#059669);color:#fff;display:flex;justify-content:space-between;align-items:center;">
-                    <span><i class="fas fa-handshake"></i> Visit</span>
+                    <span><i class="fas fa-map-pin"></i> Visit</span>
                     <span style="background:rgba(255,255,255,0.2);padding:0.2rem 0.45rem;border-radius:0.25rem;font-size:0.7rem;">{{ $visits->count() }}</span>
                 </div>
                 <div style="max-height:600px;overflow-y:auto;">
@@ -127,7 +127,7 @@
             <!-- FOLLOW UP STAGE -->
             <div style="border-right:1px solid #e5e7eb;">
                 <div style="padding:0.875rem;font-weight:600;font-size:0.95rem;background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff;display:flex;justify-content:space-between;align-items:center;">
-                    <span><i class="fas fa-redo"></i> Follow Up</span>
+                    <span><i class="fas fa-handshake"></i> Follow Up</span>
                     <span style="background:rgba(255,255,255,0.2);padding:0.2rem 0.45rem;border-radius:0.25rem;font-size:0.7rem;">{{ $followUps->count() }}</span>
                 </div>
                 <div style="max-height:600px;overflow-y:auto;">
@@ -272,7 +272,7 @@ function renderLead(d) {
       </div>
       
       <div>
-        <span class="detail-label" style="font-size:0.65rem;"><i class="fas fa-lightbulb"></i> Tujuan Visit</span>
+        <span class="detail-label" style="font-size:0.65rem;"><i class="fas fa-lightbulb"></i> Purpose</span>
         <div style="background:#eff6ff;border-left:3px solid #3b82f6;padding:0.75rem;border-radius:0.375rem;font-size:0.85rem;color:#1e40af;line-height:1.5;margin-top:0.3rem;">${h(d.visit_purpose)}</div>
       </div>
       
@@ -327,7 +327,7 @@ function renderVisit(d) {
       </div>
       
       <div>
-        <span class="detail-label" style="font-size:0.65rem;"><i class="fas fa-lightbulb"></i> Tujuan Visit</span>
+        <span class="detail-label" style="font-size:0.65rem;"><i class="fas fa-lightbulb"></i> Purpose</span>
         <div style="background:#eff6ff;border-left:3px solid #3b82f6;padding:0.75rem;border-radius:0.375rem;font-size:0.85rem;color:#1e40af;line-height:1.5;margin-top:0.3rem;">${h(d.visit_purpose)}</div>
       </div>
       

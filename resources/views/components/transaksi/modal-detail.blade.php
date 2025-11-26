@@ -12,7 +12,6 @@
 
         <!-- Content -->
         <div id="detailContent" style="padding: 1.5rem; max-height: calc(90vh - 150px); overflow-y: auto; background-color: #fafbfc;">
-            <!-- akan diisi oleh JavaScript -->
         </div>
         
     </div>

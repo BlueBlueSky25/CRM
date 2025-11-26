@@ -8,6 +8,7 @@ use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class PipelineController extends Controller
@@ -16,7 +17,7 @@ class PipelineController extends Controller
     {
         $user = Auth::user();
         
-        // 1️⃣ LEAD - dari SalesVisit yang BUKAN follow up (Initial Visit)
+        // 1️⃣ LEAD - Semua kunjungan pertama (initial visit)
         $leadQuery = SalesVisit::with(['sales', 'company', 'province', 'regency', 'pic'])
             ->where('is_follow_up', false);
         
@@ -35,9 +36,8 @@ class PipelineController extends Controller
         
         $leads = $leadQuery->orderBy('visit_date', 'desc')->get();
         
-        // 2️⃣ VISIT - sama seperti lead (non-follow-up)
-        $visitQuery = SalesVisit::with(['sales', 'company', 'province', 'regency', 'pic'])
-            ->where('is_follow_up', false);
+        // 2️⃣ VISIT - Semua kunjungan (visit) tanpa filter
+        $visitQuery = SalesVisit::with(['sales', 'company', 'province', 'regency', 'pic']);
         
         if ($user->role_id == 1) {
         } elseif (in_array($user->role_id, [7, 11])) {
@@ -52,7 +52,7 @@ class PipelineController extends Controller
         
         $visits = $visitQuery->orderBy('visit_date', 'desc')->get();
         
-        // 3️⃣ FOLLOW UP - dari SalesVisit dengan is_follow_up = true
+        // 3️⃣ FOLLOW UP - Semua kunjungan follow up
         $followUpQuery = SalesVisit::with(['sales', 'company', 'province', 'regency', 'pic'])
             ->where('is_follow_up', true);
         
@@ -101,7 +101,7 @@ class PipelineController extends Controller
                 'type' => 'lead',
                 'data' => [
                     'id' => $lead->id,
-                    'company' => $lead->company->company_name ??  '-',
+                    'company' => $lead->company->company_name ?? '-',
                     'pic_name' => $lead->pic_name ?? '-',
                     'pic_phone' => optional($lead->pic)->phone ?? '-',
                     'pic_email' => optional($lead->pic)->email ?? '-',
@@ -155,14 +155,14 @@ class PipelineController extends Controller
                     ])->filter()->implode(', ') ?: '-',
                     'address' => $visit->address ?? '-',
                     'visit_purpose' => $visit->visit_purpose ?? '-',
-                    'is_follow_up' => $visit->is_follow_up ?  'Ya' : 'Tidak',
+                    'is_follow_up' => $visit->is_follow_up ? 'Ya' : 'Tidak',
                     'created_at' => $visit->created_at->format('d/m/Y')
                 ]
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Data tidak ditemukan: ' .  $e->getMessage()
+                'message' => 'Data tidak ditemukan: ' . $e->getMessage()
             ], 404);
         }
     }
@@ -189,14 +189,14 @@ class PipelineController extends Controller
                 'data' => [
                     'id' => $transaksi->id,
                     'nama_perusahaan' => $transaksi->nama_perusahaan,
-                    'pic_name' => $transaksi->pic_name ??  '-',
+                    'pic_name' => $transaksi->pic_name ?? '-',
                     'pic_phone' => optional($transaksi->pic)->phone ?? '-',
                     'pic_email' => optional($transaksi->pic)->email ?? '-',
                     'nama_sales' => $transaksi->nama_sales,
                     'sales_email' => optional($transaksi->sales)->email ?? '-',
-                    'nilai_proyek' => 'Rp ' . number_format($transaksi->nilai_proyek, 0, ',', '. '),
+                    'nilai_proyek' => 'Rp ' . number_format($transaksi->nilai_proyek, 0, ',', '.'),
                     'status' => $transaksi->status,
-                    'tanggal_mulai_kerja' => $transaksi->tanggal_mulai_kerja ?  Carbon::parse($transaksi->tanggal_mulai_kerja)->format('d/m/Y') : '-',
+                    'tanggal_mulai_kerja' => $transaksi->tanggal_mulai_kerja ? Carbon::parse($transaksi->tanggal_mulai_kerja)->format('d/m/Y') : '-',
                     'tanggal_selesai_kerja' => $transaksi->tanggal_selesai_kerja ? Carbon::parse($transaksi->tanggal_selesai_kerja)->format('d/m/Y') : '-',
                     'work_duration' => $workDuration,
                     'keterangan' => $transaksi->keterangan ?? '-',
@@ -213,7 +213,7 @@ class PipelineController extends Controller
 
     private function calculateWorkDuration($startDate, $endDate)
     {
-        if (! $startDate || !$endDate) {
+        if (!$startDate || !$endDate) {
             return '-';
         }
 
